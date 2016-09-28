@@ -4,10 +4,7 @@ import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.AbstractVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.StrictHostnameVerifier;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
@@ -26,9 +23,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
@@ -118,37 +112,6 @@ public class ConnectionUtil {
             e.printStackTrace();
         }
         return null;
-    }
-
-    static public class MyHostnameVerifier implements X509HostnameVerifier {
-
-        @Override
-        public boolean verify(String host, SSLSession session) {
-            return false;
-        }
-
-        @Override
-        public void verify(String host, SSLSocket ssl) throws IOException {
-
-        }
-
-        @Override
-        public void verify(String host, X509Certificate cert) throws SSLException {
-
-        }
-
-        public final void verify(
-                final String host,
-                final String[] cns,
-                final String[] subjectAlts) throws SSLException {
-
-        }
-
-        @Override
-        public final String toString() {
-            return "BROWSER_COMPATIBLE";
-        }
-
     }
 
     static private class MySSLSocketFactory extends SSLSocketFactory {
