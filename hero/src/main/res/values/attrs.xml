@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="LockPatternView">
+        <!--
+             Aspect to use when drawing LockPatternView. Choices are "square"(default), "lock_width"
+             or "lock_height"
+        -->
+        <attr name="aspect">
+            <enum name="square"
+                  value="0" />
+            <enum name="lockWidth"
+                  value="1" />
+            <enum name="lockHeight"
+                  value="2" />
+        </attr>
+        <attr name="line"
+              format="color" />
+        <attr name="btnNormal"
+              format="reference" />
+        <attr name="btnTouched"
+              format="reference" />
+        <attr name="circleNormal"
+              format="reference" />
+        <attr name="circleCorrect"
+              format="reference" />
+        <attr name="circleError"
+              format="reference" />
+        <attr name="arrowCorrectUp"
+              format="reference" />
+        <attr name="arrowErrorUp"
+              format="reference" />
+        <attr name="cellSize" format="dimension|reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="SwipeBackLayout">
+        <attr name="edge_size" format="dimension"/>
+        <attr name="edge_flag">
+            <enum name="left" value="0" />
+            <enum name="right" value="1" />
+            <enum name="bottom" value="2" />
+            <enum name="all" value="3" />
+        </attr>
+        <attr name="shadow_left" format="reference"/>
+    </declare-styleable>
+
+    <attr name="SwipeBackLayoutStyle" format="reference"/>
+</resources>

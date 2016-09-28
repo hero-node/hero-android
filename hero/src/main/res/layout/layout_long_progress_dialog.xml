@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/dialog_view"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="10dp"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:minHeight="80dp"
+    android:minWidth="180dp"
+    >
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        >
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@style/HeroProgress"
+            />
+    </FrameLayout>
+
+    <com.hero.depandency.LoadingTextView
+        android:id="@+id/loadingText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="#cccccc"
+        android:textSize="16dp"
+        android:gravity="center"
+        />
+
+</LinearLayout>

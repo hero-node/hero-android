@@ -1,0 +1,10 @@
+<resources>
+    <item name="kName" type="id"></item>
+    <item name="kParent" type="id"></item>
+    <item name="kHeroJson" type="id"></item>
+    <item name="kAction" type="id"></item>
+    <item name="kViewContent" type="id"></item>
+    <item name="kLayoutListenner" type="id"></item>
+    <item name="kParentFragmentTag" type="id"></item>
+    <item name="kListViewPosition" type="id"></item>
+</resources>

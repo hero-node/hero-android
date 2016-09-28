@@ -1,0 +1,55 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="?android:attr/actionBarSize"
+                android:layout_alignParentTop="true"
+                android:background="#232325"
+                android:visibility="gone"
+    >
+
+    <ImageView
+        android:id="@+id/imgTitleBack"
+        android:layout_width="40dp"
+        android:layout_height="22dp"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:contentDescription="@string/app_name"
+        android:src="@drawable/ic_back"
+        />
+
+    <TextView
+        android:id="@+id/txtLeftTitle"
+        style="@style/StyleChatTitleText"
+        android:layout_toRightOf="@+id/imgTitleBack"
+        android:layout_centerVertical="true"
+        android:textSize="15dp"
+        android:visibility="gone"
+        />
+
+    <TextView
+        android:id="@+id/txtChatTitle"
+        style="@style/StyleChatTitleText"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"
+        />
+
+    <ImageView
+        android:id="@+id/imgTitleRight"
+        android:layout_width="40dp"
+        android:layout_height="30dp"
+        android:layout_marginRight="5dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        />
+
+    <TextView
+        android:id="@+id/txtRightTitle"
+        style="@style/StyleChatTitleText"
+        android:layout_marginRight="10dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:textSize="15dp"
+        />
+
+</RelativeLayout>

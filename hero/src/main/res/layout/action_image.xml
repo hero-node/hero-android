@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+           android:layout_width="@dimen/actionbar_icon_height"
+           android:layout_height="match_parent"
+           android:layout_marginLeft="4dp"
+           android:layout_marginRight="4dp"
+           android:padding="5dp"
+           android:background="@drawable/action_button_bg"
+           android:scaleType="fitCenter"
+    >
+</ImageView>

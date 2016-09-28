@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:minHeight="@dimen/list_footer_height"
+             android:background="#f5f5f5"
+    >
+
+    <TextView
+        android:id="@+id/sectionTitle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="6dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:contentDescription="sectionTitle"
+        android:clickable="false"
+        android:textSize="12dp"
+        android:textColor="#999999"
+        android:gravity="center_vertical"
+        />
+
+</FrameLayout>

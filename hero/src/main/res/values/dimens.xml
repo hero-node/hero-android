@@ -1,0 +1,25 @@
+<resources>
+    <dimen name="button_padding_gap">4dp</dimen>
+    <dimen name="max_delete_button_width">18dp</dimen>
+    <dimen name="tab_bar_height">48dp</dimen>
+    <dimen name="button_elevation_size">4dp</dimen>
+
+    <dimen name="list_header_height">50dp</dimen>
+    <dimen name="list_footer_height">30dp</dimen>
+    <dimen name="list_default_height">44dp</dimen>
+    <dimen name="list_separator_height">15dp</dimen>
+
+    <dimen name="gesture_pattern_thickness_size">1dp</dimen>
+    <dimen name="gesture_pattern_item_size">65dp</dimen>
+    <dimen name="gesture_pattern_within_size">20dp</dimen>
+    <dimen name="gesture_pattern_diff_size">45dp</dimen>
+    <dimen name="actionbar_icon_height">30dp</dimen>
+
+    <dimen name="index_bar_width">25dp</dimen>
+    <dimen name="index_bar_top_margin">20dp</dimen>
+    <dimen name="index_bar_item_max_height">40dp</dimen>
+    <dimen name="index_bar_font_size">12dp</dimen>
+
+    <dimen name="dash_default_width">6dp</dimen>
+    <dimen name="dash_default_gap">3dp</dimen>
+</resources>

@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Hero</string>
+    <string name="listviewFooter_hintReady">松开载入更多</string>
+    <string name="listviewFooter_hintNormal">上拉加载更多</string>
+    <string name="listviewHeader_lastTime">last updated time</string>
+    <string name="listviewHeader_hintNormal">下拉刷新</string>
+    <string name="listviewHeader_hintReady">松开刷新</string>
+    <string name="listviewHeader_hintLoading">正在加载...</string>
+    <string name="listviewHeader_noMoreData">无更多数据</string>
+    <string name="pressMoreToExit">再按一次退出客户端</string>
+
+    <string name="imageSelectDialogTitle">选择照片</string>
+    <string-array name="imageSelectDialogItems">
+        <item>相机</item>
+        <item>相册</item>
+    </string-array>
+    <string name="locationOpenTitle">定位服务未开启</string>
+    <string name="locationOpenContent">请在系统设置中开启定位服务</string>
+    <string name="locationOpenNegativeButton">暂不</string>
+    <string name="locationOpenPositiveButton">去设置</string>
+    <string name="upload_file_fail">上传文件失败</string>
+    <string name="open_camera_fail">打开摄像头失败，请授权本应用使用相机，并重试</string>
+    <string name="long_loading_hint">加载可能需要较长时间，请耐心等待</string>
+</resources>

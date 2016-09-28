@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="#D4D4D4"
+              android:orientation="vertical"
+    >
+
+    <TextView
+        android:id="@+id/refresh_net"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="网络连接不可用"
+        android:textColor="#7A858D"
+        android:textSize="18dp"
+        />
+
+</LinearLayout>
