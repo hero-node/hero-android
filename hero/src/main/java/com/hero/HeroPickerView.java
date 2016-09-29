@@ -252,6 +252,7 @@ public class HeroPickerView extends View implements IHero, View.OnClickListener,
                 }
             }
             if (isDataValid) {
+                pickerDialog=null;
                 createDialog(getContext(), jsonObject, type);
             }
         }
