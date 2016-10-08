@@ -85,9 +85,11 @@ public class HeroFragment extends Fragment implements IHeroContext {
     protected View toolbar;
     private TextView toolbarTitleView;
     private ViewGroup rootLayout;
+    private ViewGroup toolbarContainer;
     private RelativeLayout popLayout = null;
     private ViewGroup leftItemsLayout;
     private ViewGroup rightItemsLayout;
+    private View mainScrollView;
     private int viewIndex = 0;
     private Map<Integer, View> contextMenuHandler;
 
@@ -223,6 +225,8 @@ public class HeroFragment extends Fragment implements IHeroContext {
         rightItemsLayout = (ViewGroup) viewGroup.findViewById(R.id.layoutRightItem);
         backImageView = (ImageView) toolbar.findViewById(R.id.leftImage);
         rootLayout = (ViewGroup) viewGroup.findViewById(R.id.rootLayout);
+        toolbarContainer = (ViewGroup) viewGroup.findViewById(R.id.toolbarContainer);
+        mainScrollView = viewGroup.findViewById(R.id.mainScrollView);
         if (((HeroFragmentActivity) getActivity()).isBackIconShown()) {
             backImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -272,7 +276,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
     }
 
     private void initWebView() {
-        mWebview = new HeroWebView(getActivity(), getResources().getColor(R.color.defaultBackground));
+        mWebview = new HeroWebView(getActivity(), getResources().getColor(R.color.defaultWebBackground));
         mLayout.addView(mWebview);
         mWebview.setFragment(this);
         FrameLayout.LayoutParams webViewParams = new FrameLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
@@ -280,7 +284,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
     }
 
     private HeroWebView newWebView() {
-        HeroWebView webView = new HeroWebView(getActivity(), getResources().getColor(R.color.defaultBackground));
+        HeroWebView webView = new HeroWebView(getActivity(), getResources().getColor(R.color.defaultWebBackground));
         webView.setVisibility(View.GONE);
         mLayout.addView(webView);
         webView.setFragment(this);
@@ -415,6 +419,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     mLayout.removeAllViews();
                     if (getActionBar() == null) {
                         toolbar.setVisibility(View.VISIBLE);
+                        setNavigationBarOverlayed(false);
                     }
                     JSONArray views = ui.getJSONArray("views");
                     for (int i = 0; i < views.length(); i++) {
@@ -442,6 +447,12 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     }
                     if (ui.has("nav")) {
                         JSONObject nav = ui.getJSONObject("nav");
+                        if (nav.has("navigationBarHidden")) {
+                            isNavigationBarHidden = nav.getBoolean("navigationBarHidden");
+                            if (isNavigationBarHidden) {
+                                setNavigationBarHidden();
+                            }
+                        }
                         if (nav.has("title")) {
                             String titleStr = nav.getString("title");
                             if (!TextUtils.isEmpty(titleStr)) {
@@ -499,8 +510,14 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             getActivity().invalidateOptionsMenu();
                         }
                         if (nav.has("leftItems")) {
-                            JSONArray leftItems = nav.getJSONArray("leftItems");
-                            JSONObject leftItem = leftItems.optJSONObject(0);
+                            Object leftObject = nav.get("leftItems");
+                            JSONObject leftItem;
+                            if (leftObject instanceof JSONArray) {
+                                JSONArray leftItems = nav.getJSONArray("leftItems");
+                                leftItem = leftItems.optJSONObject(0);
+                            } else {
+                                leftItem = (JSONObject) leftObject;
+                            }
                             if (getActivity() != null) {
                                 if (getActivity() instanceof HeroActivity) {
                                     setActionbarDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_HOME_AS_UP);
@@ -528,6 +545,9 @@ public class HeroFragment extends Fragment implements IHeroContext {
                                     setActionbarTitleEnabled(false);
                                 }
                             }
+                        }
+                        if (nav.has("overlayed")) {
+                            setNavigationBarOverlayed(true);
                         }
                     }
                     Bundle bundle = getArguments();
@@ -597,9 +617,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                         if (jsonAppearance.has("navigationBarHidden")) {
                             isNavigationBarHidden = jsonAppearance.getBoolean("navigationBarHidden");
                             if (isNavigationBarHidden) {
-                                if (getToolbar() != null) {
-                                    getToolbar().setVisibility(View.GONE);
-                                }
+                                setNavigationBarHidden();
                             }
                         }
                         if (jsonAppearance.has("rightItems")) {
@@ -1655,8 +1673,41 @@ public class HeroFragment extends Fragment implements IHeroContext {
         return false;
     }
 
+    public int getToolBarHeight() {
+        if (toolbar != null) {
+            //if (toolbarContainer.findViewById(R.id.layoutToolbar) != null) {
+                return HeroView.getFixedActionBarHeight(getContext());
+            //} else {
+            //    return toolbar.getLayoutParams().height;
+            //}
+        }
+        return 0;
+    }
+
     public void showToolBar(boolean show) {
         toolbar.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    private void setNavigationBarHidden() {
+        if (getToolbar() != null) {
+            getToolbar().setVisibility(View.GONE);
+        }
+        setNavigationBarOverlayed(true);
+    }
+
+    private void setNavigationBarOverlayed(boolean isOverlayed) {
+        if (mainScrollView != null) {
+            ViewGroup.LayoutParams params = mainScrollView.getLayoutParams();
+            if (params instanceof FrameLayout.LayoutParams) {
+                if (isOverlayed) {
+                    ((FrameLayout.LayoutParams) params).topMargin = 0;
+                    mainScrollView.setLayoutParams(params);
+                } else {
+                    ((FrameLayout.LayoutParams) params).topMargin = HeroView.getFixedActionBarHeight(getContext());
+                    mainScrollView.setLayoutParams(params);
+                }
+            }
+        }
     }
 
     public boolean onBackPressed() {

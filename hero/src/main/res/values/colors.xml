@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="defaultBackground">#303e53</color>
+    <color name="defaultWebBackground">#303e53</color>
     <color name="actionMenuPressed">#40ffffff</color>
     <color name="popupWindowBackground">#a0000000</color>
     <color name="c0">#00bc8d</color>

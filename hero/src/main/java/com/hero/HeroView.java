@@ -139,7 +139,7 @@ public class HeroView extends FrameLayout implements IHero {
         return Math.min(width, screen_width);
     }
 
-    private static int getFixedActionBarHeight(Context context) {
+    public static int getFixedActionBarHeight(Context context) {
         int actionBarHeight = 0;
         try {
             final TypedArray typedArray = context.getTheme().obtainStyledAttributes(new int[] {android.R.attr.actionBarSize});
@@ -186,14 +186,21 @@ public class HeroView extends FrameLayout implements IHero {
         } else {
             // if no actionbar, subtract toolbar height
             boolean isFullHeight = false;
+            HeroFragment fragment = null;
             if (view.getContext() instanceof HeroFragmentActivity) {
-                HeroFragment fragment = ((HeroFragmentActivity) view.getContext()).getCurrentFragment();
+                fragment = ((HeroFragmentActivity) view.getContext()).getCurrentFragment();
                 if (fragment != null) {
                     isFullHeight = fragment.isFullHeight();
                 }
             }
             if (!isFullHeight) {
-                screen_height -= getFixedActionBarHeight(view.getContext());
+                int toolBarHeight;
+                if (fragment != null) {
+                    toolBarHeight = fragment.getToolBarHeight();
+                } else {
+                    toolBarHeight = getFixedActionBarHeight(view.getContext());
+                }
+                screen_height -= toolBarHeight;
             }
         }
         if (view.getContext() instanceof HeroHomeActivity) {
@@ -303,7 +310,7 @@ public class HeroView extends FrameLayout implements IHero {
                     } catch (NumberFormatException e) {
                         e.printStackTrace();
                     }
-                    AnimationHelper.startAnimation(view, animType, animTime, null);
+                    AnimationHelper.startAnimation(view, animType, animTime, null, null);
                 }
             }
             if (jsonObject.has("frame")) {

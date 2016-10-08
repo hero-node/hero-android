@@ -5,15 +5,13 @@
              android:layout_height="match_parent"
     >
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         >
 
-        <include layout="@layout/base_title" />
-
         <ScrollView
+            android:id="@+id/mainScrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fillViewport="true"
@@ -25,5 +23,13 @@
                 android:layout_height="match_parent"
                 />
         </ScrollView>
-    </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/toolbarContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <include layout="@layout/base_title" />
+        </FrameLayout>
+    </FrameLayout>
 </FrameLayout>
