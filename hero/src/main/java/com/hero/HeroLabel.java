@@ -7,6 +7,7 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.StrikethroughSpan;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -188,6 +189,13 @@ public class HeroLabel extends TextView implements IHero {
                         int len = Integer.parseInt(range[1]);
                         addSizedSpan(spannableString, start, start + len, Integer.parseInt(content));
                     }
+                } else if (key.startsWith("middleline(")) {
+                    String[] range = key.substring("middleline(".length(), key.length() - 1).split(",");
+                    if (range.length > 1) {
+                        int start = Integer.parseInt(range[0]);
+                        int len = Integer.parseInt(range[1]);
+                        addStrikeSpan(spannableString, start, start + len);
+                    }
                 }
             }
         } catch (JSONException e) {
@@ -206,6 +214,13 @@ public class HeroLabel extends TextView implements IHero {
         if (start >= 0 && end >= 0 && end > start && end <= spannableString.toString().length()) {
             int sizeInPx = HeroView.dip2px(getContext(), size);
             spannableString.setSpan(new AbsoluteSizeSpan(sizeInPx), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+        }
+    }
+
+    public void addStrikeSpan(SpannableString spannableString, int start, int end) {
+        if (start >= 0 && end >= 0 && end > start && end <= spannableString.toString().length()) {
+            StrikethroughSpan span = new StrikethroughSpan();
+            spannableString.setSpan(span, start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
         }
     }
 

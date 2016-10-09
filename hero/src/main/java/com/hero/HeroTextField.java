@@ -12,6 +12,7 @@ import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
 
@@ -236,6 +237,16 @@ public class HeroTextField extends EditText implements IHero {
         }
         if (jsonObject.has("editable")) {
             this.setEnabled(Boolean.valueOf(jsonObject.getString("editable")));
+        }
+        if (jsonObject.has("alignment")) {
+            String alignment = jsonObject.getString("alignment");
+            if (alignment != null && alignment.equalsIgnoreCase("center")) {
+                this.setGravity(Gravity.CENTER);
+            } else if (alignment != null && alignment.equalsIgnoreCase("left")) {
+                this.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+            } else if (alignment != null && alignment.equalsIgnoreCase("right")) {
+                this.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+            }
         }
     }
 
