@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -339,7 +340,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             Bundle bundle = new Bundle();
                             bundle.putString("newApp", globle.toString());
                             intent.putExtras(bundle);
-                            startActivity(intent);
+                            startActivitySafely(intent);
                         }
                     }
                     if (!key.equals("newApp")) {
@@ -613,7 +614,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             if (url.startsWith("tel:")) {
                                 Intent callIntent = new Intent(Intent.ACTION_DIAL);
                                 callIntent.setData(Uri.parse(url.replaceAll("/", "")));
-                                startActivity(callIntent);
+                                startActivitySafely(callIntent);
                             } else {
                                 if (getContext() instanceof HeroFragmentActivity) {
                                     Intent intent = ((HeroFragmentActivity) getContext()).getGotoIntent();//new Intent(getContext(), HeroActivity.class);
@@ -1667,6 +1668,14 @@ public class HeroFragment extends Fragment implements IHeroContext {
                 ((View) view).setContentDescription(pageName + viewIndex);
                 viewIndex++;
             }
+        }
+    }
+
+    private void startActivitySafely(Intent i) {
+        try {
+            startActivity(i);
+        } catch (ActivityNotFoundException e) {
+            e.printStackTrace();
         }
     }
 

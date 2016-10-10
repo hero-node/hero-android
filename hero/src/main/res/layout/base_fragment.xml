@@ -5,31 +5,26 @@
              android:layout_height="match_parent"
     >
 
-    <FrameLayout
+    <ScrollView
+        android:id="@+id/mainScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true"
         >
 
-        <ScrollView
-            android:id="@+id/mainScrollView"
+        <FrameLayout
+            android:id="@+id/mainLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fillViewport="true"
-            >
+            />
+    </ScrollView>
 
-            <FrameLayout
-                android:id="@+id/mainLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                />
-        </ScrollView>
+    <FrameLayout
+        android:id="@+id/toolbarContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
 
-        <FrameLayout
-            android:id="@+id/toolbarContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-            <include layout="@layout/base_title" />
-        </FrameLayout>
+        <include layout="@layout/base_title" />
     </FrameLayout>
 </FrameLayout>
