@@ -418,8 +418,16 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     }
                     mLayout.removeAllViews();
                     if (getActionBar() == null) {
-                        toolbar.setVisibility(View.VISIBLE);
-                        setNavigationBarOverlayed(false);
+                        if (!isNavigationBarHidden) {
+                            toolbar.setVisibility(View.VISIBLE);
+                            setNavigationBarOverlayed(false);
+                        }
+                    }
+                    if (ui.has("nav")) {
+                        JSONObject nav = ui.getJSONObject("nav");
+                        JSONObject appearance = new JSONObject();
+                        appearance.put("appearance", nav);
+                        this.on(appearance);
                     }
                     JSONArray views = ui.getJSONArray("views");
                     for (int i = 0; i < views.length(); i++) {
@@ -443,111 +451,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
                                     ((HeroTableView) v).setOnScrollListener(scrollListener);
                                 }
                             }
-                        }
-                    }
-                    if (ui.has("nav")) {
-                        JSONObject nav = ui.getJSONObject("nav");
-                        if (nav.has("navigationBarHidden")) {
-                            isNavigationBarHidden = nav.getBoolean("navigationBarHidden");
-                            if (isNavigationBarHidden) {
-                                setNavigationBarHidden();
-                            }
-                        }
-                        if (nav.has("title")) {
-                            String titleStr = nav.getString("title");
-                            if (!TextUtils.isEmpty(titleStr)) {
-                                title = titleStr;
-                                setActivityTitle(titleStr);
-                            }
-                        }
-                        if (nav.has("titleView")) {
-                            boolean showActionBar = false;
-                            boolean showHome = false;
-                            if (getActivity() instanceof HeroFragmentActivity && ((HeroFragmentActivity) getActivity()).isActionBarShown()) {
-                                showActionBar = true;
-                            }
-                            JSONObject titleView = nav.getJSONObject("titleView");
-                            if (showActionBar) {
-                                IHero tView = createNewIHeroView(titleView);
-                                addDescriptionToView(tView);
-                                if (tView != null) {
-                                    ((View) tView).setBackgroundColor(Color.TRANSPARENT);
-                                    tView.on(titleView);
-                                    if (getActivity() != null) {
-                                        if (getActivity() instanceof HeroActivity) {
-                                            showHome = true;
-                                        }
-                                        if (showActionBar) {
-                                            ActionBar actionBar = self.getActionBar();
-                                            if (actionBar != null) {
-                                                ActionBar.LayoutParams p = new ActionBar.LayoutParams(((View) tView).getLayoutParams());
-                                                p.gravity = p.gravity & ~Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL;
-                                                if (!showHome) {
-                                                    setActionbarDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_TITLE);
-                                                } else {
-                                                    setActionbarDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_HOME_AS_UP);
-                                                }
-                                                getActionBar().setCustomView((View) tView, p);
-                                                setActivityTitle("");
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                if (titleView.has("text")) {
-                                    setActivityTitle(titleView.getString("text"));
-                                }
-                            }
-                        }
-                        if (nav.has("rightItems")) {
-                            mRightItems = nav.getJSONArray("rightItems");
-                            if (getActivity() instanceof HeroFragmentActivity) {
-                                ((HeroFragmentActivity) getActivity()).setRightItems(mRightItems);
-                            }
-                            if (getActionBar() == null) {
-                                setupToolbarRightItems(nav);
-                            }
-                            getActivity().invalidateOptionsMenu();
-                        }
-                        if (nav.has("leftItems")) {
-                            Object leftObject = nav.get("leftItems");
-                            JSONObject leftItem;
-                            if (leftObject instanceof JSONArray) {
-                                JSONArray leftItems = nav.getJSONArray("leftItems");
-                                leftItem = leftItems.optJSONObject(0);
-                            } else {
-                                leftItem = (JSONObject) leftObject;
-                            }
-                            if (getActivity() != null) {
-                                if (getActivity() instanceof HeroActivity) {
-                                    setActionbarDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_HOME_AS_UP);
-                                } else {
-                                    if (((HeroFragmentActivity) getActivity()).isActionBarShown()) {
-                                        setActionbarDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_TITLE);
-                                    }
-                                }
-                            }
-                            if (leftItem!=null&&leftItem.has("title")) {
-                                String titleStr = leftItem.getString("title");
-                                //                                    title = titleStr;
-                                setLeftItemTitle(titleStr);
-                            }
-                            mLeftItem = leftItem;
-                            if (getActionBar() == null) {
-                                setupToolbarLeftItems(nav);
-                            }
-                        } else {
-                            if (getActivity() != null && self.getActionBar() != null) {
-                                if (getActivity() instanceof HeroOneActivity) {
-                                    // only show title
-                                    setActionbarDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
-                                } else if (getActionBar().getCustomView() != null) {
-                                    setActionbarTitleEnabled(false);
-                                }
-                            }
-                        }
-                        if (nav.has("overlayed")) {
-                            setNavigationBarOverlayed(true);
                         }
                     }
                     Bundle bundle = getArguments();
@@ -610,14 +513,36 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     Object appearance = json.get("appearance");
                     if (appearance instanceof JSONObject) {
                         JSONObject jsonAppearance = (JSONObject) appearance;
-                        if (jsonAppearance.has("title")) {
-                            title = jsonAppearance.getString("title");
-                            setActivityTitle(title);
-                        }
                         if (jsonAppearance.has("navigationBarHidden")) {
                             isNavigationBarHidden = jsonAppearance.getBoolean("navigationBarHidden");
                             if (isNavigationBarHidden) {
                                 setNavigationBarHidden();
+                            }
+                        }
+                        if (jsonAppearance.has("title")) {
+                            String titleStr = jsonAppearance.getString("title");
+                            if (!TextUtils.isEmpty(titleStr)) {
+                                title = titleStr;
+                                setActivityTitle(titleStr);
+                            }
+                        }
+                        if (jsonAppearance.has("titleView")) {
+                            boolean showActionBar = false;
+                            boolean showHome = false;
+                            if (getActivity() instanceof HeroFragmentActivity && ((HeroFragmentActivity) getActivity()).isActionBarShown()) {
+                                showActionBar = true;
+                            }
+                            JSONObject titleView = jsonAppearance.getJSONObject("titleView");
+                            if (showActionBar) {
+                                IHero tView = createNewIHeroView(titleView);
+                                if (getActivity() instanceof HeroActivity) {
+                                    showHome = true;
+                                }
+                                addCustomActionBar(tView, titleView, showHome);
+                            } else {
+                                if (titleView.has("text")) {
+                                    setActivityTitle(titleView.getString("text"));
+                                }
                             }
                         }
                         if (jsonAppearance.has("rightItems")) {
@@ -627,34 +552,55 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             } else {
                                 mRightItems = null;
                             }
+                            if (getActivity() instanceof HeroFragmentActivity) {
+                                ((HeroFragmentActivity) getActivity()).setRightItems(mRightItems);
+                            }
                             if (getActionBar() == null) {
                                 setupToolbarRightItems(jsonAppearance);
                             }
+                            getActivity().invalidateOptionsMenu();
                         } else {
                             mRightItems = null;
                         }
-                        getActivity().invalidateOptionsMenu();
+
                         if (jsonAppearance.has("leftItems")) {
                             Object objLeftItems = jsonAppearance.get("leftItems");
                             if (objLeftItems instanceof JSONArray) {
                                 JSONArray leftItems = jsonAppearance.getJSONArray("leftItems");
                                 mLeftItem = leftItems.optJSONObject(0);
-                                if (mLeftItem.has("title")) {
-                                    String titleStr = mLeftItem.getString("title");
-                                    //                                title = titleStr;
-                                    setLeftItemTitle(titleStr);
+                            } else {
+                                mLeftItem = (JSONObject) objLeftItems;
+                            }
+                            if (getActivity() != null) {
+                                if (getActivity() instanceof HeroActivity) {
+                                    setActionbarDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_HOME_AS_UP);
+                                } else {
+                                    if (((HeroFragmentActivity) getActivity()).isActionBarShown()) {
+                                        setActionbarDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_TITLE);
+                                    }
                                 }
+                            }
+                            if (mLeftItem!=null && mLeftItem.has("title")) {
+                                String titleStr = mLeftItem.getString("title");
+                                //                                    title = titleStr;
+                                setLeftItemTitle(titleStr);
                             }
                             if (getActionBar() == null) {
                                 setupToolbarLeftItems(mLeftItem);
                             }
+                        } else {
+                            if (getActivity() != null && self.getActionBar() != null) {
+                                if (getActivity() instanceof HeroOneActivity) {
+                                    // only show title
+                                    setActionbarDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
+                                } else if (getActionBar().getCustomView() != null) {
+                                    setActionbarTitleEnabled(false);
+                                }
+                            }
                         }
-                        //                        else {
-                        //                            mLeftItem = null;
-                        //                            if (getActivity() instanceof HeroOneActivity) {
-                        //                                getActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
-                        //                            }
-                        //                        }
+                        if (jsonAppearance.has("overlayed")) {
+                            setNavigationBarOverlayed(true);
+                        }
                     }
                 } else if (json.has("command")) {
                     Object cmdObj = json.get("command");
@@ -1501,7 +1447,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
 
     public void setupToolbarLeftItems(JSONObject data) {
         if (leftItemsLayout != null) {
-            if (mLeftItem == null) {
+            if (mLeftItem == null || mLeftItem.length() == 0) {
                 if (!((HeroFragmentActivity) getActivity()).isBackIconShown()) {
                     leftItemsLayout.removeAllViews();
                 }
@@ -1720,6 +1666,28 @@ public class HeroFragment extends Fragment implements IHeroContext {
             if (pageName != null) {
                 ((View) view).setContentDescription(pageName + viewIndex);
                 viewIndex++;
+            }
+        }
+    }
+
+    private void addCustomActionBar(IHero view, JSONObject titleView, boolean showHome) throws JSONException {
+        addDescriptionToView(view);
+        if (view != null) {
+            ((View) view).setBackgroundColor(Color.TRANSPARENT);
+            view.on(titleView);
+            if (getActivity() != null) {
+                ActionBar actionBar = self.getActionBar();
+                if (actionBar != null) {
+                    ActionBar.LayoutParams p = new ActionBar.LayoutParams(((View) view).getLayoutParams());
+                    p.gravity = p.gravity & ~Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL;
+                    if (!showHome) {
+                        setActionbarDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_TITLE);
+                    } else {
+                        setActionbarDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_HOME_AS_UP);
+                    }
+                    getActionBar().setCustomView((View) view, p);
+                    setActivityTitle("");
+                }
             }
         }
     }
