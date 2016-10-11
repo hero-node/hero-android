@@ -49,6 +49,15 @@ public class HeroScrollView extends XRefreshLayout implements IHero {
         contentView = (FrameLayout) this.findViewById(R.id.scrollInnerLayout);
         scrollView.setScrollBarStyle(SCROLLBARS_INSIDE_OVERLAY);
         setScrollView(scrollView);
+        contentView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                View focusedView = v.findFocus();
+                if (focusedView != null) {
+                    focusedView.clearFocus();
+                }
+            }
+        });
     }
 
     @Override

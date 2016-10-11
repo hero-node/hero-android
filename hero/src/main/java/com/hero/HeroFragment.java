@@ -121,6 +121,10 @@ public class HeroFragment extends Fragment implements IHeroContext {
             @Override
             public void onClick(View v) {
                 hideSoftKeyboard(activity);
+                View focusedView = v.findFocus();
+                if (focusedView != null) {
+                    focusedView.clearFocus();
+                }
             }
         });
         return v;
