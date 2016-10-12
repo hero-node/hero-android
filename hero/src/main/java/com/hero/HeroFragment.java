@@ -521,7 +521,9 @@ public class HeroFragment extends Fragment implements IHeroContext {
                         if (jsonAppearance.has("navigationBarHidden")) {
                             isNavigationBarHidden = jsonAppearance.getBoolean("navigationBarHidden");
                             if (isNavigationBarHidden) {
-                                setNavigationBarHidden();
+                                setNavigationBarHidden(true);
+                            } else {
+                                setNavigationBarHidden(false);
                             }
                         }
                         if (jsonAppearance.has("title")) {
@@ -1639,11 +1641,11 @@ public class HeroFragment extends Fragment implements IHeroContext {
         toolbar.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
-    private void setNavigationBarHidden() {
+    private void setNavigationBarHidden(boolean hidden) {
         if (getToolbar() != null) {
-            getToolbar().setVisibility(View.GONE);
+            getToolbar().setVisibility(hidden ? View.GONE : View.VISIBLE);
         }
-        setNavigationBarOverlayed(true);
+        setNavigationBarOverlayed(hidden);
     }
 
     private void setNavigationBarOverlayed(boolean isOverlayed) {

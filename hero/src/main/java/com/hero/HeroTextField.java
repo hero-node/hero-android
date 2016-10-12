@@ -43,6 +43,7 @@ public class HeroTextField extends EditText implements IHero {
         super(context);
         init();
         this.setTextSize(14.0f);
+        this.setPadding(0, 0, 0, 0);
     }
 
     public HeroTextField(Context context, AttributeSet attrs) {
