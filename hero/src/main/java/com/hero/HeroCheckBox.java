@@ -22,6 +22,7 @@ public class HeroCheckBox extends ImageView implements IHero, Checkable {
 
     public HeroCheckBox(Context context) {
         super(context);
+        this.setScaleType(ScaleType.CENTER_INSIDE);
         selectedDrawable = getResources().getDrawable(android.R.drawable.checkbox_on_background);
         unselectedDrawable = getResources().getDrawable(android.R.drawable.checkbox_off_background);
     }

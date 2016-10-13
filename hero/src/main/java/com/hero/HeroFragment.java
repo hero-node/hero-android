@@ -1639,6 +1639,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
 
     public void showToolBar(boolean show) {
         toolbar.setVisibility(show ? View.VISIBLE : View.GONE);
+        setNavigationBarOverlayed(false);
     }
 
     private void setNavigationBarHidden(boolean hidden) {
@@ -1705,6 +1706,16 @@ public class HeroFragment extends Fragment implements IHeroContext {
                 }
             }
         }
+    }
+
+    public boolean goBackWebView() {
+        if (mWebview != null) {
+            if (mWebview.canGoBack()) {
+                mWebview.goBack();
+                return true;
+            }
+        }
+        return false;
     }
 
     public interface ContextMenuItemListener {
