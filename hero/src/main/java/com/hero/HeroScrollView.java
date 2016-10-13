@@ -74,17 +74,17 @@ public class HeroScrollView extends XRefreshLayout implements IHero {
     public void on(JSONObject jsonObject) throws JSONException {
         HeroView.on(this, jsonObject);
         if (jsonObject.has("contentSize")) {
-            String x = jsonObject.getJSONObject("contentSize").getString("x");
-            String y = jsonObject.getJSONObject("contentSize").getString("y");
+            String x = jsonObject.getJSONObject("contentSize").optString("x");
+            String y = jsonObject.getJSONObject("contentSize").optString("y");
             Log.w("not implements", "contentSize");
         }
         if (jsonObject.has("contentOffset")) {
-            final String x = jsonObject.getJSONObject("contentOffset").getString("x");
-            final String y = jsonObject.getJSONObject("contentOffset").getString("y");
+            final int x = jsonObject.getJSONObject("contentOffset").optInt("x");
+            final int y = jsonObject.getJSONObject("contentOffset").optInt("y");
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    scrollView.scrollTo(Integer.parseInt(x), Integer.parseInt(y));
+                    scrollView.scrollTo(x, y);
                 }
             }, 1000);
         }
