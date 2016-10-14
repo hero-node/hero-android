@@ -91,6 +91,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
     private ViewGroup leftItemsLayout;
     private ViewGroup rightItemsLayout;
     private View mainScrollView;
+    protected HeroWebView customWebView = null;
     private int viewIndex = 0;
     private Map<Integer, View> contextMenuHandler;
 
@@ -244,6 +245,9 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             e.printStackTrace();
                         }
                     } else {
+                        if (goBackWebView()) {
+                            return;
+                        }
                         activity.finish();
                     }
                 }
@@ -286,6 +290,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
         mWebview.setFragment(this);
         FrameLayout.LayoutParams webViewParams = new FrameLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
         mWebview.setLayoutParams(webViewParams);
+        customWebView = mWebview;
     }
 
     private HeroWebView newWebView() {
@@ -422,6 +427,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                         setTitleBackgroundColor(titleBackgroundColor);
                     }
                     mLayout.removeAllViews();
+                    customWebView = null;
                     if (getActionBar() == null) {
                         if (!isNavigationBarHidden) {
                             toolbar.setVisibility(View.VISIBLE);
@@ -439,6 +445,9 @@ public class HeroFragment extends Fragment implements IHeroContext {
                         JSONObject view = views.getJSONObject(i);
                         IHero v = createNewIHeroView(view);
                         addDescriptionToView(v);
+                        if (v instanceof HeroWebView) {
+                            customWebView = (HeroWebView) v;
+                        }
                         if (v != null) {
                             if (view.has("parent")) {
                                 String parent = view.getString("parent");
@@ -1665,6 +1674,9 @@ public class HeroFragment extends Fragment implements IHeroContext {
     }
 
     public boolean onBackPressed() {
+        if (goBackWebView()) {
+            return true;
+        }
         return false;
     }
 
@@ -1709,9 +1721,9 @@ public class HeroFragment extends Fragment implements IHeroContext {
     }
 
     public boolean goBackWebView() {
-        if (mWebview != null) {
-            if (mWebview.canGoBack()) {
-                mWebview.goBack();
+        if (customWebView != null && customWebView.getParent() != null) {
+            if (customWebView.canGoBack()) {
+                customWebView.goBack();
                 return true;
             }
         }
