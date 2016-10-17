@@ -44,6 +44,12 @@ public class HeroDevice extends View implements IHero {
             if (jsonObject.has("UMDeviceToken")) {
                 HeroView.putValueToJson(jsonObject.getJSONObject("UMDeviceToken"), ContextUtils.getDeviceToken(getContext()));
             }
+            if (jsonObject.has("deviceId")) {
+                JSONObject value = new JSONObject();
+                value.put("imei", ContextUtils.getIMEI(context));
+                value.put("androidId", ContextUtils.getAndroidId(context));
+                HeroView.putValueToJson(jsonObject.getJSONObject("deviceId"), value);
+            }
             ((IHeroContext) getContext()).on(jsonObject);
         }
     }
