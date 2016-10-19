@@ -286,14 +286,15 @@ public class UploadUtils {
 
         String cookie = CookieManager.getInstance().getCookie(HeroApplication.getDomainAddress(url));
         if (!TextUtils.isEmpty(cookie)) {
-            post.setHeader("Cookie", cookie);
+            post.addHeader("Cookie", cookie);
         } else {
             if (sessionId != null) {
-                post.setHeader("Cookie", "JSESSIONID=" + sessionId);
+                post.addHeader("Cookie", "JSESSIONID=" + sessionId);
             }
         }
         post.addHeader(progressHttpEntity.getContentType());
         post.addHeader("accept", "*/*");
+        addMapToHeader(post, HeroApplication.getInstance().getExtraHttpHeader());
         if (referer != null) {
             post.addHeader("referer", referer);
         }
@@ -374,6 +375,7 @@ public class UploadUtils {
                 }
                 request.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
                 request.addHeader("referer", HeroApplication.getInstance().getHttpReferer());
+                addMapToHeader(request, HeroApplication.getInstance().getExtraHttpHeader());
 
                 HttpResponse response = null;
                 try {
@@ -438,6 +440,18 @@ public class UploadUtils {
                 e.printStackTrace();
             } catch (URISyntaxException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    public static void addMapToHeader(HttpRequestBase req, Map headerMap) {
+        if (!(req == null || headerMap == null || headerMap.size() == 0)) {
+            Iterator iter = headerMap.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry entry = (Map.Entry) iter.next();
+                Object key = entry.getKey();
+                Object val = entry.getValue();
+                req.addHeader((String) key, (String) val);
             }
         }
     }

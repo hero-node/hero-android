@@ -25,6 +25,7 @@ import java.net.CookieManager;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -204,8 +205,21 @@ public class ImageLoadUtils {
 
     private static GlideUrl getUrlWithCookie(String url, String cookieString) {
         LazyHeaders.Builder builder = new LazyHeaders.Builder().addHeader("Cookie", cookieString);
+        addMapToHeader(builder, HeroApplication.getInstance().getExtraHttpHeader());
         GlideUrl glideUrl = new GlideUrl(url, builder.build());
         return glideUrl;
+    }
+
+    private static void addMapToHeader(LazyHeaders.Builder builder, Map headerMap) {
+        if (!(builder == null || headerMap == null || headerMap.size() == 0)) {
+            Iterator iter = headerMap.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry entry = (Map.Entry) iter.next();
+                Object key = entry.getKey();
+                Object val = entry.getValue();
+                builder.addHeader((String) key, (String) val);
+            }
+        }
     }
 
     public static void LoadBase64Image(final Context context, final HeroImageView view, String url) {

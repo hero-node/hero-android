@@ -1,7 +1,6 @@
 package com.hero;
 
 import android.app.Activity;
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -10,6 +9,7 @@ import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.ValueCallback;
 
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -173,6 +173,10 @@ public abstract class HeroApplication extends MultiDexApplication {
             activity.finish();
             popActivity(activity);
         }
+    }
+
+    public Map getExtraHttpHeader() {
+        return null;
     }
 
     public Intent getNewActivityIntent(Context context, String url, boolean isPresent) {
