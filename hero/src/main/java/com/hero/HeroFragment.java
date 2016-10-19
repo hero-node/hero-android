@@ -889,7 +889,19 @@ public class HeroFragment extends Fragment implements IHeroContext {
                                     dialog.show();
                                 }
                             }
-                        } else if ((cmdJson.has("delay"))) {
+                        } else if(cmdJson.has("sendSms"))
+                        {
+                            final JSONObject showObj = cmdJson.getJSONObject("sendSms");
+                            if (showObj != null) {
+                                String phone = showObj.has("phone") ? showObj.getString("phone") : "";
+                                String content = showObj.has("content") ? showObj.getString("content") : "";
+                                Intent sendIntent = new Intent(Intent.ACTION_SENDTO);
+                                sendIntent.setData(Uri.parse("smsto:" + phone));
+                                sendIntent.putExtra("sms_body", content);
+                                startActivity(sendIntent);
+                            }
+                        }
+                        else if ((cmdJson.has("delay"))) {
                             final Object delayObj = cmdJson.get("delay");
                             double delayTime = cmdJson.getDouble("delayTime");
                             mWebview.postDelayed(new Runnable() {
