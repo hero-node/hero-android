@@ -71,7 +71,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
     protected JSONArray mRightItems;
     protected JSONObject mActionDatas;
     protected Activity activity;
-    IImagePickHandler imagePickHandler;
     protected Dialog customDialog;
     private ImageView closeImageView;
     protected ImageView backImageView;
@@ -1207,11 +1206,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
 
     public JSONArray getRightItem() {
         return mRightItems;
-    }
-
-    @Override
-    public void setImagePickHandler(IImagePickHandler handler) {
-        imagePickHandler = handler;
     }
 
     public static ProgressDialog createProgressDialog(Context context) {

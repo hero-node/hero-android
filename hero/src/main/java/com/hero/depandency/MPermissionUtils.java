@@ -9,6 +9,8 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 
+import java.util.ArrayList;
+
 /**
  * Created by xincai on 16-4-14.
  */
@@ -46,15 +48,18 @@ public class MPermissionUtils {
 
     public static boolean checkAndRequestPermissions(Context context, String[] permissionsName, int requestCode) {
         boolean granted = true;
+        ArrayList<String> permissions = new ArrayList<String>();
         for (String name : permissionsName) {
             if (!isPermissionGranted(context, name)) {
                 granted = false;
-                break;
+                permissions.add(name);
             }
         }
 
-        if (!granted) {
-            requestPermission(context, permissionsName, requestCode);
+        if (!granted && permissions.size() > 0) {
+            String[] requests = new String[permissions.size()];
+            requests = permissions.toArray(requests);
+            requestPermission(context, requests, requestCode);
             return false;
         }
         return true;

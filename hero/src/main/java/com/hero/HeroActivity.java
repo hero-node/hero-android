@@ -40,11 +40,8 @@ public class HeroActivity extends HeroFragmentActivity {
     HeroActivity self = this;
     JSONArray mRightItems;
     JSONObject mActionDatas;
-    View noNetworkView;
-    //    protected ArrayList<Integer> requestCodes = new ArrayList<Integer>();
     boolean shouldSendViewWillAppear;
-    IImagePickHandler imagePickHandler;
-    HeroFragment mainFragment;
+    private HeroFragment mainFragment;
     private ProgressDialog progressDialog;
     private IHero resultHandlerView;
 
@@ -54,13 +51,6 @@ public class HeroActivity extends HeroFragmentActivity {
         return autoGenerateRequestCode++;
     }
 
-    public static View createNoNetworkView(Context context) {
-        LinearLayout linearLayout = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.layout_no_net, null);
-        linearLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        linearLayout.setGravity(Gravity.CENTER);
-        linearLayout.setVisibility(View.GONE);
-        return linearLayout;
-    }
     public void setCallback(ActivityResultCallback callback)
     {
         this.callback=callback;
@@ -83,11 +73,11 @@ public class HeroActivity extends HeroFragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //          int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-        //        if (currentapiVersion >= 20){
-        //            this.setTheme(R.style.Material);
-        //        }
         super.onCreate(savedInstanceState);
+        initContent();
+    }
+
+    protected void initContent() {
         mainFragment = new HeroFragment();
         mainFragment.setArguments(getIntent().getExtras());
         setContentView(R.layout.base_activity);
@@ -258,11 +248,6 @@ public class HeroActivity extends HeroFragmentActivity {
             cursor.close();
         }
         return result;
-    }
-
-    @Override
-    public void setImagePickHandler(IImagePickHandler handler) {
-        imagePickHandler = handler;
     }
 
     @Override

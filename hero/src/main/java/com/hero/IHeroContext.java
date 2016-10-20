@@ -9,6 +9,4 @@ import org.json.JSONException;
  */
 public interface IHeroContext {
     void on(final Object object) throws JSONException;
-
-    void setImagePickHandler(IImagePickHandler handler);
 }

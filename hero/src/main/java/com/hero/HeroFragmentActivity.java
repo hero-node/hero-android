@@ -27,11 +27,6 @@ public abstract class HeroFragmentActivity extends AppCompatActivity implements 
     }
 
     @Override
-    public void setImagePickHandler(IImagePickHandler handler) {
-        // do nothing
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         hasPresentActivity = false;
