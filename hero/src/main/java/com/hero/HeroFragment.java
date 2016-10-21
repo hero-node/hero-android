@@ -38,7 +38,6 @@ import android.widget.TextView;
 
 import com.hero.depandency.ACache;
 import com.hero.depandency.ContextUtils;
-import com.hero.depandency.IImagePickHandler;
 import com.hero.depandency.ImageLoadUtils;
 import com.hero.depandency.LoadingTextView;
 import com.hero.depandency.UploadUtils;
@@ -1275,7 +1274,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
 
     public static AlertDialog.Builder createCommonAlertDialog(Context context, String title, String content) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        View customView = LayoutInflater.from(context).inflate(R.layout.common_dialog, null);
+        View customView = LayoutInflater.from(context).inflate(R.layout.hero_common_dialog, null);
         TextView txtTitle = (TextView) customView.findViewById(R.id.txtTitle);
         TextView txtContent = (TextView) customView.findViewById(R.id.txtContent);
         if (TextUtils.isEmpty(title)) {
