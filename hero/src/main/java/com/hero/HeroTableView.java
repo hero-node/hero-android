@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.SectionIndexer;
 
@@ -120,7 +119,16 @@ public class HeroTableView extends XListView implements IHero {
             indexBar.addToTable((ViewGroup) (getParent()), HeroTableView.this.getLayoutParams().height);
             this.setVerticalScrollBarEnabled(false);
         }
-
+        if (jsonObject.has("contentOffset")) {
+            final int x = jsonObject.getJSONObject("contentOffset").optInt("x");
+            final int y = jsonObject.getJSONObject("contentOffset").optInt("y");
+            postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    setSelection(y);
+                }
+            }, 500);
+        }
         if (jsonObject.has("footer")) {
             JSONObject json = jsonObject.getJSONObject("footer");
 //            if (this.getFooterViewsCount() > 0 && customFooterView != null) {
@@ -252,7 +260,7 @@ public class HeroTableView extends XListView implements IHero {
         IHero view = null;
         try {
             view = HeroView.fromJson(getContext(), json);
-            HeroView.setFragmentTag((View)view, HeroView.getFragmentTag(HeroTableView.this));
+            HeroView.setFragmentTag((View) view, HeroView.getFragmentTag(HeroTableView.this));
 
             if (view != null) {
                 view.on(json);
@@ -561,7 +569,7 @@ public class HeroTableView extends XListView implements IHero {
                     if (position < value) {
                         return index - 1;
                     }
-                    index ++;
+                    index++;
                 }
                 return valueList.size() - 1;
             }
