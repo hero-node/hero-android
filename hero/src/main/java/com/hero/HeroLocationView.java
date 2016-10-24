@@ -391,7 +391,8 @@ public class HeroLocationView extends FrameLayout implements IHero {
                 try {
                     fetch_coordinate = json.getJSONObject("fetch_coordinate");
                     if (fetch_coordinate != null) {
-                        if (location == null) {
+                        // sdk could return 4.9e-324
+                        if (location == null || !isLocationValueValid(location.getLatitude()) || !isLocationValueValid(location.getLongitude())) {
                             fetch_coordinate.put("err", -1);
                             fetch_coordinate.put("location", "err");
                             Log.i(TAG, "BDLocationResult got failed");
@@ -414,6 +415,16 @@ public class HeroLocationView extends FrameLayout implements IHero {
                 stopLocation();
             }
         });
+    }
+
+    private boolean isLocationValueValid(double value) {
+        if (value != 0.0) {
+            if (String.valueOf(value).contains("E") || String.valueOf(value).contains("e")) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     private void stopBDLocation() {
