@@ -84,9 +84,9 @@ public class HeroScrollView extends XRefreshLayout implements IHero {
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    scrollView.scrollTo(x, y);
+                    scrollView.smoothScrollTo(x, y);
                 }
-            }, 1000);
+            }, 100);
         }
         if (jsonObject.has("pullRefresh")) {
             this.setPullRefreshEnable(true);
