@@ -68,6 +68,15 @@ public class HeroWebView extends WebView implements IHero {
                     return true;
                 }
 
+                if (url.startsWith("https://cashloan-callback.dianrong.com")) {
+                    try {
+                        HeroWebView.this.on("{command:'back'}");
+                        return true;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 if(!url.startsWith("http:") || url.startsWith("https:") ) {
                     return false;
                 }
