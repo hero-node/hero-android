@@ -26,6 +26,7 @@ import org.json.JSONTokener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * Created by liuguoping on 15/9/24.
@@ -205,7 +206,15 @@ public class HeroWebView extends WebView implements IHero {
         if (!isUrlAuthenticated(url)) {
             return;
         }
-        super.loadUrl(url);
+        Map header = null;
+        if (HeroApplication.getInstance() != null) {
+            header = HeroApplication.getInstance().getExtraHttpHeader();
+        }
+        if (header != null && header.size() > 0) {
+            super.loadUrl(url, header);
+        } else {
+            super.loadUrl(url);
+        }
     }
 
     @Override
