@@ -96,7 +96,7 @@ public class XRefreshLayout extends LinearLayout implements XListViewHeader.OnSt
     }
 
     private boolean isRefreshViewScroll(float deltaY) {
-        if (isRefreshing()) {
+        if (isRefreshing() || !mEnablePullRefresh) {
             return false;
         }
 
