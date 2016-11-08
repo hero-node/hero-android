@@ -88,7 +88,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
     private RelativeLayout popLayout = null;
     private ViewGroup leftItemsLayout;
     private ViewGroup rightItemsLayout;
-    private View mainScrollView;
+    private View mainContentView;
     protected HeroWebView customWebView = null;
     private int viewIndex = 0;
     private Map<Integer, View> contextMenuHandler;
@@ -230,7 +230,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
         backImageView = (ImageView) toolbar.findViewById(R.id.leftImage);
         rootLayout = (ViewGroup) viewGroup.findViewById(R.id.rootLayout);
         toolbarContainer = (ViewGroup) viewGroup.findViewById(R.id.toolbarContainer);
-        mainScrollView = viewGroup.findViewById(R.id.mainScrollView);
+        mainContentView = viewGroup.findViewById(R.id.mainScrollView);
         if (((HeroFragmentActivity) getActivity()).isBackIconShown()) {
             backImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1664,15 +1664,15 @@ public class HeroFragment extends Fragment implements IHeroContext {
     }
 
     private void setNavigationBarOverlayed(boolean isOverlayed) {
-        if (mainScrollView != null) {
-            ViewGroup.LayoutParams params = mainScrollView.getLayoutParams();
+        if (mainContentView != null) {
+            ViewGroup.LayoutParams params = mainContentView.getLayoutParams();
             if (params instanceof FrameLayout.LayoutParams) {
                 if (isOverlayed) {
                     ((FrameLayout.LayoutParams) params).topMargin = 0;
-                    mainScrollView.setLayoutParams(params);
+                    mainContentView.setLayoutParams(params);
                 } else {
                     ((FrameLayout.LayoutParams) params).topMargin = HeroView.getFixedActionBarHeight(getContext());
-                    mainScrollView.setLayoutParams(params);
+                    mainContentView.setLayoutParams(params);
                 }
             }
         }

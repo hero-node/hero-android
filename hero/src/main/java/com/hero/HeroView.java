@@ -188,7 +188,7 @@ public class HeroView extends FrameLayout implements IHero {
             boolean isFullHeight = false;
             HeroFragment fragment = null;
             if (view.getContext() instanceof HeroFragmentActivity) {
-                fragment = ((HeroFragmentActivity) view.getContext()).getCurrentFragment();
+                fragment = ((HeroFragmentActivity) view.getContext()).getParentFragment(view);//.getCurrentFragment();
                 if (fragment != null) {
                     isFullHeight = fragment.isFullHeight();
                 }
