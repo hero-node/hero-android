@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -132,6 +133,7 @@ public class HeroWebView extends WebView implements IHero {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
+                setWindowAttribute();
             }
 
             @Override
@@ -260,5 +262,21 @@ public class HeroWebView extends WebView implements IHero {
             }
         }
         return true;
+    }
+
+    private void setWindowAttribute() {
+        Context context = getContext();
+        int scrHeightDp = HeroView.px2dip(context, HeroView.getScreenHeight(context));
+        int scrWidthDp = HeroView.px2dip(context, HeroView.getScreenWidth(context));
+        String script = String.format("window.deviceWidth=%d;window.deviceHeight=%d",scrWidthDp,scrHeightDp);
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            try {
+                this.evaluateJavascript(script, null);
+            } catch (IllegalStateException e) {
+                this.loadUrl("javascript:" + script);
+            }
+        } else {
+            this.loadUrl("javascript:" + script);
+        }
     }
 }
