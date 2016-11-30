@@ -2,7 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="match_parent"
              android:layout_height="@dimen/list_header_height"
-             android:background="#f5f5f5"
+             android:background="@color/listSectionColor"
     >
 
     <TextView
