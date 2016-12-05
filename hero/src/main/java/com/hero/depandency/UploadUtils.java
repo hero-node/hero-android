@@ -109,11 +109,11 @@ public class UploadUtils {
         return uploadImage(url,filepath,uploadName,listener,getSessionId(url));
     }
 
-    public static String uploadImage(String url, String filepath, String uploadName, UploadListener listener, String jSessionId) {
+    public static String uploadImage(String url, String filepath, String uploadName,  UploadListener listener, String jSessionId) {
         UploadListener uploadListener = listener;
-
-
         File file = new File(filepath);
+        Log.i("UploadUtils", "url:" + url);
+        Log.i("UploadUtils", "filepath:" + filepath);
 
         if (!file.exists() || url == null) {
             if (uploadListener != null) {
@@ -121,7 +121,6 @@ public class UploadUtils {
             }
             return null;
         }
-
 
         MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
         multipartEntityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
@@ -131,9 +130,7 @@ public class UploadUtils {
         String returnValue = null;
         String errorMsg = "upload failed";
 
-
         String result = executeHttpPost(url, multipartEntityBuilder, jSessionId, HeroApplication.getInstance().getHttpReferer(), uploadListener);
-
 
         JSONObject jsonObject = null;
 
@@ -175,10 +172,77 @@ public class UploadUtils {
         return returnValue;
     }
 
+    public static String uploadImage(String url, String filepath, String uploadName, List<NameValuePair> params, UploadListener listener, String jSessionId) {
+        UploadListener uploadListener = listener;
+        Log.i("UploadUtils", "url:" + url);
+        Log.i("UploadUtils", "filepath:" + filepath);
+
+        File file = new File(filepath);
+        if (!file.exists() || url == null) {
+            if (uploadListener != null) {
+                uploadListener.onUploadFailed("upload not implemented", null);
+            }
+            return null;
+        }
+        MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+        multipartEntityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+        multipartEntityBuilder.addBinaryBody(uploadName, file, ContentType.create("image/jpeg"), file.getName());
+        ContentType contentType = ContentType.create(HTTP.PLAIN_TEXT_TYPE, HTTP.UTF_8);
+        StringBody stringBody;
+        for (NameValuePair i:params)
+        {
+            stringBody = new StringBody(i.getValue(),contentType);
+            multipartEntityBuilder.addPart(i.getName(), stringBody);
+        }
+
+
+        HttpEntity entity = multipartEntityBuilder.build();
+
+        String returnValue = null;
+        String errorMsg = "upload failed";
+
+        String result = executeHttpPost(url, multipartEntityBuilder, jSessionId, HeroApplication.getInstance().getHttpReferer(), uploadListener);
+        JSONObject jsonObject = null;
+        errorMsg = result;
+        //        Log.i("UploadUtils", "upload result: " + result);
+        if (result != null) {
+            try {
+                jsonObject = new JSONObject(result);
+                if (jsonObject != null) {
+                    if (jsonObject.has("result")) {
+                        returnValue = jsonObject.getString("result");
+                    }
+                    if (jsonObject.has("errors")) {
+                        Object error = jsonObject.get("errors");
+                        if (error instanceof JSONArray && ((JSONArray) error).length() > 0) {
+                            errorMsg = ((JSONArray) error).getString(0);
+                        }
+                    } else if (result.contains("ErrorMessage")) {
+                        errorMsg = result;
+                    }
+                }
+            } catch (JSONException e) {
+                errorMsg = "";
+                e.printStackTrace();
+            }
+
+            if ("success".equals(returnValue)) {
+                // upload success
+                if (uploadListener != null) {
+                    uploadListener.onUploadSuccess(returnValue, jsonObject.optJSONObject("content"));
+                }
+                return result;
+            }
+        }
+
+        if (uploadListener != null) {
+            uploadListener.onUploadFailed(errorMsg, jsonObject);
+        }
+        return returnValue;
+    }
 
     public static String uploadFiles(Context context, String url, JSONObject content, JSONArray files, UploadListener listener) {
         UploadListener uploadListener = listener;
-
 
         JSONObject jsonObject = null;
         String fileKey = null;
@@ -329,7 +393,9 @@ public class UploadUtils {
                 while (it.hasNext()) {
                     String key = (String) it.next();
                     String value = params.getString(key);
+                    Log.i("UploadUtils",key+":"+value);
                     paramList.add(new BasicNameValuePair(key, value));
+
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
