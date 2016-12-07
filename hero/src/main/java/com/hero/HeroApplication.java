@@ -179,6 +179,10 @@ public abstract class HeroApplication extends MultiDexApplication {
         return null;
     }
 
+    public String getExtraUserAgent() {
+        return "";
+    }
+
     public Intent getNewActivityIntent(Context context, String url, boolean isPresent) {
         return null;
     }

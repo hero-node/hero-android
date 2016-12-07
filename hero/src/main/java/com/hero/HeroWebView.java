@@ -54,6 +54,12 @@ public class HeroWebView extends WebView implements IHero {
 //        }
         String userAgent = this.getSettings().getUserAgentString();
         userAgent += " Android/" + ContextUtils.getSystemVersion() + " hero-android/" + ContextUtils.getVersionCode(this.getContext()) + " imei/" + ContextUtils.getIMEI(context) + " androidId/" + ContextUtils.getAndroidId(context);
+        if (HeroApplication.getInstance() != null) {
+            String extraUA = HeroApplication.getInstance().getExtraUserAgent();
+            if (!TextUtils.isEmpty(extraUA)) {
+                userAgent += " " + extraUA;
+            }
+        }
         this.getSettings().setUserAgentString(userAgent);
         this.getSettings().setDomStorageEnabled(true);
         String appCachePath = getContext().getCacheDir().getAbsolutePath();

@@ -1,11 +1,9 @@
 package com.hero;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
+import android.view.View;
 import android.widget.Toast;
 
 /**
@@ -17,9 +15,14 @@ public abstract class HeroHomeActivity extends HeroFragmentActivity {
     public static final int RESULT_CODE_EXIT = -1001;
     public static Activity theHomeActivity = null;
     private boolean backPressed = false;
+    public int availableScreenHeight = -1;
 
     public static Activity getTheHomeActivity() {
         return theHomeActivity;
+    }
+
+    public int getAvailableScreenHeight() {
+        return availableScreenHeight;
     }
 
     @Override
@@ -37,6 +40,10 @@ public abstract class HeroHomeActivity extends HeroFragmentActivity {
 
     public void onFinishLoading() {
         finishLoading();
+        View view = findViewById(android.R.id.content);
+        if (view != null) {
+            availableScreenHeight = view.getMeasuredHeight();
+        }
     }
 
     @Override

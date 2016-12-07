@@ -1703,6 +1703,19 @@ public class HeroFragment extends Fragment implements IHeroContext {
         }
     }
 
+//    private void removeRootScrollView() {
+//        if (rootLayout != null && mainContentView != null && mainContentView instanceof ScrollView) {
+//            if (mLayout != null) {
+//                ((ViewGroup) mainContentView).removeView(mLayout);
+//                rootLayout.removeView(mainContentView);
+//                rootLayout.addView(mLayout, 0);
+//                // restore the top offset of main content
+//                mainContentView = mLayout;
+//                setNavigationBarOverlayed(isNavigationBarHidden);
+//            }
+//        }
+//    }
+
     private void addCustomActionBar(IHero view, JSONObject titleView, boolean showHome) throws JSONException {
         addDescriptionToView(view);
         if (view != null) {
