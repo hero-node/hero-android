@@ -1299,7 +1299,18 @@ public class HeroFragment extends Fragment implements IHeroContext {
             closeImageView = close;
         }
         Dialog dialog = new Dialog(getContext(), R.style.CustomDialog);
+
         dialog.setContentView(customView);
+        customView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideSoftKeyboard(activity);
+                View focusedView = v.findFocus();
+                if (focusedView != null) {
+                    focusedView.clearFocus();
+                }
+            }
+        });
         if (object instanceof JSONObject) {
             try {
                 JSONObject json = (JSONObject) object;
