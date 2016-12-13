@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="defaultBackground">#303e53</color>
+    <color name="defaultWebBackground">#303e53</color>
+    <color name="actionMenuPressed">#40ffffff</color>
+    <color name="popupWindowBackground">#a0000000</color>
+    <color name="c0">#00bc8d</color>
+    <color name="c1">#cccccc</color>
+    <color name="c7">#ffffff</color>
+    <color name="c2">#999999</color>
+    <color name="c3">#666666</color>
+    <color name="listSectionColor">#f5f5f5</color>
+    <color name="gestureErrorColor">#d70c18</color>
+    <color name="defaultListDividerColor">#cccccc</color>
+    <color name="defaultRippleColor">#40202020</color>
+    <color name="defaultRipplePressedColor">#40202020</color>
+    <color name="indexBarColor">#4080e0</color>
+    <color name="toastBackgroundColor">#DD37455C</color>
+</resources>

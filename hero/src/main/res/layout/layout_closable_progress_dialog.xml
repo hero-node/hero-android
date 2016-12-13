@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/dialog_view"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:minHeight="80dp"
+    android:minWidth="180dp"
+    >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:padding="8dp"
+        android:background="@drawable/shape_progress_bg"
+        android:gravity="center"
+        android:orientation="horizontal"
+        >
+
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@style/HeroProgress"
+            android:layout_marginLeft="4dp"
+            />
+
+        <TextView
+            android:id="@+id/loadingText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="6dp"
+            android:textColor="@color/c7"
+            android:textSize="14dp"
+            android:gravity="center"
+            />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="15dp"
+            android:background="@color/c7"
+            />
+
+        <FrameLayout
+            android:id="@+id/closeView"
+            android:paddingLeft="15dp"
+            android:paddingRight="6dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            >
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/icon_progress_close"
+            />
+        </FrameLayout>
+    </LinearLayout>
+
+</RelativeLayout>

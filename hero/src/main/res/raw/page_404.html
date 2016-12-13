@@ -1,0 +1,45 @@
+<!DOCUMENT HTML>
+<html >
+    <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8">
+	<script type="text/javascript">
+	var ui = {
+            version:0,
+	    views:
+        [
+            {
+                class:'HeroButton',
+                backgroundColor:'f5f5f5',
+                frame:{x:'0',y:'0',w:'1x',h:'1x'},
+                click:{command:'refresh'},
+            },
+            {
+                class:'HeroImageView',
+                frame:{x:'0',y:'0',w:'140',h:'140'},
+                center:{x:'0.5x',y:'0.25x'},
+                image:'net_error_icon',
+            },
+            {
+                class:'HeroLabel',
+                frame:{x:'0',y:'0',w:'1x',h:'20'},
+                center:{x:'0.5x',y:'0.4x'},
+                size:16,
+                textColor:'333333',
+                text:'网络连接异常',
+                alignment:'center',
+            },
+            {
+                class:'HeroLabel',
+                frame:{x:'0',y:'0',w:'1x',h:'20'},
+                center:{x:'0.5x',y:'0.45x'},
+                size:14,
+                textColor:'999999',
+                text:'请检查网络连接后点击屏幕刷新',
+                alignment:'center',
+            },
+        ],
+    };
+    window.native.on(JSON.stringify({ui:ui}));
+    </script>
+</head>
+</html>

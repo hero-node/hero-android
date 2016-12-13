@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/chatLayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f2f0eb"
+    >
+
+    <include
+        android:id="@+id/titleBar"
+        layout="@layout/chat_title"
+        />
+
+    <LinearLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:paddingBottom="2dip"
+        android:paddingTop="2dip"
+        android:orientation="vertical"
+        >
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="#B5B5B3"
+            />
+
+        <LinearLayout
+            android:id="@+id/inputPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#aaffffff"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            >
+
+            <CheckBox
+                android:id="@+id/btnToggleText"
+                android:layout_marginLeft="6dp"
+                android:layout_marginTop="2dp"
+                style="@style/StyleChatButton"
+                android:button="@null"
+                android:background="@drawable/chat_text_list_button_bg"
+                android:visibility="gone"
+                />
+
+            <FrameLayout
+                android:id="@+id/optionButtonsLayout"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="@dimen/input_panel_height"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:visibility="gone"
+                >
+
+                <!--<View-->
+                    <!--android:id="@+id/blankView"-->
+                    <!--android:layout_width="1dp"-->
+                    <!--android:layout_height="@dimen/input_min_height"-->
+                    <!--android:visibility="invisible"-->
+                    <!--/>-->
+
+            </FrameLayout>
+
+            <RelativeLayout
+                android:id="@+id/editTextLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="6dp"
+                android:layout_marginRight="6dp"
+                android:gravity="bottom"
+                >
+
+                <EditText
+                    android:id="@+id/chatEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="35dp"
+                    android:paddingBottom="3dp"
+                    android:paddingLeft="1dp"
+                    android:paddingRight="1dp"
+                    android:paddingTop="3dp"
+                    android:background="@null"
+                    android:textCursorDrawable="@null"
+                    android:textColor="#606060"
+                    android:maxLines="3"
+                    android:minHeight="@dimen/input_min_height"
+                    android:textSize="17dp"
+                    android:focusable="true"
+                    />
+
+                <ImageView
+                    android:id="@+id/imgEmojiNormal"
+                    style="@style/StyleChatButton.Emoji"
+                    android:layout_alignParentRight="true"
+                    android:src="@drawable/chat_emoji_btn"
+                    android:visibility="visible"
+                    />
+
+                <ImageView
+                    android:id="@+id/imgEmojiChecked"
+                    style="@style/StyleChatButton.Emoji"
+                    android:layout_alignParentRight="true"
+                    android:src="@drawable/chat_emoji_btn_pressed"
+                    android:visibility="invisible"
+                    />
+
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/btnMore"
+                style="@style/StyleChatButton"
+                android:layout_marginTop="4dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/chat_more_btn"
+                />
+
+            <Button
+                android:id="@+id/btnSend"
+                android:layout_width="70dp"
+                android:layout_height="32dp"
+                android:layout_marginRight="4dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/chat_send_btn_bg"
+                android:text="@string/chat_button_send"
+                android:textColor="#ffffff"
+                android:textSize="16sp"
+                android:visibility="gone"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutTools"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            >
+
+            <LinearLayout
+                android:id="@+id/layoutEmoji"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:orientation="vertical"
+                android:visibility="visible"
+                >
+
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/emojiPager"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="10dp"
+                    android:background="@drawable/chat_menu_bg"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/layoutMore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottomBar"
+        android:layout_below="@+id/titleBar"
+        android:orientation="vertical"
+        >
+
+        <ProgressBar
+            android:id="@+id/progress"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerHorizontal="true"
+            android:visibility="gone"
+            />
+
+        <ListView
+            android:id="@+id/chat_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:cacheColorHint="#00000000"
+            android:divider="@null"
+            android:transcriptMode="alwaysScroll"
+            android:listSelector="@android:color/transparent"
+            />
+
+    </LinearLayout>
+</RelativeLayout>

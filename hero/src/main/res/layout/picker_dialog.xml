@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:gravity="center"
+              android:orientation="vertical"
+    >
+
+    <LinearLayout
+        android:id="@+id/pickerLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        >
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_marginTop="20dp"
+        android:background="#c0c0c0"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <Button
+            android:id="@+id/btnConfirm"
+            style="@android:style/Widget.Holo.Light.Button.Borderless.Small"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="16dp"
+            android:text="@android:string/ok"
+            />
+    </LinearLayout>
+</LinearLayout>

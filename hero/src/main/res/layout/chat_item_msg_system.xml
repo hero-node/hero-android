@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:paddingTop="2dp"
+              android:paddingBottom="2dp"
+              android:paddingLeft="6dp"
+              android:paddingRight="6dp"
+              android:orientation="vertical"
+    >
+
+    <TextView
+        android:id="@+id/txtSystemMsg"
+        style="@style/StyleChatText.System"
+        android:singleLine="false"
+        android:maxWidth="@dimen/bubble_max_width"
+        android:layout_marginTop="@dimen/items_padding"
+        android:layout_marginBottom="@dimen/items_padding"
+        />
+
+</LinearLayout>

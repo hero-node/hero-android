@@ -1,0 +1,5 @@
+<resources>
+    <string name="chat_menu_copy">复制</string>
+    <string name="chat_button_send">发送</string>
+    <string name="chat_copied">已复制</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="message_color">#000000</color>
+    <color name="name_color">#666666</color>
+    <color name="system_message_color">#fefefe</color>
+</resources>

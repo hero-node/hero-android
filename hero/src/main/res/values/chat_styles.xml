@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="StyleChatTitleText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">20dp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:maxWidth">240dp</item>
+    </style>
+
+    <style name="StyleChatText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="StyleChatText.System">
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:paddingLeft">6dp</item>
+        <item name="android:paddingRight">6dp</item>
+        <item name="android:textColor">@color/system_message_color</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textSize">@dimen/system_message_text_size</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:clickable">true</item>
+        <item name="android:background">@drawable/chat_system_message_bg</item>
+    </style>
+
+    <style name="StyleChatText.Message">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_vertical|left</item>
+        <item name="android:minHeight">@dimen/bubble_min_height</item>
+        <item name="android:maxWidth">@dimen/bubble_max_width</item>
+        <item name="android:textColor">@color/message_color</item>
+        <item name="android:textSize">@dimen/message_text_size</item>
+        <item name="android:clickable">false</item>
+        <item name="android:paddingLeft">6dp</item>
+        <item name="android:paddingRight">6dp</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingBottom">6dp</item>
+        <item name="android:autoLink">web|phone</item>
+    </style>
+
+    <style name="StyleChatText.Name">
+        <item name="android:layout_height">@dimen/user_name_height</item>
+        <item name="android:maxWidth">@dimen/user_name_max_width</item>
+        <item name="android:textColor">@color/name_color</item>
+        <item name="android:textSize">@dimen/name_text_size</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:clickable">true</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="StyleChatButton">
+        <item name="android:layout_width">@dimen/tool_button_size</item>
+        <item name="android:layout_height">@dimen/tool_button_size</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
+    <style name="StyleChatButton.Emoji">
+        <item name="android:layout_width">@dimen/emoji_button_size</item>
+        <item name="android:layout_height">@dimen/emoji_button_size</item>
+        <item name="android:layout_margin">1dp</item>
+    </style>
+
+    <style name="StyleChatImageAvatar">
+        <item name="android:layout_width">@dimen/avatar_size</item>
+        <item name="android:layout_height">@dimen/avatar_size</item>
+        <item name="android:layout_alignParentTop">true</item>
+        <item name="android:src">@drawable/chat_avatar_default</item>
+        <item name="android:clickable">true</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
+    <style name="StyleChatUILayout">
+        <item name="android:layout_width">@dimen/bubble_max_width</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+</resources>

@@ -1,0 +1,4 @@
+<cycleInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+                   android:cycles="6"
+    />
+    <!-- 动画连续多次运行，这里是6次 -->

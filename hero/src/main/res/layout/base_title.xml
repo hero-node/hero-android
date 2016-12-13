@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/layoutToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?android:attr/actionBarSize"
+                android:background="@color/defaultBackground"
+                android:visibility="gone">
+
+    <TextView
+        android:id="@+id/txtTitle"
+        style="@style/ToolbarTitleText"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:singleLine="true"
+        android:gravity="center"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"
+        android:layout_centerInParent="true"
+        />
+
+    <LinearLayout
+        android:id="@+id/layoutLeftItem"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        >
+        <ImageView
+            android:id="@+id/leftImage"
+            android:layout_width="@dimen/actionbar_icon_height"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp"
+            android:padding="5dp"
+            android:background="@drawable/action_button_bg"
+            android:src="@drawable/ic_back"
+            android:scaleType="fitCenter"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutRightItem"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        >
+    </LinearLayout>
+</RelativeLayout>

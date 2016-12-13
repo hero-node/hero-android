@@ -1,0 +1,80 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="android:Theme.Holo.Light">
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="Material" parent="android:Theme.Material.Light">
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="Switch"
+           parent="android:Theme.Holo.Light">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:track">@drawable/selector_switch_track</item>
+        <item name="android:thumb">@drawable/switch_thumb</item>
+        <item name="android:textOn"></item>
+        <item name="android:textOff"></item>
+        <item name="android:thumbTextPadding">12dp</item>
+        <item name="android:switchMinWidth">32dp</item>
+    </style>
+
+    <style name="HeroProgress"
+           parent="@android:style/Widget.Holo.Light.ProgressBar.Inverse">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+    </style>
+
+    <style name="PickerDialog"
+           parent="android:Theme.Dialog">
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowMinWidthMinor">70%</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.6</item>
+        <item name="android:background">@drawable/picker_dialog_bg</item>
+    </style>
+
+    <style name="CustomDialog" parent="PickerDialog">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <style name="ImageDialog"
+           parent="android:Theme.DeviceDefault.Dialog.NoActionBar">
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:background">#00000000</item>
+        <item name="android:windowMinWidthMinor">100%</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="ToolbarTitleText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">18dp</item>
+    </style>
+
+    <style name="ToolbarMenuText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">6dp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">16dp</item>
+        <item name="android:background">@drawable/action_button_bg</item>
+    </style>
+
+    <style name="SwipeBackLayout">
+        <item name="edge_size">50dip</item>
+        <item name="shadow_left">@drawable/shadow_left</item>
+    </style>
+</resources>
