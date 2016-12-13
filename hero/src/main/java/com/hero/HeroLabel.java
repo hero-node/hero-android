@@ -1,3 +1,34 @@
+/**
+ * BSD License
+ * Copyright (c) Hero software.
+ * All rights reserved.
+
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+
+ * Neither the name Facebook nor the names of its contributors may be used to
+ * endorse or promote products derived from this software without specific
+ * prior written permission.
+
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package com.hero;
 
 import android.content.Context;
@@ -23,6 +54,7 @@ import java.util.Iterator;
 public class HeroLabel extends TextView implements IHero {
     private boolean isAutoHeight = false;
     private String oldText;
+    private static final int INVALID_VALUE = -9999;
 
     public HeroLabel(Context context) {
         super(context);
@@ -131,7 +163,7 @@ public class HeroLabel extends TextView implements IHero {
         if (isAutoHeight && oldText != null && !oldText.equals(text)) {
             FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.getLayoutParams();
             if (params != null) {
-                updateSelfHeight(measureSelfHeight(params.width));
+                updateSelfWidthHeight(INVALID_VALUE, measureSelfHeight(params.width));
             }
         }
         if (text != null) {
@@ -147,7 +179,15 @@ public class HeroLabel extends TextView implements IHero {
         return height;
     }
 
-    private void updateSelfHeight(int height) {
+    private int measureSelfWidth(int height) {
+        int widthMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        int heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST);
+        this.measure(widthMeasureSpec, heightMeasureSpec);
+        int width = getMeasuredWidth();
+        return width;
+    }
+
+    private void updateSelfWidthHeight(int width, int height) {
         if (!isAutoHeight) {
             return;
         }
@@ -159,8 +199,16 @@ public class HeroLabel extends TextView implements IHero {
             JSONObject frame = new JSONObject();
             frame.put("x", HeroView.px2dip(context, params.leftMargin));
             frame.put("y", HeroView.px2dip(context, params.topMargin));
-            frame.put("w", HeroView.px2dip(context, params.width));
-            frame.put("h", HeroView.px2dip(context, height));
+            if (width == INVALID_VALUE) {
+                frame.put("w", HeroView.px2dip(context, params.width));
+            } else {
+                frame.put("w", HeroView.px2dip(context, width));
+            }
+            if (height == INVALID_VALUE) {
+                frame.put("h", HeroView.px2dip(context, params.height));
+            } else {
+                frame.put("h", HeroView.px2dip(context, height));
+            }
             jsonObject.put("frame", frame);
             HeroView.on(HeroLabel.this, jsonObject);
         } catch (JSONException e) {
