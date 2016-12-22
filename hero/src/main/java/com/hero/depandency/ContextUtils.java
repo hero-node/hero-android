@@ -43,8 +43,11 @@ import android.os.Environment;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Base64;
 
 import com.hero.HeroApplication;
+
+import java.util.UUID;
 
 public class ContextUtils {
 
@@ -213,5 +216,25 @@ public class ContextUtils {
             e.printStackTrace();
         }
         return "";
+    }
+
+    public static void saveUUID(Context context, String id) {
+        SharedPreferences sp = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+        sp.edit().putString("heroUUID", id).commit();
+    }
+
+    public static String getUUID(Context context) {
+        SharedPreferences sp = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+        String uuid = sp.getString("heroUUID", "");
+        if (TextUtils.isEmpty(uuid)) {
+            uuid = generateUUID();
+            saveUUID(context, uuid);
+        }
+        return uuid;
+    }
+
+    private static String generateUUID() {
+        String uuid = UUID.randomUUID().toString();
+        return Base64.encodeToString(uuid.getBytes(), Base64.DEFAULT);
     }
 }
