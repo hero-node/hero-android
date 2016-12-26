@@ -85,6 +85,7 @@ public class HeroWebView extends WebView implements IHero {
 //        }
         String userAgent = this.getSettings().getUserAgentString();
         userAgent += " Android/" + ContextUtils.getSystemVersion() + " hero-android/" + ContextUtils.getVersionCode(this.getContext()) + " imei/" + ContextUtils.getIMEI(context) + " androidId/" + ContextUtils.getAndroidId(context);
+        userAgent += " Brand/" + ContextUtils.getDeviceBrand() +" Model/" + ContextUtils.getDeviceName();
         if (HeroApplication.getInstance() != null) {
             String extraUA = HeroApplication.getInstance().getExtraUserAgent();
             if (!TextUtils.isEmpty(extraUA)) {
@@ -159,7 +160,7 @@ public class HeroWebView extends WebView implements IHero {
                 if (view.getParent() != null && parentFragment != null) {
                     parentFragment.showToolBar(true);
                     try {
-                        JSONObject object = new JSONObject("{common:{event:finish}}");
+                        JSONObject object = new JSONObject("{common:{event:'finish'}}");
                         HeroView.sendActionToContext(getContext(), object);
                     } catch (JSONException e) {
                         e.printStackTrace();

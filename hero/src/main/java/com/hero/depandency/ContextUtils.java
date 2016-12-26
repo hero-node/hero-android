@@ -110,6 +110,10 @@ public class ContextUtils {
         return Build.MODEL;
     }
 
+    public static String getDeviceBrand() {
+        return Build.BRAND;
+    }
+
     public static String getSystemVersion() {
         return "" + Build.VERSION.SDK_INT;
     }
