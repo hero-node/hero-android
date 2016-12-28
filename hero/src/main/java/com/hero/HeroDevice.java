@@ -33,6 +33,8 @@ package com.hero;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.view.View;
 
@@ -40,6 +42,8 @@ import com.hero.depandency.ContextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
 
 /**
  * Created by R9L7NGH on 2015/12/22.
@@ -79,9 +83,32 @@ public class HeroDevice extends View implements IHero {
                 JSONObject value = new JSONObject();
                 value.put("imei", ContextUtils.getIMEI(context));
                 value.put("androidId", ContextUtils.getAndroidId(context));
+                value.put("uuid", ContextUtils.getUUID(context));
                 HeroView.putValueToJson(jsonObject.getJSONObject("deviceId"), value);
             }
             ((IHeroContext) getContext()).on(jsonObject);
         }
+    }
+
+    private String getInstalledAppListAsString(){
+        PackageManager pm = context.getPackageManager();
+        List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+        StringBuffer stringBuffer = new StringBuffer();
+        for (ApplicationInfo app : apps) {
+            if(pm.getLaunchIntentForPackage(app.packageName) != null) {
+                // apps with launcher intent
+                if((app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 1) {
+                    // updated system apps
+
+                } else if ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 1) {
+                    // system apps
+
+                } else {
+                    // user installed apps
+                    stringBuffer.append(app.packageName).append(';');
+                }
+            }
+        }
+        return stringBuffer.toString();
     }
 }

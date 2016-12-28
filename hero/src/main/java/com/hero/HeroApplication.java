@@ -40,6 +40,8 @@ import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.ValueCallback;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 import java.util.Stack;
 
@@ -93,15 +95,14 @@ public abstract class HeroApplication extends MultiDexApplication {
     }
 
     public static String getDomainAddress(String url) {
-        int index = url.indexOf("://");
-        if (index != -1) {
-            url = url.substring(index + "://".length());
+        try {
+            URL netUrl = new URL(url);
+            return netUrl.getHost();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
-        index = url.indexOf("/");
-        if (index != -1) {
-            url = url.substring(0, index);
-        }
-        return url;
+
+        return null;
     }
 
     public HeroApp getHeroApp() {

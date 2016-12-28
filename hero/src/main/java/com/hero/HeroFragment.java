@@ -83,9 +83,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-//import android.support.v7.app.ActionBar;
-//import android.support.v7.app.AppCompatActivity;
-
 public class HeroFragment extends Fragment implements IHeroContext {
     public static final String ARGUMENTS_URL = "url";
     public static final String ARGUMENTS_MAGIC_VIEW = "magicViewName";
@@ -164,9 +161,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        //        if (getActionBar() == null) {
-        //            toolbar.setVisibility(View.VISIBLE);
-        //        }
     }
 
     @Override
@@ -217,13 +211,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
         if (this.isResumed() && !hidden) {
             if (getActivity() instanceof HeroHomeActivity && !TextUtils.isEmpty(title)) {
                 setActivityTitle(title);
-                //                if (getActionBar() != null && getActionBar().getCustomView() != null) {
-                //                    if (mLeftItem == null) {
-                //                        setActionbarTitleEnabled(false);
-                //                    } else {
-                //                        setActionbarTitleEnabled(true);
-                //                    }
-                //                }
             }
             if (mActionDatas != null && mActionDatas.has("viewWillAppear")) {
                 try {
@@ -724,14 +711,11 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             if (getContext() instanceof HeroFragmentActivity) {
 
                                 Intent intent = ((HeroFragmentActivity) getContext()).getPresentIntent();
-                                //                            Intent intent = new Intent(getContext(), HeroOneActivity.class);
                                 intent.putExtra("url", url);
                                 intent.putExtra("headBarVisible", true);
                                 if (getActivity() instanceof HeroHomeActivity) {
                                     intent.putExtra(HeroHomeActivity.LAUNCH_FROM_HOME, true);
                                 }
-                                //                                int requestCode = HeroActivity.getAutoGenerateRequestCode();
-                                //                                requestCodes.add(requestCode);
                                 if (getActivity() instanceof HeroFragmentActivity) {
                                     if (((HeroFragmentActivity) getActivity()).isHasPresentActivity()) {
                                         return;
@@ -1160,9 +1144,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
     protected ActionBar getActionBar() {
         if (getActivity() != null) {
             return getActivity().getActionBar();
-            //            if (getActivity() instanceof AppCompatActivity) {
-            //                return ((AppCompatActivity) getActivity()).getSupportActionBar();
-            //            }
         }
         return null;
     }
@@ -1240,7 +1221,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
     }
 
     public static ProgressDialog createProgressDialog(Context context) {
-        //        if (progressDialog == null) {
         ProgressDialog dialog;
         dialog = new ProgressDialog(context);
         dialog.setIndeterminate(true);
@@ -1448,12 +1428,11 @@ public class HeroFragment extends Fragment implements IHeroContext {
     }
 
     private boolean isAlwaysNeedReload(String data, int version) {
-        // if contains JSESSIONID or captcha, always need reloading
         if (TextUtils.isEmpty(data)) {
             return false;
         }
         // as defined, version 0 means the page always need reloading, such as which contains captcha
-        if (version == 0 || data.contains("captcha.jpg")) {
+        if (version == 0) {
             return true;
         }
         return false;
@@ -1677,19 +1656,12 @@ public class HeroFragment extends Fragment implements IHeroContext {
 
     // is the fragment full screen (no action bar)
     public boolean isFullHeight() {
-        if (isNavigationBarHidden) {
-            return true;
-        }
-        return false;
+        return isNavigationBarHidden;
     }
 
     public int getToolBarHeight() {
         if (toolbar != null) {
-            //if (toolbarContainer.findViewById(R.id.layoutToolbar) != null) {
-                return HeroView.getFixedActionBarHeight(getContext());
-            //} else {
-            //    return toolbar.getLayoutParams().height;
-            //}
+            return HeroView.getFixedActionBarHeight(getContext());
         }
         return 0;
     }

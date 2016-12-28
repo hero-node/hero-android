@@ -102,17 +102,6 @@ public abstract class HeroFragmentActivity extends AppCompatActivity implements 
         return true;
     }
 
-    //    @Override
-    //    public boolean onCreateOptionsMenu(Menu menu) {
-    //        getCurrentFragment().onCreateOptionsMenu(menu, getMenuInflater());
-    //        return true;
-    //    }
-    //
-    //    @Override
-    //    public boolean onOptionsItemSelected(MenuItem item) {
-    //        return getCurrentFragment().onOptionsItemSelected(item);
-    //    }
-
     public void setRightItems(JSONArray array) {
         mRightItems = array;
     }
