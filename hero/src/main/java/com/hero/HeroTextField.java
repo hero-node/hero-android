@@ -260,8 +260,8 @@ public class HeroTextField extends EditText implements IHero {
         if (jsonObject.has("minLength")) {
             Log.w("not implements", "minLength");
         }
-        if (jsonObject.has("_allowString")) {
-            Log.w("not implements", "_allowString");
+        if (jsonObject.has("_allowString") || jsonObject.has("allowString")) {
+            Log.w("not implements", "allowString");
         }
         if (jsonObject.has("text")) {
 
