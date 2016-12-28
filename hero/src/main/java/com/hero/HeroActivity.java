@@ -193,16 +193,6 @@ public class HeroActivity extends HeroFragmentActivity {
             return;
         }
 
-        //        if (resultCode == RESULT_OK) {
-        //            if (requestCodes != null && requestCodes.size() > 0) {
-        //                for (int i : requestCodes) {
-        //                    if (requestCode == i) {
-        //                        setResult(RESULT_OK);
-        //                        self.finish();
-        //                    }
-        //                }
-        //            }
-        //        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 

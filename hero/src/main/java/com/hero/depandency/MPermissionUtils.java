@@ -68,6 +68,15 @@ public class MPermissionUtils {
         return ActivityCompat.checkSelfPermission(context, permissionsName) == PackageManager.PERMISSION_GRANTED;
     }
 
+    public static boolean isPermissionsGranted(Context context, String[] permissionsName) {
+        for (String name : permissionsName) {
+            if (!isPermissionGranted(context, name)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // check and request
     public static boolean checkAndRequestPermission(Context context, String permissionName, int requestCode) {
         if (!isPermissionGranted(context, permissionName)) {

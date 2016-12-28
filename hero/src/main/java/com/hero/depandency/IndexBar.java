@@ -91,7 +91,7 @@ public class IndexBar extends View {
         textPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
         textPaint.setTextAlign(Paint.Align.CENTER);
         backgroundPaint = new Paint();
-        backgroundPaint.setColor(Color.parseColor("#40cccccc"));
+        backgroundPaint.setColor(getResources().getColor(R.color.indexBarBackColor));
     }
 
     private void init(JSONArray data) {

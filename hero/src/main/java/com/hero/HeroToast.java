@@ -104,9 +104,7 @@ public class HeroToast extends View implements IHero {
         }
 
         if (!TextUtils.isEmpty(theText)) {
-            //            if (!theText.equals(text)) {
             isContentChanged = true;
-            //            }
             text = theText;
         }
 

@@ -15,5 +15,6 @@
     <color name="defaultRippleColor">#40202020</color>
     <color name="defaultRipplePressedColor">#40202020</color>
     <color name="indexBarColor">#4080e0</color>
+    <color name="indexBarBackColor">#40cccccc</color>
     <color name="toastBackgroundColor">#DD37455C</color>
 </resources>
