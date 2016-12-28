@@ -175,7 +175,7 @@ public class UploadUtils {
         return returnValue;
     }
 
-    public static String uploadImage(String url, String filepath, String uploadName, List<NameValuePair> params, UploadListener listener, String jSessionId) {
+    public static String uploadImage(String url, String filepath, String uploadName, List<NameValuePair> params, UploadListener listener, String extra) {
         UploadListener uploadListener = listener;
         Log.i("UploadUtils", "url:" + url);
         Log.i("UploadUtils", "filepath:" + filepath);
@@ -204,7 +204,7 @@ public class UploadUtils {
         String returnValue = null;
         String errorMsg = "upload failed";
 
-        String result = executeHttpPost(url, multipartEntityBuilder, jSessionId, HeroApplication.getInstance().getHttpReferer(), uploadListener);
+        String result = executeHttpPost(url, multipartEntityBuilder, extra, HeroApplication.getInstance().getHttpReferer(), uploadListener);
         JSONObject jsonObject = null;
         errorMsg = result;
         //        Log.i("UploadUtils", "upload result: " + result);
