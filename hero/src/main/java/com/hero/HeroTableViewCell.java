@@ -202,8 +202,16 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
         } else if (json.has("emptySeparator")) {
             return R.layout.hero_list_section_separator;
         } else if (json.has("AccessoryType")) {
+            // Deprecated
             try {
                 String type = json.getString("AccessoryType");
+                return R.layout.hero_listcell;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else if (json.has("accessoryType")) {
+            try {
+                String type = json.getString("accessoryType");
                 return R.layout.hero_listcell;
             } catch (JSONException e) {
                 e.printStackTrace();

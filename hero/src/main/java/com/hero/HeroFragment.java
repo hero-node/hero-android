@@ -347,14 +347,19 @@ public class HeroFragment extends Fragment implements IHeroContext {
             });
         } else {
             try {
-                if (json.has("globle")) {
-                    JSONObject globle = json.getJSONObject("globle");
-                    String key = globle.getString("key");
+                if (json.has("globle") || json.has("global")) {
+                    JSONObject globalEvent;
+                    if (json.has("globle") ) {
+                        globalEvent = json.getJSONObject("globle");
+                    } else {
+                        globalEvent = json.optJSONObject("global");
+                    }
+                    String key = globalEvent.getString("key");
                     LocalBroadcastManager manager = LocalBroadcastManager.getInstance(self.getContext());
                     Intent intent = new Intent(key);
                     intent.setAction(key);
-                    if (globle.has("value")) {
-                        intent.putExtra("value", globle.getString("value"));
+                    if (globalEvent.has("value")) {
+                        intent.putExtra("value", globalEvent.getString("value"));
                     }
                     if (key.equals("tabSelect")) {
                         returnToHome();
@@ -364,7 +369,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             intent = new Intent(getContext(), home.getClass());
                             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             Bundle bundle = new Bundle();
-                            bundle.putString("newApp", globle.toString());
+                            bundle.putString("newApp", globalEvent.toString());
                             intent.putExtras(bundle);
                             startActivitySafely(intent);
                         }
