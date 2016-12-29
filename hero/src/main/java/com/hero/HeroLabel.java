@@ -114,9 +114,6 @@ public class HeroLabel extends TextView implements IHero {
             int lines = jsonObject.getInt("numberOfLines");
             if (lines > 0) {
                 this.setLines(lines);
-                //                if (lines > 1) {
-                //                    this.setGravity(Gravity.TOP);
-                //                }
             }
         }
 

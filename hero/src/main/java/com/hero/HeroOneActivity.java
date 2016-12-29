@@ -47,7 +47,6 @@ import org.json.JSONObject;
 public class HeroOneActivity extends HeroActivity {
     private boolean backPressed = false;
     private boolean isLaunchFromHome = false;
-    //    private boolean hasLeftItem = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,20 +57,6 @@ public class HeroOneActivity extends HeroActivity {
     @Override
     public void on(Object object) throws JSONException {
         super.on(object);
-        //        if (object != null && object instanceof JSONObject) {
-        //            final JSONObject json = (JSONObject) object;
-        //            if (json.has("ui")) {
-        //                JSONObject ui = (JSONObject) json.get("ui");
-        //                if (ui.has("nav")) {
-        //                    JSONObject nav = ui.getJSONObject("nav");
-        //                    if (nav.has("leftItems")) {
-        //                        hasLeftItem = true;
-        //                    } else {
-        //                        hasLeftItem = false;
-        //                    }
-        //                }
-        //            }
-        //        }
     }
 
     @Override
@@ -86,35 +71,6 @@ public class HeroOneActivity extends HeroActivity {
 
     @Override
     public void onBackPressed() {
-        // only no left item and launched form home leads to exit
-//        if (isLaunchFromHome) {
-//            if (getCurrentFragment().getLeftItem() == null) {
-//                if (this.backPressed) {
-//                    setResult(HeroHomeActivity.RESULT_CODE_EXIT);
-//                    this.finish();
-//                    return;
-//                }
-//                backPressed = true;
-//                Toast.makeText(this, getString(R.string.pressMoreToExit), Toast.LENGTH_SHORT).show();
-//                new Handler().postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        backPressed = false;
-//                    }
-//                }, 2000);
-//                return;
-//            } //else {
-//                if (getCurrentFragment().getLeftItem().has("click")) {
-//                    try {
-//                        JSONObject click = getCurrentFragment().getLeftItem().getJSONObject("click");
-//                        self.on(click);
-//                        return;
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        }
         super.onBackPressed();
     }
 

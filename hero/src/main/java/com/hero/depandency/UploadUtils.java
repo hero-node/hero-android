@@ -107,40 +107,12 @@ public class UploadUtils {
         return url;
     }
 
-
-    public static String getSessionId(String url) {
-        if (!TextUtils.isEmpty(url)) {
-
-            String domain = getDomainAddress(url);
-            String cookie = CookieManager.getInstance().getCookie(domain);
-            if (cookie != null) {
-                return getSessionIdFromCookie(cookie);
-
-            }
-        }
-        return null;
-    }
-
-    public static String getSessionIdFromCookie(String cookie) {
-        String session;
-        int index = cookie.indexOf("JSESSIONID=");
-        if (index >= 0) {
-            session = cookie.substring(index + "JSESSIONID=".length());
-        } else {
-            return null;
-        }
-        index = session.indexOf(";");
-        if (index >= 0) {
-            session = session.substring(0, index);
-        }
-        return session;
-    }
     public static String uploadImage(String url, String filepath, String uploadName, UploadListener listener)
     {
-        return uploadImage(url,filepath,uploadName,listener,getSessionId(url));
+        return uploadImage(url,filepath,uploadName,listener, null);
     }
 
-    public static String uploadImage(String url, String filepath, String uploadName,  UploadListener listener, String jSessionId) {
+    public static String uploadImage(String url, String filepath, String uploadName,  UploadListener listener, String extra) {
         UploadListener uploadListener = listener;
         File file = new File(filepath);
         Log.i("UploadUtils", "url:" + url);
@@ -161,7 +133,7 @@ public class UploadUtils {
         String returnValue = null;
         String errorMsg = "upload failed";
 
-        String result = executeHttpPost(url, multipartEntityBuilder, jSessionId, HeroApplication.getInstance().getHttpReferer(), uploadListener);
+        String result = executeHttpPost(url, multipartEntityBuilder, extra, HeroApplication.getInstance().getHttpReferer(), uploadListener);
 
         JSONObject jsonObject = null;
 
@@ -203,7 +175,7 @@ public class UploadUtils {
         return returnValue;
     }
 
-    public static String uploadImage(String url, String filepath, String uploadName, List<NameValuePair> params, UploadListener listener, String jSessionId) {
+    public static String uploadImage(String url, String filepath, String uploadName, List<NameValuePair> params, UploadListener listener, String extra) {
         UploadListener uploadListener = listener;
         Log.i("UploadUtils", "url:" + url);
         Log.i("UploadUtils", "filepath:" + filepath);
@@ -232,7 +204,7 @@ public class UploadUtils {
         String returnValue = null;
         String errorMsg = "upload failed";
 
-        String result = executeHttpPost(url, multipartEntityBuilder, jSessionId, HeroApplication.getInstance().getHttpReferer(), uploadListener);
+        String result = executeHttpPost(url, multipartEntityBuilder, extra, HeroApplication.getInstance().getHttpReferer(), uploadListener);
         JSONObject jsonObject = null;
         errorMsg = result;
         //        Log.i("UploadUtils", "upload result: " + result);
@@ -356,7 +328,7 @@ public class UploadUtils {
     }
 
 
-    public static String  executeHttpPost(String url, MultipartEntityBuilder builder, String sessionId, String referer, final UploadListener uploadListener) {
+    public static String  executeHttpPost(String url, MultipartEntityBuilder builder, String extra, String referer, final UploadListener uploadListener) {
         String apiReturn = null;
         HttpClient client = ConnectionUtil.getHttpClient();
         HttpPost post = new HttpPost(url);
@@ -382,10 +354,6 @@ public class UploadUtils {
         String cookie = CookieManager.getInstance().getCookie(HeroApplication.getDomainAddress(url));
         if (!TextUtils.isEmpty(cookie)) {
             post.addHeader("Cookie", cookie);
-        } else {
-            if (sessionId != null) {
-                post.addHeader("Cookie", "JSESSIONID=" + sessionId);
-            }
         }
         post.addHeader(progressHttpEntity.getContentType());
         post.addHeader("accept", "*/*");

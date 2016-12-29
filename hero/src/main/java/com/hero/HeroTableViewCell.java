@@ -51,7 +51,6 @@ import java.lang.reflect.InvocationTargetException;
  * Created by liuguoping on 15/9/24.
  */
 public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
-//    public static final int DEFAULT_CELL_HEIGHT = 44;
 
     public HeroTableViewCell(Context context) {
         super(context);
@@ -114,7 +113,6 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
         try {
             AbsListView.LayoutParams p;
             p = new AbsListView.LayoutParams(HeroView.getScreenWidth(context), json.has("height") ? HeroView.dip2px(context, json.getInt("height")) : context.getResources().getDimensionPixelSize(R.dimen.list_default_height));
-//            Log.i("HeroTableViewCell", "HeroTableViewCell init " + json);
             if (json.has("sectionView")) {
                 JSONObject titleView = json.getJSONObject("sectionView");
                 IHero tView = HeroView.fromJson(context, titleView);
@@ -204,8 +202,16 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
         } else if (json.has("emptySeparator")) {
             return R.layout.hero_list_section_separator;
         } else if (json.has("AccessoryType")) {
+            // Deprecated
             try {
                 String type = json.getString("AccessoryType");
+                return R.layout.hero_listcell;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else if (json.has("accessoryType")) {
+            try {
+                String type = json.getString("accessoryType");
                 return R.layout.hero_listcell;
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -275,7 +281,6 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
             TextView textView = (TextView) findViewById(R.id.textView2);
             if (textView != null) {
                 textView.setText("");
-//                findViewById(R.id.arrow).setVisibility(VISIBLE);
             }
         }
         if (jsonObject.has("image")) {

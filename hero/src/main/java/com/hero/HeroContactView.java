@@ -194,7 +194,6 @@ public class HeroContactView extends TextView implements IHero {
         uri = CallLog.Calls.CONTENT_URI;
         //        uri = uri.buildUpon().appendQueryParameter("address_book_index_extras", "true").build();
 
-        //        CallLog.Calls.INCOMING_TYPE, CallLog.Calls.OUTGOING_TYPE, CallLog.Calls.MISSED_TYPE;
         String[] projection = new String[] {CallLog.Calls.NUMBER, CallLog.Calls.CACHED_NAME, CallLog.Calls.DATE, CallLog.Calls.DURATION, CallLog.Calls.TYPE};
         String[] selectionArgs = null;
         String sortOrder = CallLog.Calls.DATE + " desc";

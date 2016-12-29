@@ -423,9 +423,7 @@ public class HeroImageView extends ImageView implements IHero {
         if (jsonObject.has("uploadUrl")) {
             uploadUrl = jsonObject.getString("uploadUrl");
         }
-        if (jsonObject.has("JSESSIONID")) {
-            sessionId = jsonObject.getString("JSESSIONID");
-        }
+
         if (jsonObject.has("hidden")) {
             if (deleteView != null) {
                 if (isLocalFileExists(localImageName)) {
@@ -541,17 +539,6 @@ public class HeroImageView extends ImageView implements IHero {
         if (pickUri != null) {
             final File sourceFile = new File(path);
             showProgressDialog();
-            if (!TextUtils.isEmpty(uploadUrl) && TextUtils.isEmpty(sessionId)) {
-                Context application = getContext().getApplicationContext();
-                if (application instanceof HeroApplication) {
-                    String domain = HeroApplication.getDomainAddress(uploadUrl);
-                    String cookie = ((HeroApplication) application).getCookieManager().getCookie(domain);
-                    if (cookie != null) {
-                        sessionId = getSessionIdFromCookie(cookie);
-                    }
-                }
-            }
-            final String jSessionId = sessionId;
             if (sourceFile.exists() && sourceFile.canRead()) {
                 new Thread(new Runnable() {
                     @Override
@@ -593,7 +580,7 @@ public class HeroImageView extends ImageView implements IHero {
                                 message.obj = error;
                                 refreshHandler.sendMessage(message);
                             }
-                        }, jSessionId);
+                        }, null);
                         deleteTempFile();
                     }
                 }).start();
@@ -675,21 +662,6 @@ public class HeroImageView extends ImageView implements IHero {
             recycleBitmapIfNeeded(bmp);
         }
         return targetFile;
-    }
-
-    public String getSessionIdFromCookie(String cookie) {
-        String session;
-        int index = cookie.indexOf("JSESSIONID=");
-        if (index >= 0) {
-            session = cookie.substring(index + "JSESSIONID=".length());
-        } else {
-            return null;
-        }
-        index = session.indexOf(";");
-        if (index >= 0) {
-            session = session.substring(0, index);
-        }
-        return session;
     }
 
     private String getLocalFilePath(String fileName) {
@@ -802,11 +774,6 @@ public class HeroImageView extends ImageView implements IHero {
     private void removeDeleteView() {
         if (deleteView != null) {
             deleteView.setVisibility(GONE);
-            //            if (deleteView.getParent() != null) {
-            //                ViewGroup parent = (ViewGroup) deleteView.getParent();
-            //                parent.removeView(deleteView);
-            //                deleteView = null;
-            //            }
         }
     }
 
