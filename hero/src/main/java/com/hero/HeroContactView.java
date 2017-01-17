@@ -47,6 +47,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import rx.functions.Action1;
+
 public class HeroContactView extends TextView implements IHero {
     private static final String TAG = "HeroContactView";
     private JSONObject contactObject;
@@ -65,61 +67,31 @@ public class HeroContactView extends TextView implements IHero {
                 contactObject = jsonObject.getJSONObject("getContact");
             }
             //            pickContact();
-            new Thread(new Runnable() {
+            MPermissionUtils.requestPermissionAndCall(getContext(), Manifest.permission.READ_CONTACTS, new Action1<Boolean>() {
                 @Override
-                public void run() {
-                    JSONArray jsonArray = getAllContacts();
-                    if (jsonArray.length() > 0) {
-                        JSONObject value = new JSONObject();
-                        try {
-                            value.put("contacts", jsonArray);
-                            contactObject.put("value", value);
-                            ((IHeroContext) getContext()).on(contactObject);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                public void call(Boolean aBoolean) {
+                    if (aBoolean) {
+                        postContactsData();
                     } else {
-                        JSONObject value = new JSONObject();
-                        try {
-                            value.put("error", false);
-                            contactObject.put("value", value);
-                            ((IHeroContext) getContext()).on(contactObject);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                        postFailure(contactObject);
                     }
                 }
-            }).start();
+            });
         }
         if (jsonObject.has("getRecent")) {
             if (jsonObject.get("getRecent") instanceof JSONObject) {
                 callsObject = jsonObject.getJSONObject("getRecent");
             }
-            new Thread(new Runnable() {
+            MPermissionUtils.requestPermissionAndCall(getContext(), Manifest.permission.READ_CALL_LOG, new Action1<Boolean>() {
                 @Override
-                public void run() {
-                    JSONArray jsonArray = getAllCallLogs();
-                    if (jsonArray.length() > 0) {
-                        JSONObject value = new JSONObject();
-                        try {
-                            value.put("callHistories", jsonArray);
-                            callsObject.put("value", value);
-                            ((IHeroContext) getContext()).on(callsObject);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                public void call(Boolean aBoolean) {
+                    if (aBoolean) {
+                        postCallLogs();
                     } else {
-                        JSONObject value = new JSONObject();
-                        try {
-                            value.put("error", "fail");
-                            callsObject.put("value", value);
-                            ((IHeroContext) getContext()).on(callsObject);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                        postFailure(callsObject);
                     }
                 }
-            }).start();
+            });
         }
         if (jsonObject.has("contactName") || jsonObject.has("contactNumber")) {
             if (contactObject != null) {
@@ -138,6 +110,59 @@ public class HeroContactView extends TextView implements IHero {
                     ((IHeroContext) this.getContext()).on(contactObject);
                 }
             }
+        }
+    }
+
+    private void postContactsData() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                JSONArray jsonArray = getAllContacts();
+                if (jsonArray.length() > 0) {
+                    JSONObject value = new JSONObject();
+                    try {
+                        value.put("contacts", jsonArray);
+                        contactObject.put("value", value);
+                        ((IHeroContext) getContext()).on(contactObject);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    postFailure(contactObject);
+                }
+            }
+        }).start();
+    }
+
+    private void postCallLogs() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                JSONArray jsonArray = getAllCallLogs();
+                if (jsonArray.length() > 0) {
+                    JSONObject value = new JSONObject();
+                    try {
+                        value.put("callHistories", jsonArray);
+                        callsObject.put("value", value);
+                        ((IHeroContext) getContext()).on(callsObject);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    postFailure(callsObject);
+                }
+            }
+        }).start();
+    }
+
+    private void postFailure(JSONObject content) {
+        JSONObject value = new JSONObject();
+        try {
+            value.put("error", "fail");
+            content.put("value", value);
+            ((IHeroContext) getContext()).on(content);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
@@ -198,25 +223,29 @@ public class HeroContactView extends TextView implements IHero {
         String[] selectionArgs = null;
         String sortOrder = CallLog.Calls.DATE + " desc";
 
-        Cursor callCursor = resolver.query(uri, projection, null, selectionArgs, sortOrder);
-        if (callCursor.moveToFirst()) {
-            do {
-                if (callCursor.getInt(4) != CallLog.Calls.MISSED_TYPE) {
-                    JSONObject item = new JSONObject();
-                    try {
-                        item.put("phone", callCursor.getString(0));
-                        item.put("name", callCursor.getString(1));
-                        item.put("callTime", callCursor.getString(2));
-                        item.put("duration", callCursor.getString(3));
-                        item.put("callType", callCursor.getInt(4) == CallLog.Calls.INCOMING_TYPE ? "CALLIN" : "CALLOUT");
-                        array.put(item);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+        try {
+            Cursor callCursor = resolver.query(uri, projection, null, selectionArgs, sortOrder);
+            if (callCursor.moveToFirst()) {
+                do {
+                    if (callCursor.getInt(4) != CallLog.Calls.MISSED_TYPE) {
+                        JSONObject item = new JSONObject();
+                        try {
+                            item.put("phone", callCursor.getString(0));
+                            item.put("name", callCursor.getString(1));
+                            item.put("callTime", callCursor.getString(2));
+                            item.put("duration", callCursor.getString(3));
+                            item.put("callType", callCursor.getInt(4) == CallLog.Calls.INCOMING_TYPE ? "CALLIN" : "CALLOUT");
+                            array.put(item);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
-            } while (callCursor.moveToNext());
+                } while (callCursor.moveToNext());
+            }
+            callCursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        callCursor.close();
         return array;
     }
 
