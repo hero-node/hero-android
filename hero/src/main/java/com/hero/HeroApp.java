@@ -31,31 +31,58 @@
 
 package com.hero;
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
-import android.view.View;
-
-import com.hero.depandency.ContextUtils;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Objects;
 
 /**
  * Created by R9L7NGH on 2015/12/22.
  */
 public class HeroApp implements IHero {
     private Object content;
+    private Context context;
+    private LocalBroadcastManager broadcastManager;
+
+    public static final String HEROAPP_BADGE = "badgeValue";
+    public static final String HEROAPP_TAB_CHANGED = "tabSelect";
+    public static final String HEROAPP_NEW_APP = "newApp";
+
+    public static final String HEROAPP_EXTRA_BADGE_VALUE = "badgeValue";
+    public static final String HEROAPP_EXTRA_BADGE_INDEX = "index";
 
     public HeroApp(Context c) {
+        context = c;
+        broadcastManager = LocalBroadcastManager.getInstance(c);
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void on(final JSONObject object) throws JSONException {
-        content = object;
+        if (object.has("tabs")) {
+            content = object;
+        } else {
+            // send a local broadcast
+            if ("HeroApp".equals(object.optString("key"))) {
+                Intent intent = new Intent();
+                if (object.has(HEROAPP_BADGE)) {
+                    JSONObject data = object.getJSONObject(HEROAPP_BADGE);
+                    intent.setAction(HEROAPP_BADGE);
+                    intent.putExtra(HEROAPP_EXTRA_BADGE_INDEX, data.optInt(HEROAPP_EXTRA_BADGE_INDEX));
+                    intent.putExtra(HEROAPP_EXTRA_BADGE_VALUE, data.optString(HEROAPP_EXTRA_BADGE_VALUE));
+                } else if (object.has(HEROAPP_NEW_APP)) {
+                    // startActivity should be called in an activity
+                    return;
+                } else if (object.has(HEROAPP_TAB_CHANGED)) {
+                    intent.setAction(HEROAPP_TAB_CHANGED);
+                    if (object.has("value")) {
+                        intent.putExtra("value", object.getString("value"));
+                    }
+                }
+                broadcastManager.sendBroadcast(intent);
+            }
+        }
     }
 
     public Object getContent() {

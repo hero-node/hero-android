@@ -373,8 +373,10 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             intent.putExtras(bundle);
                             startActivitySafely(intent);
                         }
+                    } else if (key.equals("HeroApp")) {
+                        HeroApplication.getInstance().getHeroApp().on(globalEvent);
                     }
-                    if (!key.equals("newApp")) {
+                    if (!key.equals("newApp") && !key.equals("HeroApp")) {
                         manager.sendBroadcast(intent);
                     }
                 }
