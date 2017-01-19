@@ -78,6 +78,8 @@ public class HeroScanBarCodeView extends FrameLayout implements IHero, QRCodeRea
         if (Camera.getNumberOfCameras() > 0) {
             qrCodeView = new QRCodeReaderView(this.getContext());
             qrCodeView.setOnQRCodeReadListener(this);
+            qrCodeView.setBackCamera();
+            qrCodeView.setAutofocusInterval(2000L);
             if (previewLayout != null) {
                 previewLayout.addView(qrCodeView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             } else {
