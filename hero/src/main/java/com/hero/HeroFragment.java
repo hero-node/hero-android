@@ -101,7 +101,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
     protected Activity activity;
     protected Dialog customDialog;
     private ImageView closeImageView;
-    protected ImageView backImageView;
     protected String title;
     private boolean shouldSendViewWillAppear;
     private boolean isHidden = false;
@@ -246,10 +245,10 @@ public class HeroFragment extends Fragment implements IHeroContext {
         toolbarTitleView = (TextView) viewGroup.findViewById(R.id.txtTitle);
         leftItemsLayout = (ViewGroup) viewGroup.findViewById(R.id.layoutLeftItem);
         rightItemsLayout = (ViewGroup) viewGroup.findViewById(R.id.layoutRightItem);
-        backImageView = (ImageView) toolbar.findViewById(R.id.leftImage);
         rootLayout = (ViewGroup) viewGroup.findViewById(R.id.rootLayout);
         toolbarContainer = (ViewGroup) viewGroup.findViewById(R.id.toolbarContainer);
         mainContentView = viewGroup.findViewById(R.id.mainScrollView);
+        ImageView backImageView = (ImageView) toolbar.findViewById(R.id.leftImage);
         if (((HeroFragmentActivity) getActivity()).isBackIconShown()) {
             backImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1506,41 +1505,15 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     leftItemsLayout.removeAllViews();
                     try {
                         String title = mLeftItem.getString("title");
-                        View view = getFirstChild(leftItemsLayout);
-                        if (view == null) {
-                            view = createTextButton(mLeftItem, leftItemsLayout, mLeftItem.optJSONObject("click"));
-                        } else {
-                            setLeftItemTitle(title);
+                        if (!TextUtils.isEmpty(title)) {
+                            createTextButton(mLeftItem, leftItemsLayout, mLeftItem.optJSONObject("click"));
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 } else if (mLeftItem.has("image")) {
-                    ImageView leftImage = (ImageView) leftItemsLayout.findViewById(R.id.leftImage);
-                    if (leftImage != null) {
-                        try {
-                            String image = mLeftItem.getString("image");
-                            leftImage.setVisibility(View.VISIBLE);
-                            leftImage.setImageResource(ImageLoadUtils.getLocalImageIdByName(getContext(), image));
-                            if (mLeftItem.has("click")) {
-                                leftImage.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        try {
-                                            HeroView.sendActionToContext(getContext(), mLeftItem.getJSONObject("click"));
-                                            hideSoftKeyboard(getContext());
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                });
-                            } else {
-                                leftImage.setOnClickListener(null);
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    leftItemsLayout.removeAllViews();
+                    createImageButton(leftItemsLayout, mLeftItem);
                 }
             }
         }
