@@ -241,7 +241,7 @@ public class HeroDevice extends View implements IHero {
         String sortOrder = SORT_ORDER;
 
         Cursor cursor = resolver.query(uri, projection, selection, null, sortOrder);
-        if (cursor.moveToFirst()) {
+        if (cursor != null && cursor.moveToFirst()) {
             do {
                 JSONObject item = new JSONObject();
                 try {

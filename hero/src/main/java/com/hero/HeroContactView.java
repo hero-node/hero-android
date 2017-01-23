@@ -175,7 +175,7 @@ public class HeroContactView extends TextView implements IHero {
         ContentResolver cr = getContext().getContentResolver();
         Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
 
-        if (cursor.moveToFirst()) {
+        if (cursor != null && cursor.moveToFirst()) {
             do {
                 String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
                 String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
@@ -225,7 +225,7 @@ public class HeroContactView extends TextView implements IHero {
 
         try {
             Cursor callCursor = resolver.query(uri, projection, null, selectionArgs, sortOrder);
-            if (callCursor.moveToFirst()) {
+            if (callCursor != null && callCursor.moveToFirst()) {
                 do {
                     if (callCursor.getInt(4) != CallLog.Calls.MISSED_TYPE) {
                         JSONObject item = new JSONObject();
