@@ -485,13 +485,74 @@ public class HeroView extends FrameLayout implements IHero {
                         }
                     }
                 }
+
+                if (jsonObject.has("xOffset")) {
+                    String xOffset = jsonObject.getString("xOffset");
+                    String[] content = xOffset.split("\\+");
+                    if (content.length > 1) {
+                        String name = content[0];
+                        float offset = Float.parseFloat(content[1]);
+                        // find the left view
+                        View leftView = null;
+                        if (view.getParent() != null) {
+                            leftView = (View) HeroView.findViewByName((View) view.getParent(), name);
+                        }
+                        if (leftView == null) {
+                            HeroFragment fragment = ((HeroFragmentActivity) view.getContext()).getParentFragment(view);
+                            if (fragment != null) {
+                                leftView = (View) HeroView.findViewByName(fragment.getView(), name);
+                            }
+                        }
+                        FrameLayout.LayoutParams viewLayout = (FrameLayout.LayoutParams) view.getLayoutParams();
+                        if (leftView != null) {
+                            // update layout parameters according to the left view
+                            FrameLayout.LayoutParams leftLayout = (FrameLayout.LayoutParams) leftView.getLayoutParams();
+                            viewLayout.leftMargin = leftLayout.leftMargin + leftLayout.width + dip2px(view.getContext(), offset);
+                            view.setLayoutParams(viewLayout);
+                            // add the view to the listener list of left view
+                            List<View> leftLayoutListeners = HeroView.getLayoutListener(leftView, true);
+                            if (leftLayoutListeners != null) {
+                                if (!leftLayoutListeners.contains(view)) {
+                                    leftLayoutListeners.add(view);
+                                }
+                            }
+                        } else {
+                            viewLayout.leftMargin = dip2px(view.getContext(), offset);
+                        }
+
+                        // update frame info of this view
+                        if (HeroView.getJson(view) != null) {
+                            JSONObject originalJson = (JSONObject) HeroView.getJson(view);
+                            JSONObject newFrame = new JSONObject();
+                            newFrame.put("x", px2dip(context, viewLayout.leftMargin));
+                            newFrame.put("y", px2dip(context, viewLayout.topMargin));
+                            newFrame.put("w", px2dip(context, viewLayout.width));
+                            newFrame.put("h", px2dip(context, viewLayout.height));
+                            if (viewLayout.width == 1 && px2dip(context, viewLayout.width) == 0) {
+                                newFrame.put("w", 0.5);
+                            }
+                            originalJson.put("frame", newFrame);
+                            originalJson.put("xOffset", xOffset);
+
+                            if (jsonObject.has("center") && jsonObject.optJSONObject("center") != null) {
+                                originalJson.put("center", jsonObject.getJSONObject("center"));
+                            }
+                        }
+                    }
+                }
+                // update the listeners of this view after its frame changed
                 List<View> layoutListeners = HeroView.getLayoutListener(view, false);
                 if (layoutListeners != null && layoutListeners.size() > 0) {
                     for (View layoutListener : layoutListeners) {
                         if (layoutListener != null) {
                             JSONObject layoutEvent = new JSONObject();
                             layoutEvent.put("frame", HeroView.getJson(layoutListener).get("frame"));
-                            layoutEvent.put("yOffset", HeroView.getJson(layoutListener).getString("yOffset"));
+                            if (HeroView.getJson(layoutListener).has("yOffset")) {
+                                layoutEvent.put("yOffset", HeroView.getJson(layoutListener).getString("yOffset"));
+                            }
+                            if (HeroView.getJson(layoutListener).has("xOffset")) {
+                                layoutEvent.put("xOffset", HeroView.getJson(layoutListener).getString("xOffset"));
+                            }
 
                             if (HeroView.getJson(layoutListener).has("center") && HeroView.getJson(layoutListener).optJSONObject("center") != null) {
                                 layoutEvent.put("center", HeroView.getJson(layoutListener).getJSONObject("center"));
