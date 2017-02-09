@@ -118,7 +118,7 @@ public class HeroContactView extends TextView implements IHero {
             @Override
             public void run() {
                 JSONArray jsonArray = getAllContacts();
-                if (jsonArray.length() > 0) {
+                if (jsonArray != null) {
                     JSONObject value = new JSONObject();
                     try {
                         value.put("contacts", jsonArray);
@@ -139,7 +139,7 @@ public class HeroContactView extends TextView implements IHero {
             @Override
             public void run() {
                 JSONArray jsonArray = getAllCallLogs();
-                if (jsonArray.length() > 0) {
+                if (jsonArray != null) {
                     JSONObject value = new JSONObject();
                     try {
                         value.put("callHistories", jsonArray);
@@ -170,7 +170,7 @@ public class HeroContactView extends TextView implements IHero {
         JSONArray array = new JSONArray();
 
         if (!requestContactPermission()) {
-            return array;
+            return null;
         }
         ContentResolver cr = getContext().getContentResolver();
         Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
@@ -212,7 +212,7 @@ public class HeroContactView extends TextView implements IHero {
         JSONArray array = new JSONArray();
 
         if (!requestCalllogPermission()) {
-            return array;
+            return null;
         }
         final ContentResolver resolver = getContext().getContentResolver();
         Uri uri;
