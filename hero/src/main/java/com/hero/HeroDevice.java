@@ -2,21 +2,21 @@
  * BSD License
  * Copyright (c) Hero software.
  * All rights reserved.
-
+ * <p>
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
-
+ * <p>
  * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
-
+ * <p>
  * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
-
+ * <p>
  * Neither the name Facebook nor the names of its contributors may be used to
  * endorse or promote products derived from this software without specific
  * prior written permission.
-
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,6 +33,8 @@ package com.hero;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -54,6 +56,8 @@ import org.json.JSONObject;
 import java.util.List;
 
 import rx.functions.Action1;
+
+import static android.content.Context.CLIPBOARD_SERVICE;
 
 /**
  * Created by R9L7NGH on 2015/12/22.
@@ -80,6 +84,7 @@ public class HeroDevice extends View implements IHero {
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void on(final JSONObject object) throws JSONException {
+        HeroView.on(this, object);
         if (object.has("getInfo")) {
             JSONObject jsonObject = object.getJSONObject("getInfo");
             if (jsonObject.has("appInfo")) {
@@ -123,6 +128,12 @@ public class HeroDevice extends View implements IHero {
                     }
                 }
             });
+        }
+        if (object.has("copy")) {
+            copy(object.optString("copy"));
+        }
+        if (object.has("paste")) {
+            paste();
         }
     }
 
@@ -263,4 +274,28 @@ public class HeroDevice extends View implements IHero {
         cursor.close();
         return jsonArray;
     }
+
+    private void copy(String content) {
+        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
+        clipboardManager.setPrimaryClip(ClipData.newPlainText(HeroDevice.class.getSimpleName(), content));
+    }
+
+    private void paste() {
+        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
+        ClipData data = clipboardManager.getPrimaryClip();
+        if (data != null && data.getItemAt(0) != null) {
+            String text = data.getItemAt(0).getText().toString();
+            JSONObject actionObject = new JSONObject();
+            try {
+                if (HeroView.getName(this) != null) {
+                    actionObject.put("name", HeroView.getName(this));
+                }
+                HeroView.putValueToJson(actionObject, text);
+                HeroView.sendActionToContext(context, actionObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }
