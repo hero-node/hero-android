@@ -164,7 +164,9 @@ public class HeroFragment extends Fragment implements IHeroContext {
 
     @Override
     public void onDestroy() {
-        mWebview.destroy();
+        if (mWebview != null) {
+            mWebview.destroy();
+        }
         if (mWebview2 != null) {
             mWebview2.destroy();
         }
@@ -389,7 +391,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             return;
                         }
                         ui = (JSONObject) json.get("ui");
-                        JSONObject ui_cache = mCache.getAsJSONObject(mUrl);
+                        JSONObject ui_cache = (mCache == null) ? null : mCache.getAsJSONObject(mUrl);
                         if (ui_cache != null && ui_cache.has("ui_cache")) {
                             ui_cache = ui_cache.getJSONObject("ui_cache");
                             if (ui.has("version")) {
@@ -491,7 +493,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                         }
                     }
                     Bundle bundle = getArguments();
-                    if (bundle.containsKey(ARGUMENTS_MAGIC_VIEW)) {
+                    if (bundle != null &&bundle.containsKey(ARGUMENTS_MAGIC_VIEW)) {
                         // cache != 0 means ui should be cached
                         if (!isCache || cacheVersion != 0) {
                             transitionMagicView(bundle.getString(ARGUMENTS_MAGIC_VIEW));
@@ -1637,6 +1639,11 @@ public class HeroFragment extends Fragment implements IHeroContext {
     // is the fragment full screen (no action bar)
     public boolean isFullHeight() {
         return isNavigationBarHidden;
+    }
+
+    public void setFullHeight(boolean fullHeight) {
+        isNavigationBarHidden = fullHeight;
+        setNavigationBarHidden(isNavigationBarHidden);
     }
 
     public int getToolBarHeight() {

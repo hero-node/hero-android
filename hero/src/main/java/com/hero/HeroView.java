@@ -163,6 +163,9 @@ public class HeroView extends FrameLayout implements IHero {
             } else {
                 width = ((View) view.getParent()).getWidth();
             }
+            if (width <= 0) {
+                width = ((View) view.getParent()).getWidth();;
+            }
         }
         if (width <= 0) {
             width = screen_width;
