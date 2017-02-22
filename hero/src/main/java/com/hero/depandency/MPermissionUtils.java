@@ -128,14 +128,14 @@ public class MPermissionUtils {
 
     // request then proceed to next step
     public static void requestPermissionAndCall(Context context, String permissionName, Action1<Boolean> action) {
-        RxPermissions.getInstance(context)
-                .request(new String[] {permissionName})
-                .subscribe(action);
+        if (context instanceof Activity) {
+            new RxPermissions((Activity) context).request(new String[] {permissionName}).subscribe(action);
+        }
     }
 
     public static void requestPermissionsAndCall(Context context, String[] permissionsName, Action1<Boolean> action) {
-        RxPermissions.getInstance(context)
-                .request(permissionsName)
-                .subscribe(action);
+        if (context instanceof Activity) {
+            new RxPermissions((Activity) context).request(permissionsName).subscribe(action);
+        }
     }
 }
