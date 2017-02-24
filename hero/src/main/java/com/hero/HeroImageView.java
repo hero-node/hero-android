@@ -39,6 +39,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -56,6 +58,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -84,6 +87,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -309,7 +313,7 @@ public class HeroImageView extends ImageView implements IHero {
             localImageName = jsonObject.getString("localImage") + imageExtension;
             if (!openImageForDisplay(localImageName)) {
                 //                ((IHeroContext) getContext()).setImagePickHandler(this);
-                pickUri = Uri.fromFile(getTempFile());
+//                pickUri = Uri.fromFile(getTempFile());
                 if (jsonObject.has("isDeleted")) {
                     Animation animation = new AlphaAnimation(1.0f, 0.1f);
                     animation.setDuration(DELETE_ANIME_DURATION);
@@ -416,7 +420,7 @@ public class HeroImageView extends ImageView implements IHero {
             } else {
                 localImageName = System.currentTimeMillis() + ".jpg";
             }
-            pickUri = Uri.fromFile(getTempFile());
+//            pickUri = Uri.fromFile(getTempFile());
             buildImageDialog();
         }
 
@@ -492,8 +496,29 @@ public class HeroImageView extends ImageView implements IHero {
         }).create().show();
     }
 
+    private Uri getTempFileUri(Intent intent,File file)
+    {
+        Uri uri;
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentapiVersion<24){
+            uri=Uri.fromFile(file);
+        }else {
+            uri = FileProvider.getUriForFile(getContext(), getContext().getPackageName()+".fileprovider", file);
+            List<ResolveInfo> resInfoList= getContext().getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+            for (ResolveInfo resolveInfo : resInfoList) {
+                String packageName = resolveInfo.activityInfo.packageName;
+                getContext().grantUriPermission(packageName, uri,
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            }
+        }
+        return uri;
+    }
     private void takePhoto() {
+        if (!requestCameraPermission()) {
+            return;
+        }
         Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+        pickUri=getTempFileUri(intent,getTempFile());
         intent.putExtra(MediaStore.EXTRA_OUTPUT, pickUri);
         if (getContext() instanceof HeroActivity) {
             ((HeroActivity) (getContext())).startActivityByView(intent, HeroActivity.REQUEST_CODE_CAMERA, this);
@@ -504,6 +529,7 @@ public class HeroImageView extends ImageView implements IHero {
         Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
         if (needCrop) {
+            pickUri=getTempFileUri(intent,getTempFile());
             intent.putExtra("crop", "true");
             intent.putExtra("return-data", false);
             intent.putExtra("scale", true);
@@ -516,13 +542,14 @@ public class HeroImageView extends ImageView implements IHero {
         }
     }
 
-    private void cropPhoto(Uri uri) {
+    private void cropPhoto(String path) {
         Intent intent = new Intent("com.android.camera.action.CROP");
-        intent.setDataAndType(uri, "image/*");
+        pickUri=getTempFileUri(intent, new File(path));
+        intent.setDataAndType(pickUri, "image/*");
         intent.putExtra("crop", "true");
         intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
         intent.putExtra("noFaceDetection", true);
-        intent.putExtra("output", uri);
+        intent.putExtra("output", pickUri);
         if (getContext() instanceof HeroActivity) {
             ((HeroActivity) (getContext())).startActivityByView(intent, HeroActivity.REQUEST_CODE_PHOTO_CROP, this);
         }
@@ -531,12 +558,12 @@ public class HeroImageView extends ImageView implements IHero {
     public void handlePickResult(int type, String path) {
         // data not used currently
         if (needCrop && HeroActivity.REQUEST_CODE_CAMERA == type) {
-            if (pickUri != null) {
-                cropPhoto(pickUri);
+            if (path != null) {
+                cropPhoto(path);
             }
             return;
         }
-        if (pickUri != null) {
+        if (path != null) {
             final File sourceFile = new File(path);
             showProgressDialog();
             if (sourceFile.exists() && sourceFile.canRead()) {
@@ -887,4 +914,9 @@ public class HeroImageView extends ImageView implements IHero {
         setBackgroundDrawable(anim);
         anim.start();
     }
+
+    private boolean requestCameraPermission() {
+        return MPermissionUtils.checkAndRequestPermissions(getContext(), new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA}, MPermissionUtils.HERO_PERMISSION_CAMERA);
+    }
+
 }
