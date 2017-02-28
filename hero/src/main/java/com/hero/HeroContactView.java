@@ -182,10 +182,12 @@ public class HeroContactView extends TextView implements IHero {
                 String phoneNumber = "";
 
                 Cursor phones = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId, null, null);
-                while (phones.moveToNext()) {
-                    phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                if (phones != null) {
+                    while (phones.moveToNext()) {
+                        phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    }
+                    phones.close();
                 }
-                phones.close();
                 JSONObject item = new JSONObject();
                 try {
                     item.put("phone", phoneNumber);
