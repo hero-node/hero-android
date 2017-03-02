@@ -53,6 +53,7 @@ import java.util.Iterator;
  */
 public class HeroLabel extends TextView implements IHero {
     private boolean isAutoHeight = false;
+    private boolean isAutoWidth = false;
     private String oldText;
     private static final int INVALID_VALUE = -9999;
 
@@ -69,6 +70,12 @@ public class HeroLabel extends TextView implements IHero {
         if (jsonObject.has("hAuto")) {
             if (jsonObject.getBoolean("hAuto")) {
                 isAutoHeight = true;
+            }
+        }
+
+        if (jsonObject.has("wAuto")) {
+            if (jsonObject.getBoolean("wAuto")) {
+                isAutoWidth = true;
             }
         }
 
@@ -162,6 +169,11 @@ public class HeroLabel extends TextView implements IHero {
             if (params != null) {
                 updateSelfWidthHeight(INVALID_VALUE, measureSelfHeight(params.width));
             }
+        } else if (isAutoWidth && oldText != null && !oldText.equals(text)) {
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.getLayoutParams();
+            if (params != null) {
+                updateSelfWidthHeight(measureSelfWidth(params.height), INVALID_VALUE);
+            }
         }
         if (text != null) {
             oldText = text.toString();
@@ -185,7 +197,7 @@ public class HeroLabel extends TextView implements IHero {
     }
 
     private void updateSelfWidthHeight(int width, int height) {
-        if (!isAutoHeight) {
+        if (!isAutoHeight && !isAutoWidth) {
             return;
         }
 

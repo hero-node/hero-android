@@ -22,4 +22,6 @@
 
     <dimen name="dash_default_width">6dp</dimen>
     <dimen name="dash_default_gap">3dp</dimen>
+
+    <dimen name="cellLeftMargin">15dp</dimen>
 </resources>

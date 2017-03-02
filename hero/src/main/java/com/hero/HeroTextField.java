@@ -69,6 +69,7 @@ public class HeroTextField extends EditText implements IHero {
     private FocusChangeListener focusChangeListener = null;
     private int formatStyle;
     private boolean isFocused = false;
+    private boolean isSecret = false;
 
     public HeroTextField(Context context) {
         super(context);
@@ -127,7 +128,7 @@ public class HeroTextField extends EditText implements IHero {
                         end.put("value", self.getText().toString());
                         end.put("name", HeroView.getName(HeroTextField.this));
                         end.put("event", "UIControlEventEditingChanged");
-                        ((IHeroContext) self.getContext()).on(end);
+                        postEventToContext(end);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -160,7 +161,7 @@ public class HeroTextField extends EditText implements IHero {
                             end.put("value", self.getText().toString());
                             end.put("name", HeroView.getName(HeroTextField.this));
                             end.put("event", "textFieldDidEndEditing");
-                            ((IHeroContext) self.getContext()).on(end);
+                            postEventToContext(end);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -170,7 +171,7 @@ public class HeroTextField extends EditText implements IHero {
                             begin.put("value", self.getText().toString());
                             begin.put("name", HeroView.getName(HeroTextField.this));
                             begin.put("event", "textFieldDidBeginEditing");
-                            ((IHeroContext) self.getContext()).on(begin);
+                            postEventToContext(begin);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -206,6 +207,9 @@ public class HeroTextField extends EditText implements IHero {
                 this.setSelection(this.getText().length());
             }
         }
+        if (jsonObject.has("secret")) {
+            isSecret = jsonObject.optBoolean("secret");
+        }
         if (jsonObject.has("placeHolder")) {
             this.setHint(jsonObject.getString("placeHolder"));
         }
@@ -222,7 +226,7 @@ public class HeroTextField extends EditText implements IHero {
                 try {
                     JSONObject end = json.getJSONObject("textFieldDidEditing");
                     end.put("value", "");
-                    ((IHeroContext) self.getContext()).on(end);
+                    postEventToContext(end);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -322,5 +326,12 @@ public class HeroTextField extends EditText implements IHero {
 
     public interface FocusChangeListener {
         void focusChanged(boolean hasFocus);
+    }
+
+    private void postEventToContext(JSONObject object) throws JSONException {
+        if (isSecret) {
+            object.put("secret", isSecret);
+        }
+        ((IHeroContext) self.getContext()).on(object);
     }
 }

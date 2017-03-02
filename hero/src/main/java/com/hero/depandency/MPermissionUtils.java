@@ -40,7 +40,11 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 
+import com.tbruyelle.rxpermissions.RxPermissions;
+
 import java.util.ArrayList;
+
+import rx.functions.Action1;
 
 /**
  * Created by xincai on 16-4-14.
@@ -54,6 +58,7 @@ public class MPermissionUtils {
     public static int HERO_PERMISSION_SDCARD = 5;
     public static int HERO_PERMISSION_CAMERA = 6;
     public static int HERO_PERMISSION_PHONE_STATE = 7;
+    public static int HERO_PERMISSION_SMS = 8;
 
     public static void requestPermission(Context context, String[] permissions, int requestCode) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -121,4 +126,16 @@ public class MPermissionUtils {
         context.startActivity(intent);
     }
 
+    // request then proceed to next step
+    public static void requestPermissionAndCall(Context context, String permissionName, Action1<Boolean> action) {
+        if (context instanceof Activity) {
+            new RxPermissions((Activity) context).request(new String[] {permissionName}).subscribe(action);
+        }
+    }
+
+    public static void requestPermissionsAndCall(Context context, String[] permissionsName, Action1<Boolean> action) {
+        if (context instanceof Activity) {
+            new RxPermissions((Activity) context).request(permissionsName).subscribe(action);
+        }
+    }
 }

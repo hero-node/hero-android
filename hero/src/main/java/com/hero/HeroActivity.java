@@ -31,6 +31,7 @@
 
 package com.hero;
 
+import android.Manifest;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -52,6 +53,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.hero.depandency.IImagePickHandler;
+import com.hero.depandency.MPermissionUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -198,10 +200,13 @@ public class HeroActivity extends HeroFragmentActivity {
 
     private void handleContactPick(Intent data) {
         String phoneNumber = null, name = null;
+        boolean isDenied = false;
 
         if (data != null) {
             Uri uri = data.getData();
-            if (uri != null) {
+            if (!MPermissionUtils.isPermissionGranted(this, Manifest.permission.READ_CONTACTS)) {
+                isDenied = true;
+            } else if (uri != null) {
                 Cursor c = null;
                 Cursor phone = null;
                 try {
@@ -220,6 +225,7 @@ public class HeroActivity extends HeroFragmentActivity {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                    isDenied = true;
                 } finally {
                     if (c != null) {
                         c.close();
@@ -240,12 +246,14 @@ public class HeroActivity extends HeroFragmentActivity {
                 }
 
             } else {
-                // permission denied
+                // permission denied or no phone number
                 JSONObject item = new JSONObject();
                 try {
                     item.put("contactName", name == null ? "" : name);
                     item.put("contactNumber", "");
-                    item.put("error", "denied");
+                    if (isDenied) {
+                        item.put("error", "denied");
+                    }
                     if (resultHandlerView != null) {
                         resultHandlerView.on(item);
                         resultHandlerView = null;

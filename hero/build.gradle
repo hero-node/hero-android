@@ -37,6 +37,8 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.2.0'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.android.support:support-v4:24.2.0'
-    compile 'com.dlazaro66.qrcodereaderview:qrcodereaderview:1.0.0'
+    compile 'com.dlazaro66.qrcodereaderview:qrcodereaderview:2.0.1'
     compile 'com.android.support:multidex:1.0.1'
+    compile "com.tbruyelle.rxpermissions:rxpermissions:0.9.1@aar"
+    compile "io.reactivex:rxjava:1.1.0"
 }

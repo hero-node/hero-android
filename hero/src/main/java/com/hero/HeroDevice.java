@@ -2,21 +2,21 @@
  * BSD License
  * Copyright (c) Hero software.
  * All rights reserved.
-
+ * <p>
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
-
+ * <p>
  * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
-
+ * <p>
  * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
-
+ * <p>
  * Neither the name Facebook nor the names of its contributors may be used to
  * endorse or promote products derived from this software without specific
  * prior written permission.
-
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,26 +31,50 @@
 
 package com.hero;
 
+import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 
 import com.hero.depandency.ContextUtils;
+import com.hero.depandency.MPermissionUtils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
 
+import rx.functions.Action1;
+
+import static android.content.Context.CLIPBOARD_SERVICE;
+
 /**
  * Created by R9L7NGH on 2015/12/22.
  */
 public class HeroDevice extends View implements IHero {
+    public static final int SMS_POST_COUNT = 50;
 
     private Context context;
+
+    private Handler postDataHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.obj != null && msg.obj instanceof JSONObject) {
+                HeroView.sendActionToContext(getContext(), (JSONObject) msg.obj);
+            }
+        }
+    };
 
     public HeroDevice(Context c) {
         super(c);
@@ -60,6 +84,7 @@ public class HeroDevice extends View implements IHero {
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void on(final JSONObject object) throws JSONException {
+        HeroView.on(this, object);
         if (object.has("getInfo")) {
             JSONObject jsonObject = object.getJSONObject("getInfo");
             if (jsonObject.has("appInfo")) {
@@ -88,16 +113,55 @@ public class HeroDevice extends View implements IHero {
             }
             ((IHeroContext) getContext()).on(jsonObject);
         }
+        if (object.has("getAppList")) {
+            postInstalledApp(object.getJSONObject("getAppList"));
+        }
+        if (object.has("getSms")) {
+            final JSONObject smsObject = object.getJSONObject("getSms");
+            MPermissionUtils.requestPermissionAndCall(getContext(), Manifest.permission.READ_SMS, new Action1<Boolean>() {
+                @Override
+                public void call(Boolean aBoolean) {
+                    if (aBoolean) {
+                        postSms(smsObject);
+                    } else {
+                        postSmsDataOnce(smsObject, new JSONArray());
+                    }
+                }
+            });
+        }
+        if (object.has("copy")) {
+            copy(object.optString("copy"));
+        }
+        if (object.has("paste")) {
+            paste();
+        }
     }
 
-    private String getInstalledAppListAsString(){
+    private void postInstalledApp(final JSONObject jsonObject) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    JSONArray jsonArray = getAppList();
+                    JSONObject value = new JSONObject();
+                    value.put("appList", jsonArray);
+                    value.put("system", "ANDROID");
+                    HeroView.putValueToJson(jsonObject, value);
+                    postDataHandler.sendMessage(generateMessage(jsonObject));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    private JSONArray getAppList() {
         PackageManager pm = context.getPackageManager();
         List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-        StringBuffer stringBuffer = new StringBuffer();
+        JSONArray jsonArray = new JSONArray();
         for (ApplicationInfo app : apps) {
-            if(pm.getLaunchIntentForPackage(app.packageName) != null) {
-                // apps with launcher intent
-                if((app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 1) {
+            if (pm.getLaunchIntentForPackage(app.packageName) != null) {
+                if ((app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 1) {
                     // updated system apps
 
                 } else if ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 1) {
@@ -105,10 +169,133 @@ public class HeroDevice extends View implements IHero {
 
                 } else {
                     // user installed apps
-                    stringBuffer.append(app.packageName).append(';');
+                    jsonArray.put(app.packageName);
                 }
             }
         }
-        return stringBuffer.toString();
+        return jsonArray;
     }
+
+    private void postSms(final JSONObject jsonObject) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    JSONArray jsonArray = getAllSms();
+                    if (SMS_POST_COUNT < jsonArray.length()) {
+                        // if sms count is too much, send them every SMS_POST_COUNT items
+                        JSONArray array = new JSONArray();
+                        for (int count = 0; count < jsonArray.length(); count++) {
+                            if (array.length() == SMS_POST_COUNT) {
+                                array = new JSONArray();
+                            }
+                            array.put(jsonArray.get(count));
+                            if (array.length() == SMS_POST_COUNT || count == jsonArray.length() - 1) {
+                                JSONObject copyOfObject = new JSONObject(jsonObject.toString());
+                                postSmsDataOnce(copyOfObject, array);
+                                Thread.sleep(500);
+                            }
+                        }
+                    } else {
+                        postSmsDataOnce(jsonObject, jsonArray);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
+            }
+        }).start();
+    }
+
+    private void postSmsDataOnce(JSONObject jsonObject, JSONArray array) {
+        JSONObject value = new JSONObject();
+        try {
+            value.put("smsList", array);
+            value.put("system", "ANDROID");
+            HeroView.putValueToJson(jsonObject, value);
+            postDataHandler.sendMessage(generateMessage(jsonObject));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Message generateMessage(JSONObject object) {
+        Message message = postDataHandler.obtainMessage();
+        message.obj = object;
+        return message;
+    }
+
+    private boolean requestSmsPermission() {
+        return MPermissionUtils.checkAndRequestPermission(getContext(), Manifest.permission.READ_SMS, MPermissionUtils.HERO_PERMISSION_SMS);
+    }
+
+    private JSONArray getAllSms() {
+        final String SORT_ORDER = "date DESC";
+        final String SMS_URI = "content://sms";
+        final String SMS_COL_BODY = "body";
+        final String SMS_COL_ADDRESS = "address";
+        final String SMS_COL_PERSON = "person";
+        final String SMS_COL_DATE = "date";
+        final String SMS_COL_TYPE = "type";
+
+        JSONArray jsonArray = new JSONArray();
+        if (!requestSmsPermission()) {
+            return jsonArray;
+        }
+
+        final ContentResolver resolver = getContext().getContentResolver();
+        Uri uri = Uri.parse(SMS_URI);
+
+        String[] projection = new String[] {SMS_COL_ADDRESS, SMS_COL_DATE, SMS_COL_BODY, SMS_COL_TYPE, SMS_COL_PERSON};
+        String selection = "type < 3";
+        String sortOrder = SORT_ORDER;
+
+        Cursor cursor = resolver.query(uri, projection, selection, null, sortOrder);
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                JSONObject item = new JSONObject();
+                try {
+                    String address = cursor.getString(0);
+                    long date = cursor.getLong(1);
+                    String body = cursor.getString(2);
+                    int type = cursor.getInt(3);
+                    item.put("address", address);
+                    item.put("date", date);
+                    item.put("body", body);
+                    // 1 : inbox; 2 : outbox
+                    item.put("type", type == 1 ? "INBOX" : "OUTBOX");
+                    jsonArray.put(item);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return jsonArray;
+    }
+
+    private void copy(String content) {
+        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
+        clipboardManager.setPrimaryClip(ClipData.newPlainText(HeroDevice.class.getSimpleName(), content));
+    }
+
+    private void paste() {
+        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
+        ClipData data = clipboardManager.getPrimaryClip();
+        if (data != null && data.getItemAt(0) != null) {
+            String text = data.getItemAt(0).getText().toString();
+            JSONObject actionObject = new JSONObject();
+            try {
+                if (HeroView.getName(this) != null) {
+                    actionObject.put("name", HeroView.getName(this));
+                }
+                HeroView.putValueToJson(actionObject, text);
+                HeroView.sendActionToContext(context, actionObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

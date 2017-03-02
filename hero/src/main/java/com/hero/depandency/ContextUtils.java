@@ -54,7 +54,7 @@ public class ContextUtils {
     // 以此channel标记GooglePlay应用
     private static final String CHANNEL_GOOGLE = "play.google.com";
 
-    private static final String PREFERENCES_NAME = "CONTEXT";
+    public static final String PREFERENCES_NAME = "CONTEXT";
 
     public static String getVersionName(Context context) {
         return getPackageInfo(context).versionName;

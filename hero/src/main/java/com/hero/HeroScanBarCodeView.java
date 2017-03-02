@@ -43,8 +43,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.dlazaro66.qrcodereaderview.QRCodeReaderView;
 import com.hero.depandency.MPermissionUtils;
-import com.hero.depandency.QRCodeReaderView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,7 +54,7 @@ import org.json.JSONObject;
  */
 public class HeroScanBarCodeView extends FrameLayout implements IHero, QRCodeReaderView.OnQRCodeReadListener {
     private FrameLayout previewLayout;
-    private QRCodeReaderView mydecoderview;
+    private QRCodeReaderView qrCodeView;
 
     public HeroScanBarCodeView(Context context) {
         super(context);
@@ -76,14 +76,16 @@ public class HeroScanBarCodeView extends FrameLayout implements IHero, QRCodeRea
             return;
         }
         if (Camera.getNumberOfCameras() > 0) {
-            mydecoderview = new QRCodeReaderView(this.getContext());
-            mydecoderview.setOnQRCodeReadListener(this);
+            qrCodeView = new QRCodeReaderView(this.getContext());
+            qrCodeView.setOnQRCodeReadListener(this);
+            qrCodeView.setBackCamera();
+            qrCodeView.setAutofocusInterval(2000L);
             if (previewLayout != null) {
-                previewLayout.addView(mydecoderview, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                previewLayout.addView(qrCodeView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             } else {
-                this.addView(mydecoderview, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                this.addView(qrCodeView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             }
-            mydecoderview.getCameraManager().startPreview();
+            qrCodeView.startCamera();
         }
     }
 
@@ -91,8 +93,8 @@ public class HeroScanBarCodeView extends FrameLayout implements IHero, QRCodeRea
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (mydecoderview != null) {
-            mydecoderview.getCameraManager().stopPreview();
+        if (qrCodeView != null) {
+            qrCodeView.stopCamera();
         }
     }
 
@@ -108,16 +110,6 @@ public class HeroScanBarCodeView extends FrameLayout implements IHero, QRCodeRea
                 e.printStackTrace();
             }
         }
-
-    }
-
-    @Override
-    public void cameraNotFound() {
-        Toast.makeText(getContext(), R.string.open_camera_fail, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void QRCodeNotFoundOnCamImage() {
 
     }
 

@@ -6,17 +6,34 @@
                 android:background="@color/defaultBackground"
                 android:visibility="gone">
 
-    <TextView
-        android:id="@+id/txtTitle"
-        style="@style/ToolbarTitleText"
+    <RelativeLayout
+        android:id="@+id/layoutCenterItem"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:singleLine="true"
-        android:gravity="center"
         android:layout_marginLeft="60dp"
         android:layout_marginRight="60dp"
+        android:orientation="horizontal"
         android:layout_centerInParent="true"
-        />
+        android:gravity="center"
+        >
+
+        <ImageView
+            android:id="@+id/centerImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="center"
+            android:layout_centerInParent="true"
+            />
+        <TextView
+            android:id="@+id/txtTitle"
+            style="@style/ToolbarTitleText"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:singleLine="true"
+            android:gravity="center"
+            android:layout_centerInParent="true"
+            />
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/layoutLeftItem"

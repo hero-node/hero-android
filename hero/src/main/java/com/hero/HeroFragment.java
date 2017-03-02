@@ -101,7 +101,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
     protected Activity activity;
     protected Dialog customDialog;
     private ImageView closeImageView;
-    protected ImageView backImageView;
     protected String title;
     private boolean shouldSendViewWillAppear;
     private boolean isHidden = false;
@@ -112,6 +111,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
     protected int titleBackgroundColor;
     protected View toolbar;
     private TextView toolbarTitleView;
+    private ImageView toolbarImageView;
     private ViewGroup rootLayout;
     private ViewGroup toolbarContainer;
     private RelativeLayout popLayout = null;
@@ -165,7 +165,9 @@ public class HeroFragment extends Fragment implements IHeroContext {
 
     @Override
     public void onDestroy() {
-        mWebview.destroy();
+        if (mWebview != null) {
+            mWebview.destroy();
+        }
         if (mWebview2 != null) {
             mWebview2.destroy();
         }
@@ -244,12 +246,13 @@ public class HeroFragment extends Fragment implements IHeroContext {
         mLayout = (FrameLayout) viewGroup.findViewById(R.id.mainLayout);
         toolbar = viewGroup.findViewById(R.id.layoutToolbar);
         toolbarTitleView = (TextView) viewGroup.findViewById(R.id.txtTitle);
+        toolbarImageView = (ImageView) viewGroup.findViewById(R.id.centerImage);
         leftItemsLayout = (ViewGroup) viewGroup.findViewById(R.id.layoutLeftItem);
         rightItemsLayout = (ViewGroup) viewGroup.findViewById(R.id.layoutRightItem);
-        backImageView = (ImageView) toolbar.findViewById(R.id.leftImage);
         rootLayout = (ViewGroup) viewGroup.findViewById(R.id.rootLayout);
         toolbarContainer = (ViewGroup) viewGroup.findViewById(R.id.toolbarContainer);
         mainContentView = viewGroup.findViewById(R.id.mainScrollView);
+        ImageView backImageView = (ImageView) toolbar.findViewById(R.id.leftImage);
         if (((HeroFragmentActivity) getActivity()).isBackIconShown()) {
             backImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -373,8 +376,10 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             intent.putExtras(bundle);
                             startActivitySafely(intent);
                         }
+                    } else if (key.equals("HeroApp")) {
+                        HeroApplication.getInstance().getHeroApp().on(globalEvent);
                     }
-                    if (!key.equals("newApp")) {
+                    if (!key.equals("newApp") && !key.equals("HeroApp")) {
                         manager.sendBroadcast(intent);
                     }
                 }
@@ -388,7 +393,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             return;
                         }
                         ui = (JSONObject) json.get("ui");
-                        JSONObject ui_cache = mCache.getAsJSONObject(mUrl);
+                        JSONObject ui_cache = (mCache == null) ? null : mCache.getAsJSONObject(mUrl);
                         if (ui_cache != null && ui_cache.has("ui_cache")) {
                             ui_cache = ui_cache.getJSONObject("ui_cache");
                             if (ui.has("version")) {
@@ -490,7 +495,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                         }
                     }
                     Bundle bundle = getArguments();
-                    if (bundle.containsKey(ARGUMENTS_MAGIC_VIEW)) {
+                    if (bundle != null &&bundle.containsKey(ARGUMENTS_MAGIC_VIEW)) {
                         // cache != 0 means ui should be cached
                         if (!isCache || cacheVersion != 0) {
                             transitionMagicView(bundle.getString(ARGUMENTS_MAGIC_VIEW));
@@ -564,6 +569,13 @@ public class HeroFragment extends Fragment implements IHeroContext {
                                 setActivityTitle(titleStr);
                             }
                         }
+                        if (jsonAppearance.has("image")) {
+                            String url = jsonAppearance.getString("image");
+                            if (!TextUtils.isEmpty(url)) {
+                                setActivityImageTitle(url);
+                            }
+                        }
+
                         if (jsonAppearance.has("titleView")) {
                             boolean showActionBar = false;
                             boolean showHome = false;
@@ -1175,6 +1187,12 @@ public class HeroFragment extends Fragment implements IHeroContext {
         }
     }
 
+    protected void setActivityImageTitle(String url) {
+        if (toolbar != null && toolbar.getVisibility() == View.VISIBLE) {
+            ImageLoadUtils.loadLocalImage(toolbarImageView, url);
+        }
+
+    }
     protected void setTitleBackgroundColor(int color) {
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
@@ -1504,41 +1522,15 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     leftItemsLayout.removeAllViews();
                     try {
                         String title = mLeftItem.getString("title");
-                        View view = getFirstChild(leftItemsLayout);
-                        if (view == null) {
-                            view = createTextButton(mLeftItem, leftItemsLayout, mLeftItem.optJSONObject("click"));
-                        } else {
-                            setLeftItemTitle(title);
+                        if (!TextUtils.isEmpty(title)) {
+                            createTextButton(mLeftItem, leftItemsLayout, mLeftItem.optJSONObject("click"));
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 } else if (mLeftItem.has("image")) {
-                    ImageView leftImage = (ImageView) leftItemsLayout.findViewById(R.id.leftImage);
-                    if (leftImage != null) {
-                        try {
-                            String image = mLeftItem.getString("image");
-                            leftImage.setVisibility(View.VISIBLE);
-                            leftImage.setImageResource(ImageLoadUtils.getLocalImageIdByName(getContext(), image));
-                            if (mLeftItem.has("click")) {
-                                leftImage.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        try {
-                                            HeroView.sendActionToContext(getContext(), mLeftItem.getJSONObject("click"));
-                                            hideSoftKeyboard(getContext());
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                });
-                            } else {
-                                leftImage.setOnClickListener(null);
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    leftItemsLayout.removeAllViews();
+                    createImageButton(leftItemsLayout, mLeftItem);
                 }
             }
         }
@@ -1662,6 +1654,11 @@ public class HeroFragment extends Fragment implements IHeroContext {
     // is the fragment full screen (no action bar)
     public boolean isFullHeight() {
         return isNavigationBarHidden;
+    }
+
+    public void setFullHeight(boolean fullHeight) {
+        isNavigationBarHidden = fullHeight;
+        setNavigationBarHidden(isNavigationBarHidden);
     }
 
     public int getToolBarHeight() {
