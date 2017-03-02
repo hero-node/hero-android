@@ -1,2 +1,2 @@
-the submodule of Hero components
-Hero详细介绍见 https://github.com/dianrong/Hero
+# hero-android
+a hero imp on android
