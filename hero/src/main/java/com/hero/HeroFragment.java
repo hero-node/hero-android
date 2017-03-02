@@ -111,6 +111,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
     protected int titleBackgroundColor;
     protected View toolbar;
     private TextView toolbarTitleView;
+    private ImageView toolbarImageView;
     private ViewGroup rootLayout;
     private ViewGroup toolbarContainer;
     private RelativeLayout popLayout = null;
@@ -245,6 +246,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
         mLayout = (FrameLayout) viewGroup.findViewById(R.id.mainLayout);
         toolbar = viewGroup.findViewById(R.id.layoutToolbar);
         toolbarTitleView = (TextView) viewGroup.findViewById(R.id.txtTitle);
+        toolbarImageView = (ImageView) viewGroup.findViewById(R.id.centerImage);
         leftItemsLayout = (ViewGroup) viewGroup.findViewById(R.id.layoutLeftItem);
         rightItemsLayout = (ViewGroup) viewGroup.findViewById(R.id.layoutRightItem);
         rootLayout = (ViewGroup) viewGroup.findViewById(R.id.rootLayout);
@@ -567,6 +569,13 @@ public class HeroFragment extends Fragment implements IHeroContext {
                                 setActivityTitle(titleStr);
                             }
                         }
+                        if (jsonAppearance.has("image")) {
+                            String url = jsonAppearance.getString("image");
+                            if (!TextUtils.isEmpty(url)) {
+                                setActivityImageTitle(url);
+                            }
+                        }
+
                         if (jsonAppearance.has("titleView")) {
                             boolean showActionBar = false;
                             boolean showHome = false;
@@ -1178,6 +1187,12 @@ public class HeroFragment extends Fragment implements IHeroContext {
         }
     }
 
+    protected void setActivityImageTitle(String url) {
+        if (toolbar != null && toolbar.getVisibility() == View.VISIBLE) {
+            ImageLoadUtils.loadLocalImage(toolbarImageView, url);
+        }
+
+    }
     protected void setTitleBackgroundColor(int color) {
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
