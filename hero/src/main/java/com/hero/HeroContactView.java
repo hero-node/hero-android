@@ -198,8 +198,9 @@ public class HeroContactView extends TextView implements IHero {
                 }
 
             } while (cursor.moveToNext());
+            cursor.close();
         }
-        cursor.close();
+
         return array;
     }
 
@@ -243,8 +244,8 @@ public class HeroContactView extends TextView implements IHero {
                         }
                     }
                 } while (callCursor.moveToNext());
+                callCursor.close();
             }
-            callCursor.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

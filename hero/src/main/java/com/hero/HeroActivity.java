@@ -41,18 +41,13 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentManager;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
-import com.hero.depandency.IImagePickHandler;
 import com.hero.depandency.MPermissionUtils;
 
 import org.json.JSONArray;
@@ -253,6 +248,12 @@ public class HeroActivity extends HeroFragmentActivity {
                     item.put("contactNumber", "");
                     if (isDenied) {
                         item.put("error", "denied");
+                    } else {
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                            if (name == null && phoneNumber == null) {
+                                item.put("error", "empty");
+                            }
+                        }
                     }
                     if (resultHandlerView != null) {
                         resultHandlerView.on(item);
