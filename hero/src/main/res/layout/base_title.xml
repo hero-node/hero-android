@@ -19,11 +19,12 @@
 
         <ImageView
             android:id="@+id/centerImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scaleType="center"
+            android:layout_width="37dp"
+            android:layout_height="22dp"
+            android:scaleType="fitXY"
             android:layout_centerInParent="true"
             />
+
         <TextView
             android:id="@+id/txtTitle"
             style="@style/ToolbarTitleText"
