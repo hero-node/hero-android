@@ -37,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.widget.TextView;
@@ -119,6 +120,11 @@ public class HeroContactView extends TextView implements IHero {
             public void run() {
                 JSONArray jsonArray = getAllContacts();
                 if (jsonArray != null) {
+                    if (jsonArray.length()==0&& Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+                    {
+                        postFailure(contactObject);
+                        return;
+                    }
                     JSONObject value = new JSONObject();
                     try {
                         value.put("contacts", jsonArray);
