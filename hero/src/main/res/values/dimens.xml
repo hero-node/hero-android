@@ -24,4 +24,5 @@
     <dimen name="dash_default_gap">3dp</dimen>
 
     <dimen name="cellLeftMargin">15dp</dimen>
+    <dimen name="drawerMenuWidth">240dp</dimen>
 </resources>
