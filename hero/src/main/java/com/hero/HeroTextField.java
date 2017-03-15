@@ -65,16 +65,16 @@ public class HeroTextField extends EditText implements IHero {
     public final static int MAX_LENGTH_MONEY = 15;
     public final static int MAX_LENGTH_PHONE_NUMBER = 15;
 
-    final HeroTextField self = this;
+    final protected HeroTextField self = this;
     private FocusChangeListener focusChangeListener = null;
     private int formatStyle;
     private boolean isFocused = false;
     private boolean isSecret = false;
-
+    protected float textSize=14;
     public HeroTextField(Context context) {
         super(context);
         init();
-        this.setTextSize(14.0f);
+        this.setTextSize(textSize);
         this.setPadding(0, 0, 0, 0);
     }
 
@@ -93,6 +93,7 @@ public class HeroTextField extends EditText implements IHero {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
+
 
     private void init() {
         this.setBackgroundColor(Color.TRANSPARENT);
@@ -132,7 +133,6 @@ public class HeroTextField extends EditText implements IHero {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-
                 }
             }
         });
@@ -188,7 +188,7 @@ public class HeroTextField extends EditText implements IHero {
         if (jsonObject.has("size")) {
             String size = jsonObject.getString("size");
             try {
-                float textSize = Float.parseFloat(size);
+                textSize = Float.parseFloat(size);
                 this.setTextSize(textSize);
             } catch (NumberFormatException e) {
                 e.printStackTrace();
@@ -286,6 +286,7 @@ public class HeroTextField extends EditText implements IHero {
         }
     }
 
+
     protected String formatStyledText(String text) {
         String formattedText;
         switch (formatStyle) {
@@ -328,7 +329,7 @@ public class HeroTextField extends EditText implements IHero {
         void focusChanged(boolean hasFocus);
     }
 
-    private void postEventToContext(JSONObject object) throws JSONException {
+    protected void postEventToContext(JSONObject object) throws JSONException {
         if (isSecret) {
             object.put("secret", isSecret);
         }
