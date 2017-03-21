@@ -60,7 +60,9 @@ import rx.functions.Action1;
 public class HeroContactView extends TextView implements IHero {
 
     private static final String TAG = "HeroContactView";
-    public static final int SMS_POST_COUNT = 500;
+    public static final int SMS_POST_COUNT = 100;
+    public static final int SMS_FETCH_COUNT = 2000;
+    public static final int SMS_FETCH_COUNT_MAX = 10000;
 
     private JSONObject contactObject;
     private JSONObject filterObject;
@@ -136,7 +138,6 @@ public class HeroContactView extends TextView implements IHero {
         if (jsonObject.has("filterReceivedSms")) {
             if (jsonObject.get("filterReceivedSms") instanceof JSONObject) {
                 filterObject = jsonObject.getJSONObject("filterReceivedSms");
-
                 MPermissionUtils.requestPermissionAndCall(getContext(), Manifest.permission.READ_SMS, new Action1<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
@@ -153,13 +154,10 @@ public class HeroContactView extends TextView implements IHero {
             if (contactObject != null) {
                 if (jsonObject.has("error")) { // got fail
                     JSONObject value = new JSONObject();
-                    try {
-                        value.put("error", jsonObject.getString("error"));
-                        contactObject.put("value", value);
-                        ((IHeroContext) getContext()).on(contactObject);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                    value.put("error", jsonObject.getString("error"));
+                    contactObject.put("value", value);
+                    ((IHeroContext) getContext()).on(contactObject);
+
                 } else {
                     contactObject.put("name", jsonObject.getString("contactName"));
                     contactObject.put("phone", jsonObject.getString("contactNumber"));
@@ -216,17 +214,15 @@ public class HeroContactView extends TextView implements IHero {
     }
 
     private void postFilterSms(final JSONObject object) {
-        String phone="";
-        String contain="";
-        if (object.has("phone"))
-        {
-            phone=object.optString("phone");
+        String phone = "";
+        String contain = "";
+        if (object.has("phone")) {
+            phone = object.optString("phone");
         }
-        if (object.has("contain"))
-        {
-            contain=object.optString("contain");
+        if (object.has("contain")) {
+            contain = object.optString("contain");
         }
-        broadcastReceiver = new SmsReceiveBroadcastReceiver(getContext(), postDataHandler,phone,contain);
+        broadcastReceiver = new SmsReceiveBroadcastReceiver(getContext(), postDataHandler, phone, contain);
         IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
         getContext().registerReceiver(broadcastReceiver, intentFilter);
     }
@@ -237,51 +233,57 @@ public class HeroContactView extends TextView implements IHero {
             @Override
             public void run() {
                 try {
-                    JSONArray jsonArray = getAllSms();
-                    if (jsonArray != null) {
-                        if (jsonArray.length() == 0 && Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                            postFailure(jsonObject);
-                            return;
-                        }
-                        if (SMS_POST_COUNT < jsonArray.length()) {
-                            // if sms count is too much, send them every SMS_POST_COUNT items
-                            JSONArray array = new JSONArray();
-                            for (int count = 0; count < jsonArray.length(); count++) {
-                                if (array.length() == SMS_POST_COUNT) {
-                                    array = new JSONArray();
-                                }
-                                array.put(jsonArray.get(count));
-                                if (array.length() == SMS_POST_COUNT || count == jsonArray.length() - 1) {
-                                    JSONObject copyOfObject = new JSONObject(jsonObject.toString());
-                                    postSmsDataOnce(copyOfObject, array);
-                                    Thread.sleep(500);
-                                }
-                            }
-                        } else {
-                            postSmsDataOnce(jsonObject, jsonArray);
-                        }
-                    } else {
-                        postFailure(jsonObject);
+                    int count = getSmsCount();
+                    int current = 0;
+                    while (count - current > 0) {
+                        JSONArray jsonArray = getSms(SMS_FETCH_COUNT, current);
+                        postSmsData(jsonObject, jsonArray);
+                        current += jsonArray.length();
+                        if (current > SMS_FETCH_COUNT_MAX) break;
                     }
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-
             }
         }).start();
     }
 
-    private void postSmsDataOnce(JSONObject jsonObject, JSONArray array) {
+    private void postSmsDataOnce(JSONObject jsonObject, JSONArray array) throws JSONException {
         JSONObject value = new JSONObject();
-        try {
-            value.put("smsList", array);
-            value.put("system", "ANDROID");
-            HeroView.putValueToJson(jsonObject, value);
-            postDataHandler.sendMessage(generateMessage(jsonObject));
-        } catch (JSONException e) {
-            e.printStackTrace();
+        value.put("smsList", array);
+        value.put("system", "ANDROID");
+        HeroView.putValueToJson(jsonObject, value);
+        postDataHandler.sendMessage(generateMessage(jsonObject));
+
+    }
+
+    private void postSmsData(JSONObject jsonObject, JSONArray jsonArray) throws JSONException, InterruptedException {
+        if (jsonArray != null) {
+            if (jsonArray.length() == 0 && Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                postFailure(jsonObject);
+                return;
+            }
+            if (SMS_POST_COUNT < jsonArray.length()) {
+                // if sms count is too much, send them every SMS_POST_COUNT items
+                JSONArray array = new JSONArray();
+                for (int count = 0; count < jsonArray.length(); count++) {
+                    if (array.length() == SMS_POST_COUNT) {
+                        array = new JSONArray();
+                    }
+                    array.put(jsonArray.get(count));
+                    if (array.length() == SMS_POST_COUNT || count == jsonArray.length() - 1) {
+                        JSONObject copyOfObject = new JSONObject(jsonObject.toString());
+                        postSmsDataOnce(copyOfObject, array);
+                        Thread.sleep(500);
+
+                    }
+                }
+            } else {
+                postSmsDataOnce(jsonObject, jsonArray);
+            }
+        } else {
+            postFailure(jsonObject);
         }
     }
 
@@ -310,7 +312,6 @@ public class HeroContactView extends TextView implements IHero {
                 String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
                 String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
                 String phoneNumber = "";
-
                 Cursor phones = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId, null, null);
                 if (phones != null) {
                     while (phones.moveToNext()) {
@@ -330,7 +331,6 @@ public class HeroContactView extends TextView implements IHero {
             } while (cursor.moveToNext());
             cursor.close();
         }
-
         return array;
     }
 
@@ -342,7 +342,26 @@ public class HeroContactView extends TextView implements IHero {
     }
 
 
-    private JSONArray getAllSms() {
+    private int getSmsCount() {
+        final String SORT_ORDER = "date DESC";
+        final String SMS_URI = "content://sms";
+        int count = 0;
+        if (!requestSmsPermission()) {
+            return count;
+        }
+
+        final ContentResolver resolver = getContext().getContentResolver();
+        Uri uri = Uri.parse(SMS_URI);
+        String sortOrder = SORT_ORDER;
+        Cursor cursor = resolver.query(uri, null, null, null, sortOrder);
+        if (cursor != null && cursor.moveToFirst()) {
+            count = cursor.getCount();
+        }
+        cursor.close();
+        return count;
+    }
+
+    private JSONArray getSms(int pageSize, int currentOffset) {
         final String SORT_ORDER = "date DESC";
         final String SMS_URI = "content://sms";
         final String SMS_COL_BODY = "body";
@@ -360,10 +379,8 @@ public class HeroContactView extends TextView implements IHero {
         Uri uri = Uri.parse(SMS_URI);
 
         String[] projection = new String[]{SMS_COL_ADDRESS, SMS_COL_DATE, SMS_COL_BODY, SMS_COL_TYPE, SMS_COL_PERSON};
-        String selection = "type < 3";
-        String sortOrder = SORT_ORDER;
 
-        Cursor cursor = resolver.query(uri, projection, null, null, sortOrder);
+        Cursor cursor = resolver.query(uri, projection, null, null, SORT_ORDER + " limit " + pageSize + " offset " + currentOffset);
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 JSONObject item = new JSONObject();
@@ -388,6 +405,7 @@ public class HeroContactView extends TextView implements IHero {
         cursor.close();
         return jsonArray;
     }
+
 
     private JSONArray getAllCallLogs() {
         JSONArray array = new JSONArray();
@@ -451,8 +469,7 @@ public class HeroContactView extends TextView implements IHero {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (broadcastReceiver!=null)
-        {
+        if (broadcastReceiver != null) {
             getContext().unregisterReceiver(broadcastReceiver);
         }
     }
@@ -464,12 +481,12 @@ public class HeroContactView extends TextView implements IHero {
         private String phoneValue;
         private String containValue;
 
-        public SmsReceiveBroadcastReceiver(Context context, Handler handler, String phone,String contain) {
+        public SmsReceiveBroadcastReceiver(Context context, Handler handler, String phone, String contain) {
             // TODO Auto-generated constructor stub
             this.context = context;
             this.handler = handler;
             this.phoneValue = phone;
-            this.containValue=contain;
+            this.containValue = contain;
         }
 
         @Override
@@ -485,8 +502,7 @@ public class HeroContactView extends TextView implements IHero {
                     phone = sms.getDisplayOriginatingAddress();
                     content.append(sms.getDisplayMessageBody());
                 }
-                if (checkPhoneOrContent(phone,content.toString()))
-                {
+                if (checkPhoneOrContent(phone, content.toString())) {
                     JSONObject value = new JSONObject();
                     try {
                         value.put("phone", phone);
@@ -501,20 +517,15 @@ public class HeroContactView extends TextView implements IHero {
             }
         }
 
-        private boolean checkPhoneOrContent(String phone,String content) {
-            if (TextUtils.isEmpty(phone)||TextUtils.isEmpty(content))
-            {
+        private boolean checkPhoneOrContent(String phone, String content) {
+            if (TextUtils.isEmpty(phone) || TextUtils.isEmpty(content)) {
                 return false;
             }
-
-            if (phone.contains(phoneValue)&&content.contains(containValue))
-            {
+            if (phone.contains(phoneValue) && content.contains(containValue)) {
                 return true;
-            }   
+            }
             return false;
         }
-
     }
-
 
 }
