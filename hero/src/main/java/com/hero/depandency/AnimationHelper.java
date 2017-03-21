@@ -33,9 +33,9 @@ package com.hero.depandency;
 
 import android.view.View;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.CycleInterpolator;
-import android.view.animation.Interpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 
@@ -51,9 +51,10 @@ public class AnimationHelper {
 
     public static final String ANIMATION_SHAKE = "shake";
     public static final String ANIMATION_SCALE = "scale";
-    public static final String ANIMATION_TRANSLATION = "translation";
+    public static final String ANIMATION_FRAME = "frame";
+    public static final String ANIMATION_FLIP = "flip";
 
-    public static void startAnimation(View view, String animType, float time, JSONObject params, Animation.AnimationListener listener) {
+    public static void startAnimation(View view, String animType, float time, JSONObject params, final AnimationEndListener listener) {
         if (view != null && SHOW_ANIMATION) {
             Animation animation = null;
             if (ANIMATION_SHAKE.equals(animType)) {
@@ -70,20 +71,49 @@ public class AnimationHelper {
                     animation.setRepeatCount(0);
                     animation.setFillAfter(true);
                 }
-            } else if (ANIMATION_TRANSLATION.equals(animType)) {
+            } else if (ANIMATION_FRAME.equals(animType)) {
                 if (params != null) {
-                    animation = new TranslateAnimation(params.optInt("x"), params.optInt("toX"), params.optInt("y"), params.optInt("toY"));
-                    animation.setDuration((long) (time * 1000));
-                    animation.setRepeatCount(0);
+                    TranslateAnimation animation1 = new TranslateAnimation(params.optInt("x"), params.optInt("toX"), params.optInt("y"), params.optInt("toY"));
+                    animation1.setDuration((long) (time * 1000));
+                    animation1.setRepeatCount(0);
+
+                    animation = new AnimationSet(false);
+                    animation.setFillAfter(false);
+                    ((AnimationSet) animation).addAnimation(animation1);
+                    if (params.has("scaleX") || params.has("scaleY")) {
+                        ScaleAnimation animation2 = new ScaleAnimation(1.0f, (float) params.optDouble("scaleX"), 1.0f, (float) params.optDouble("scaleY"), Animation.ABSOLUTE, 0.0f, Animation.ABSOLUTE, 0.0f);
+                        animation2.setDuration((long) (time * 1000));
+                        animation2.setRepeatCount(0);
+                        ((AnimationSet) animation).addAnimation(animation2);
+                    }
                 }
             }
 
             if (animation != null) {
                 if (listener != null) {
-                    animation.setAnimationListener(listener);
+                    animation.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            listener.onAnimationEnd(animation);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+
+                        }
+                    });
                 }
                 view.startAnimation(animation);
             }
         }
+    }
+
+    public interface AnimationEndListener {
+        public void onAnimationEnd(Animation animation);
     }
 }

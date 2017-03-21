@@ -54,6 +54,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.animation.Animation;
 import android.widget.FrameLayout;
 
 import com.hero.depandency.AnimationHelper;
@@ -205,6 +206,9 @@ public class HeroView extends FrameLayout implements IHero {
             screen_top = getFixedStatusBarHeight(view.getContext());
         }
         screen_height -= screen_top;
+//        if (HeroHomeActivity.getAvailableScreenHeight() > 0) {
+//           screen_height = Math.min(screen_height, HeroHomeActivity.getAvailableScreenHeight());
+//        }
         if (view.getContext() instanceof AppCompatActivity && ((AppCompatActivity) view.getContext()).getSupportActionBar() != null) {
             int actionBarHeight = ((AppCompatActivity) view.getContext()).getSupportActionBar().getHeight();
             if (actionBarHeight == 0 && view.getContext() instanceof HeroActivity) {
@@ -274,6 +278,17 @@ public class HeroView extends FrameLayout implements IHero {
         return frame.top;
     }
 
+    public static float getAnimTime(JSONObject jsonObject) throws JSONException {
+        String animation = jsonObject.getString("animation");
+        float animTime = 0.0f;
+        try {
+            animTime = Float.parseFloat(animation);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+        return animTime;
+    }
+
     public static IHero fromJson(Context context, JSONObject jsonObject) throws JSONException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         IHero view = null;
         if (jsonObject.has("res")) {
@@ -337,13 +352,7 @@ public class HeroView extends FrameLayout implements IHero {
             if (jsonObject.has("animation")) {
                 if (jsonObject.has("animationType")) {
                     String animType = jsonObject.getString("animationType");
-                    String animation = jsonObject.getString("animation");
-                    float animTime = 0.0f;
-                    try {
-                        animTime = Float.parseFloat(animation);
-                    } catch (NumberFormatException e) {
-                        e.printStackTrace();
-                    }
+                    float animTime = getAnimTime(jsonObject);
                     AnimationHelper.startAnimation(view, animType, animTime, null, null);
                 }
             }
@@ -357,7 +366,7 @@ public class HeroView extends FrameLayout implements IHero {
                 String h = frame.has("h") ? frame.getString("h") : null;
                 String r = frame.has("r") ? frame.getString("r") : null;
                 String b = frame.has("b") ? frame.getString("b") : null;
-                FrameLayout.LayoutParams p = new FrameLayout.LayoutParams(0, 0);
+                final FrameLayout.LayoutParams p = new FrameLayout.LayoutParams(0, 0);
                 int w_screen = HeroView.getParentWidth(view);
                 int h_screen = HeroView.getParentHeight(view);
                 if (x != null) {
@@ -393,27 +402,6 @@ public class HeroView extends FrameLayout implements IHero {
                     }
                 }
 
-                //                if (jsonObject.has("animation")) {
-                //                    JSONObject originalFrame = null;
-                //                    if (HeroView.getJson(view) != null) {
-                //                        originalFrame = (JSONObject) HeroView.getJson(view).getJSONObject("frame");
-                //                    }
-                //                    if (originalFrame != null) {
-                //                        if (SHOW_ANIMATION) {
-                //                            FrameLayout.LayoutParams oldP = (LayoutParams) view.getLayoutParams();
-                //                            float oldW = oldP.width;
-                //                            float oldH = oldP.height;
-                //                            float curW = p.width;
-                //                            float endX = (oldW == 0) ? 1.0f : curW / oldW;
-                //                            float curH = p.height;
-                //                            float endY = (oldH == 0) ? 1.0f : curH / oldH;
-                //                            TranslateAnimation animation = new TranslateAnimation(oldP.leftMargin, p.leftMargin, oldP.topMargin, p.topMargin);
-                //                            animation.setDuration(2000);
-                //                            view.startAnimation(animation);
-                //                        }
-                //                    }
-                //                }
-
                 if (jsonObject.has("center")) {
                     JSONObject center = jsonObject.getJSONObject("center");
                     x = center.has("x") ? center.getString("x") : null;
@@ -432,7 +420,32 @@ public class HeroView extends FrameLayout implements IHero {
                 }
 
                 if (frame.length() > 0) {
-                    view.setLayoutParams(p);
+                    // frame animation
+                    JSONObject animParam = null;
+                    if (jsonObject.has("animation") && !jsonObject.has("animationType")) {
+                        FrameLayout.LayoutParams oldP = (LayoutParams) view.getLayoutParams();
+                        animParam = new JSONObject();
+                        if (p.width != oldP.width || p.height != oldP.height) {
+                            animParam.put("scaleX", (float) p.width / oldP.width);
+                            animParam.put("scaleY", (float) p.height / oldP.height);
+                        }
+                        if (p.leftMargin != oldP.leftMargin || p.topMargin != oldP.topMargin) {
+                            animParam.put("toX", (p.leftMargin - oldP.leftMargin));
+                            animParam.put("toY", (p.topMargin - oldP.topMargin));
+                        }
+                    }
+                    if (animParam != null && animParam.length() > 0) {
+                        float animTime = getAnimTime(jsonObject);
+                        AnimationHelper.startAnimation(view, AnimationHelper.ANIMATION_FRAME, animTime, animParam, new AnimationHelper.AnimationEndListener() {
+                            @Override
+                            public void onAnimationEnd(Animation animation) {
+                                view.clearAnimation();
+                                view.setLayoutParams(p);
+                            }
+                        });
+                    } else {
+                        view.setLayoutParams(p);
+                    }
                     JSONObject json = HeroView.getJson(view);
                     if (json != null && !frame.equals(json.optJSONObject("frame"))) {
                         json.put("frame", frame);
