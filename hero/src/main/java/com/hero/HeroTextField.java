@@ -45,6 +45,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.hero.depandency.FormatUtils;
@@ -232,6 +233,17 @@ public class HeroTextField extends EditText implements IHero {
                 }
             }
         }
+        if (jsonObject.has("focus")) {
+            if (jsonObject.optBoolean("focus")) {
+                requestFocus();
+                postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        showSoftKeyboard(true);
+                    }
+                }, 100);
+            }
+        }
         if (jsonObject.has("type")) {
             String type = jsonObject.getString("type");
             if (type.equals("number")) {
@@ -303,6 +315,15 @@ public class HeroTextField extends EditText implements IHero {
                 formattedText = text;
         }
         return formattedText;
+    }
+
+    private void showSoftKeyboard(boolean isShown) {
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (isShown) {
+            imm.showSoftInput(HeroTextField.this, 0);
+        } else {
+            imm.hideSoftInputFromWindow(HeroTextField.this.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
     }
 
     protected String formatTextOnEnd(String text) {
