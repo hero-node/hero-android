@@ -161,4 +161,22 @@ public class HeroScrollView extends XRefreshLayout implements IHero {
         }
 
     }
+
+    @Override
+    public void removeAllViews() {
+        if (contentView != null) {
+            contentView.removeAllViews();
+        } else {
+            super.removeAllViews();
+        }
+    }
+
+    @Override
+    public void removeView(View view) {
+        if (contentView != null) {
+            contentView.removeView(view);
+        } else {
+            super.removeView(view);
+        }
+    }
 }

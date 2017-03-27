@@ -349,13 +349,6 @@ public class HeroView extends FrameLayout implements IHero {
                 view.setVisibility(INVISIBLE);
             }
 
-            if (jsonObject.has("animation")) {
-                if (jsonObject.has("animationType")) {
-                    String animType = jsonObject.getString("animationType");
-                    float animTime = getAnimTime(jsonObject);
-                    AnimationHelper.startAnimation(view, animType, animTime, null, null);
-                }
-            }
             if (jsonObject.has("frame")) {
                 JSONObject frame = jsonObject.getJSONObject("frame");
                 String x = frame.has("x") ? frame.getString("x") : null;
@@ -739,17 +732,23 @@ public class HeroView extends FrameLayout implements IHero {
             }
             if (jsonObject.has("subViews")) {
                 JSONArray views = jsonObject.getJSONArray("subViews");
-                if (views != null && view instanceof ViewGroup) {
-                    for (int i = 0; i < views.length(); i++) {
-                        JSONObject viewsJSONObject = views.getJSONObject(i);
-                        IHero v = HeroView.fromJson(view.getContext(), viewsJSONObject);
-                        ((ViewGroup) view).addView((View) v);
-                        String fragmentTag = getFragmentTag((view));
-                        if (fragmentTag != null) {
-                            HeroView.setFragmentTag((View)v, fragmentTag);
-                        }
-                        v.on(viewsJSONObject);
+                // subview has not flip animation
+                if (!(jsonObject.has("animation") && AnimationHelper.ANIMATION_FLIP.equals(jsonObject.optString("animationType")))) {
+                    if (view instanceof ViewGroup) {
+                        ((ViewGroup) view).removeAllViews();
                     }
+                    createSubViews(view, views);
+                }
+            }
+            if (jsonObject.has("animation")) {
+                if (jsonObject.has("animationType")) {
+                    String animType = jsonObject.getString("animationType");
+                    float animTime = getAnimTime(jsonObject);
+                    JSONObject animParam = null;
+                    if (jsonObject.has("subViews")) {
+                        animParam = jsonObject;
+                    }
+                    AnimationHelper.startAnimation(view, animType, animTime, animParam, null);
                 }
             }
             if (view instanceof ViewGroup) {
@@ -773,6 +772,21 @@ public class HeroView extends FrameLayout implements IHero {
             e.printStackTrace();
         }
 
+    }
+
+    public static void createSubViews(View rootView, JSONArray viewData) throws NoSuchMethodException, InstantiationException, JSONException, IllegalAccessException, InvocationTargetException, ClassNotFoundException {
+        if (viewData != null && rootView instanceof ViewGroup) {
+            for (int i = 0; i < viewData.length(); i++) {
+                JSONObject viewsJSONObject = viewData.getJSONObject(i);
+                IHero v = HeroView.fromJson(rootView.getContext(), viewsJSONObject);
+                ((ViewGroup) rootView).addView((View) v);
+                String fragmentTag = getFragmentTag((rootView));
+                if (fragmentTag != null) {
+                    HeroView.setFragmentTag((View)v, fragmentTag);
+                }
+                v.on(viewsJSONObject);
+            }
+        }
     }
 
     public static StateListDrawable createSelector(int colorNormal, int colorPressed) {

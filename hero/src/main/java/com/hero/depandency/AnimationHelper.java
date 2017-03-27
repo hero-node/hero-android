@@ -32,16 +32,24 @@
 package com.hero.depandency;
 
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.CycleInterpolator;
+import android.view.animation.Interpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 
+import com.hero.HeroView;
+import com.hero.IHero;
 import com.hero.R;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Created by xincai on 16-5-13.
@@ -52,7 +60,7 @@ public class AnimationHelper {
     public static final String ANIMATION_SHAKE = "shake";
     public static final String ANIMATION_SCALE = "scale";
     public static final String ANIMATION_FRAME = "frame";
-    public static final String ANIMATION_FLIP = "flip";
+    public static final String ANIMATION_FLIP = "doflip";
 
     public static void startAnimation(View view, String animType, float time, JSONObject params, final AnimationEndListener listener) {
         if (view != null && SHOW_ANIMATION) {
@@ -87,6 +95,21 @@ public class AnimationHelper {
                         ((AnimationSet) animation).addAnimation(animation2);
                     }
                 }
+            } else if (ANIMATION_FLIP.equals(animType)) {
+                final JSONArray views = params.optJSONArray("subViews");
+                animation = FlipAnimation.createFlipAnimation(view, new FlipAnimation.OnFlipListener() {
+                    @Override
+                    public void onFlippedToOpposite(View root) {
+                        if (root instanceof ViewGroup && views != null && views.length() > 0) {
+                            ((ViewGroup) root).removeAllViews();
+                            try {
+                                HeroView.createSubViews(root, views);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }, (long) (time * 1000));
             }
 
             if (animation != null) {
