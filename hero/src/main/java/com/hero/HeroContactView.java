@@ -49,6 +49,7 @@ import android.telephony.SmsMessage;
 import android.text.TextUtils;
 import android.widget.TextView;
 
+import com.hero.depandency.ContactUtils;
 import com.hero.depandency.MPermissionUtils;
 
 import org.json.JSONArray;
@@ -171,7 +172,7 @@ public class HeroContactView extends TextView implements IHero {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                JSONArray jsonArray = getAllContacts();
+                JSONArray jsonArray = ContactUtils.getContactsArray(getContext());
                 if (jsonArray != null) {
                     if (jsonArray.length() == 0 && Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                         postFailure(contactObject);
@@ -304,6 +305,7 @@ public class HeroContactView extends TextView implements IHero {
         if (!requestContactPermission()) {
             return null;
         }
+
         ContentResolver cr = getContext().getContentResolver();
         Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
 
