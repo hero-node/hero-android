@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.dianrong.gradle.publisher'
 
-def VERSION_CODE = 1000001
-def VERSION_NAME = "1.0.1"
+def VERSION_CODE = 1000002
+def VERSION_NAME = "1.0.2"
 def SNAPSHOT = true
 
 android {

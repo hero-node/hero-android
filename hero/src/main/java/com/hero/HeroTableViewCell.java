@@ -141,6 +141,10 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
                     if (json.has("frame")) {
                         FrameLayout layout = new FrameLayout(context);
                         layout.addView((View) v);
+                        // if the cell has no specific height but has a frame, the outer layout should WRAP_CONTENT too
+                        if (!json.has("height")) {
+                            p.height = LayoutParams.WRAP_CONTENT;
+                        }
                         layout.setLayoutParams(p);
                         return layout;
                     } else {
