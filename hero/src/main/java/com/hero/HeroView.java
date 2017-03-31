@@ -155,6 +155,15 @@ public class HeroView extends FrameLayout implements IHero {
         return layoutListener;
     }
 
+    public static void setExtendToNavigationBar(View view) {
+        view.setTag(R.id.kIsExtendToNavigation, "true");
+    }
+
+    public static boolean isExtendToNavigationBar(View view) {
+        String value = (String) view.getTag(R.id.kIsExtendToNavigation);
+        return "true".equals(value);
+    }
+
     public static int getParentWidth(View view) {
         int width = 0;
         int screen_width = getScreenWidth(view.getContext());
@@ -231,7 +240,7 @@ public class HeroView extends FrameLayout implements IHero {
                     isFullHeight = fragment.isFullHeight();
                 }
             }
-            if (!isFullHeight) {
+            if (!isFullHeight && !isExtendToNavigationBar(view)) {
                 int toolBarHeight;
                 if (fragment != null) {
                     toolBarHeight = fragment.getToolBarHeight();
@@ -418,7 +427,7 @@ public class HeroView extends FrameLayout implements IHero {
                     if (jsonObject.has("animation") && !jsonObject.has("animationType")) {
                         FrameLayout.LayoutParams oldP = (LayoutParams) view.getLayoutParams();
                         animParam = new JSONObject();
-                        if (p.width != oldP.width || p.height != oldP.height) {
+                        if (oldP.width != 0 && oldP.height != 0 && (p.width != oldP.width || p.height != oldP.height)) {
                             animParam.put("scaleX", (float) p.width / oldP.width);
                             animParam.put("scaleY", (float) p.height / oldP.height);
                         }
@@ -783,6 +792,9 @@ public class HeroView extends FrameLayout implements IHero {
                 String fragmentTag = getFragmentTag((rootView));
                 if (fragmentTag != null) {
                     HeroView.setFragmentTag((View)v, fragmentTag);
+                }
+                if (HeroView.isExtendToNavigationBar(rootView)) {
+                    HeroView.setExtendToNavigationBar((View) v);
                 }
                 v.on(viewsJSONObject);
             }

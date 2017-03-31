@@ -7,4 +7,5 @@
     <item name="kLayoutListenner" type="id"></item>
     <item name="kParentFragmentTag" type="id"></item>
     <item name="kListViewPosition" type="id"></item>
+    <item name="kIsExtendToNavigation" type="id"></item>
 </resources>

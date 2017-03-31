@@ -1353,6 +1353,8 @@ public class HeroFragment extends Fragment implements IHeroContext {
                 addDescriptionToView(view);
                 if (view != null) {
                     root.addView((View) view);
+                    // views on dialog can extend to navigation bar
+                    HeroView.setExtendToNavigationBar((View) view);
                     view.on(json);
 
                     if (view instanceof ViewGroup) {
@@ -1620,8 +1622,10 @@ public class HeroFragment extends Fragment implements IHeroContext {
     }
 
     private ImageView createImageButton(ViewGroup parent, JSONObject data) {
-        ImageView imageView = (ImageView) LayoutInflater.from(getContext()).inflate(R.layout.action_image, parent, false);
-        parent.addView(imageView);
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.action_image, parent, false);
+
+        parent.addView(view);
+        ImageView imageView = (ImageView) view.findViewById(R.id.actionImage);
         String image = data.optString("image");
         if (image != null) {
             imageView.setImageResource(ImageLoadUtils.getLocalImageIdByName(getContext(), image));

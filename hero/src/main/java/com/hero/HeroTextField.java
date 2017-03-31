@@ -234,15 +234,18 @@ public class HeroTextField extends EditText implements IHero {
             }
         }
         if (jsonObject.has("focus")) {
-            if (jsonObject.optBoolean("focus")) {
+            final boolean focused = jsonObject.optBoolean("focus");
+            if (focused) {
                 requestFocus();
-                postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        showSoftKeyboard(true);
-                    }
-                }, 100);
+            } else {
+                clearFocus();
             }
+            postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    showSoftKeyboard(focused);
+                }
+            }, 100);
         }
         if (jsonObject.has("type")) {
             String type = jsonObject.getString("type");
