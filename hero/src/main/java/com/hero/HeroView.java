@@ -58,6 +58,7 @@ import android.view.animation.Animation;
 import android.widget.FrameLayout;
 
 import com.hero.depandency.AnimationHelper;
+import com.hero.depandency.ContextUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -310,14 +311,17 @@ public class HeroView extends FrameLayout implements IHero {
         String type = jsonObject.getString("class");
         if (type != null) {
             String namespace = jsonObject.has("package") ? jsonObject.getString("package") : null;
-            Class c;
+            Class c = null;
             if (namespace != null) {
                 c = Class.forName(namespace + "." + type);
             } else {
                 try {
                     c = Class.forName("com.hero." + type);
                 } catch (ClassNotFoundException e) {
-                    c = Class.forName("mafia." + type);
+                    String extendingViewsPackage = ContextUtils.getMetaData(context, "extending_views_package");
+                    if (!TextUtils.isEmpty(extendingViewsPackage)) {
+                        c = Class.forName(extendingViewsPackage + "." + type);
+                    }
                 }
             }
             if (c == null) {
