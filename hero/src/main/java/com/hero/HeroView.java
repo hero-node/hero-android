@@ -359,7 +359,11 @@ public class HeroView extends FrameLayout implements IHero {
                 }
             }
             if (jsonObject.has("android_hidden")) {
-                view.setVisibility(INVISIBLE);
+                if (jsonObject.getBoolean("android_hidden")) {
+                    view.setVisibility(INVISIBLE);
+                } else {
+                    view.setVisibility(VISIBLE);
+                }
             }
 
             if (jsonObject.has("frame")) {
@@ -658,7 +662,12 @@ public class HeroView extends FrameLayout implements IHero {
                     if (jsonObject.has("backgroundColor")) {
                         color = HeroView.parseColor("#" + jsonObject.getString("backgroundColor"));
                     } else {
-                        color = Color.TRANSPARENT;
+                        JSONObject object = HeroView.getJson(view);
+                        if (object != null && object.has("backgroundColor")) {
+                            color = HeroView.parseColor("#" + object.getString("backgroundColor"));
+                        } else {
+                            color = Color.TRANSPARENT;
+                        }
                     }
                     if (jsonObject.has("cornerRadius")) {
                         cornerRadius = dip2px(view.getContext(), (float) jsonObject.getDouble("cornerRadius"));
