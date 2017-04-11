@@ -36,6 +36,7 @@ import android.graphics.Typeface;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StrikethroughSpan;
@@ -119,7 +120,10 @@ public class HeroLabel extends TextView implements IHero {
         }
         if (jsonObject.has("numberOfLines")) {
             int lines = jsonObject.getInt("numberOfLines");
-            if (lines > 0) {
+            if (lines == 1){
+                setSingleLine();
+            }
+            else if (lines > 1){
                 this.setLines(lines);
             }
         }
@@ -164,12 +168,18 @@ public class HeroLabel extends TextView implements IHero {
     @Override
     protected void onTextChanged(final CharSequence text, final int start, final int before, final int after) {
         super.onTextChanged(text, start, before, after);
-        if (isAutoHeight && oldText != null && !oldText.equals(text)) {
+        if (isAutoHeight && isAutoWidth && !TextUtils.equals(oldText,text)) {
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.getLayoutParams();
+            if (params != null) {
+                updateSelfWidthHeight(measureSelfWidth(params.height), measureSelfHeight(params.width));
+            }
+        }
+        else if (isAutoHeight && !TextUtils.equals(oldText,text)) {
             FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.getLayoutParams();
             if (params != null) {
                 updateSelfWidthHeight(INVALID_VALUE, measureSelfHeight(params.width));
             }
-        } else if (isAutoWidth && oldText != null && !oldText.equals(text)) {
+        } else if (isAutoWidth && !TextUtils.equals(oldText,text)) {
             FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.getLayoutParams();
             if (params != null) {
                 updateSelfWidthHeight(measureSelfWidth(params.height), INVALID_VALUE);
