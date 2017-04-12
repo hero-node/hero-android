@@ -80,7 +80,7 @@ public class HeroSlider extends SeekBar implements IHero {
             this.setLayoutParams(params);
         }
         if (jsonObject.has("value")) {
-            this.setProgress(jsonObject.getInt("value") * 100);
+            this.setProgress((int) (jsonObject.getDouble("value") * 100));
         }
 
     }

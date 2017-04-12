@@ -32,7 +32,7 @@
 package com.hero;
 
 import android.content.Context;
-import android.graphics.Color;
+import android.util.SparseIntArray;
 import android.view.Gravity;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -47,20 +47,22 @@ import org.json.JSONObject;
 public class HeroSegmentControl extends RadioGroup implements IHero {
     HeroSegmentControl self = this;
     JSONArray actions;
-    private int currentSelectedId;
+    private int currentSelectedIndex;
     private RadioGroup.LayoutParams layoutParamsChild;
+    private SparseIntArray mapIdToIndex = new SparseIntArray();
     private RadioGroup.OnCheckedChangeListener checkListener = new RadioGroup.OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(RadioGroup group, int checkedId) {
-            currentSelectedId = checkedId;
-            sendData(currentSelectedId);
+
+            currentSelectedIndex = mapIdToIndex.get(checkedId,0);
+            sendData(currentSelectedIndex);
         }
     };
 
     public HeroSegmentControl(Context context) {
         super(context);
         this.setOrientation(HORIZONTAL);
-        currentSelectedId = 0;
+        currentSelectedIndex = 0;
         //        this.setBackgroundResource(R.drawable.segmentcontrol_bg);
 
         //        this.setShowDividers(SHOW_DIVIDER_BEGINNING | SHOW_DIVIDER_MIDDLE);
@@ -73,12 +75,18 @@ public class HeroSegmentControl extends RadioGroup implements IHero {
         HeroView.on(this, jsonObject);
         int color = 0;
         if (jsonObject.has("selectedSegmentIndex")) {
-            currentSelectedId = jsonObject.getInt("selectedSegmentIndex");
+            currentSelectedIndex = jsonObject.getInt("selectedSegmentIndex");
+            setSelectedIndex(currentSelectedIndex);
         }
         if (jsonObject.has("tinyColor")) {
             color = HeroView.parseColor("#" + jsonObject.getString("tinyColor"));
         }
         if (jsonObject.has("dataSource")) {
+
+            //when dataSource changed, remove all child and rebuild
+            mapIdToIndex.clear();
+            removeAllViews();
+
             JSONArray items = jsonObject.getJSONArray("dataSource");
             for (int i = 0; i < items.length(); i++) {
                 JSONObject item = items.getJSONObject(i);
@@ -92,15 +100,15 @@ public class HeroSegmentControl extends RadioGroup implements IHero {
                 }
                 button.setText(item.getString("title"));
                 this.addView(button);
-
-                if (currentSelectedId == i) {
+                if (currentSelectedIndex == i) {
                     button.setChecked(true);
                 }
+                mapIdToIndex.put(button.getId(),i);
             }
 
             if (jsonObject.has("action")) {
                 actions = jsonObject.getJSONArray("action");
-                sendData(currentSelectedId);
+                sendData(currentSelectedIndex);
             }
         }
 
@@ -108,7 +116,7 @@ public class HeroSegmentControl extends RadioGroup implements IHero {
     }
 
     public int getSelectedIndex() {
-        return currentSelectedId;
+        return currentSelectedIndex;
     }
 
     public void setSelectedIndex(int index) {
