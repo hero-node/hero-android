@@ -193,6 +193,7 @@ public class HeroPickerView extends View implements IHero, View.OnClickListener,
             } else {
                 //                this.setText(formatDate(year, month, day));
             }
+            pickerDialog=null;
             createDialog(getContext(), jsonObject, type);
         }
 
