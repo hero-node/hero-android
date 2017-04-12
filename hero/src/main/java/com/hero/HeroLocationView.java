@@ -167,6 +167,7 @@ public class HeroLocationView extends FrameLayout implements IHero {
     public void on(JSONObject jsonObject) throws JSONException {
         HeroView.on(this, jsonObject);
         if (jsonObject.has("coordinate")) {
+            setVisibility(VISIBLE);
             createMapView();
             JSONObject coordinate = jsonObject.getJSONObject("coordinate");
             if (coordinate.has("la") && coordinate.has("lo")) {
