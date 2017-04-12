@@ -1,8 +1,10 @@
 package com.hero;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
 import android.view.ViewGroup;
@@ -107,6 +109,34 @@ public abstract class DrawerActivity extends HeroHomeActivity {
             }
         }
         return url;
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String extra = intent.getStringExtra("newApp");
+        if (extra != null) {
+            try {
+                JSONObject newApp = new JSONObject(extra);
+                if (newApp.has("tabs")) {
+                    if (HeroApplication.getInstance().getHeroApp() != null) {
+                        HeroApplication.getInstance().getHeroApp().on(newApp);
+                    }
+                    reInitFragment();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void reInitFragment() {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.remove(mainFragment); // commit() will be executed in next step
+        initFragment();
+        if (drawerFragment != null) {
+            drawerFragment.getView().removeAllViews();
+        }
     }
 
     private void initDrawerFragment() {

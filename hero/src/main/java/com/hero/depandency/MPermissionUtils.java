@@ -59,6 +59,7 @@ public class MPermissionUtils {
     public static int HERO_PERMISSION_CAMERA = 6;
     public static int HERO_PERMISSION_PHONE_STATE = 7;
     public static int HERO_PERMISSION_SMS = 8;
+    public static int HERO_PERMISSION_CALENDAR = 8;
 
     public static void requestPermission(Context context, String[] permissions, int requestCode) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
