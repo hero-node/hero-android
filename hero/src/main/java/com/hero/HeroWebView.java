@@ -52,6 +52,8 @@ import android.webkit.WebViewClient;
 
 import com.hero.depandency.ContextUtils;
 
+import org.apache.http.client.methods.HttpPost;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -68,6 +70,11 @@ public class HeroWebView extends WebView implements IHero {
     static final String TAG = "HeroWebView";
     public final static boolean NEED_VERIFY_URL_HOST = false;
     private HeroFragment parentFragment = null;
+    private JSONArray hijackUrlArray;
+    private String mUrl;
+    private String postData;
+    private String method;
+    private static final String METHOD_POST = HttpPost.METHOD_NAME;
 
     public HeroWebView(Context context) {
         super(context);
@@ -101,11 +108,33 @@ public class HeroWebView extends WebView implements IHero {
         this.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
         this.setDownloadListener(new MyWebViewDownLoadListener());
 
+        final Context theContext = context;
         this.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (!isUrlAuthenticated(url)) {
                     return true;
+                }
+
+                if (hijackUrlArray != null) {
+                    try {
+                        JSONObject jsonObject = shouldHijackUrl(url);
+                        if (jsonObject != null) {
+                            JSONObject event = new JSONObject();
+                            event.put("name", HeroView.getName(view));
+                            event.put("url", jsonObject.optString("url"));
+                            HeroView.sendActionToContext(theContext, event);
+
+                            if (jsonObject.has("isLoad")) {
+                                // isLoad: this url need to be loaded
+                                if (!jsonObject.getBoolean("isLoad")) {
+                                    return true;
+                                }
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 if (url.startsWith("https://cashloan-callback.dianrong.com")) {
@@ -261,12 +290,55 @@ public class HeroWebView extends WebView implements IHero {
     public void on(JSONObject jsonObject) throws JSONException {
         HeroView.on(this, jsonObject);
         if (jsonObject.has("url")) {
-            String urlStr = jsonObject.getString("url");
-            this.loadUrl(urlStr);
+            Object urlObject = jsonObject.get("url");
+            if (urlObject instanceof JSONObject) {
+                method = ((JSONObject) urlObject).optString("method");
+                mUrl = ((JSONObject) urlObject).getString("url");
+                postData = ((JSONObject) urlObject).optString("data");
+                // if post data not null but method is not specified, think it as POST
+                if (!TextUtils.isEmpty(postData) && TextUtils.isEmpty(method)) {
+                    method = METHOD_POST;
+                }
+                if (METHOD_POST.equals(method)) {
+                    byte data[] = TextUtils.isEmpty(postData) ? new byte[1] : postData.getBytes();
+                    this.postUrl(mUrl, data);
+                } else {
+                    this.loadUrl(mUrl);
+                }
+            } else {
+                mUrl = jsonObject.getString("url");
+                this.loadUrl(mUrl);
+            }
         }
         if (jsonObject.has("innerHtml")) {
             this.loadData(jsonObject.getString("innerHtml"), "text/html;charset=UTF-8", null);
         }
+        if (jsonObject.has("hijackURLs")) {
+            hijackUrlArray = jsonObject.optJSONArray("hijackURLs");
+        }
+    }
+
+    @Override
+    public void reload() {
+        if (!TextUtils.isEmpty(postData) && METHOD_POST.equals(method) && !TextUtils.isEmpty(mUrl)) {
+            this.postUrl(mUrl, postData.getBytes());
+            return;
+        }
+        super.reload();
+    }
+
+    // if it's in the hijack list, return the object, else return null
+    private JSONObject shouldHijackUrl(String url) throws JSONException {
+        if (hijackUrlArray == null || hijackUrlArray.length() == 0) {
+            return null;
+        }
+        for (int i = 0; i < hijackUrlArray.length(); i ++) {
+            JSONObject item = hijackUrlArray.getJSONObject(i);
+            if (TextUtils.equals(url, item.optString("url"))) {
+                return item;
+            }
+        }
+        return null;
     }
 
     public void setFragment(HeroFragment fragment) {
