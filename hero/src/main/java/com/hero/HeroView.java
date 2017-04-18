@@ -113,6 +113,16 @@ public class HeroView extends FrameLayout implements IHero {
         return null;
     }
 
+    public static float px2FloatDip(Context context, float pxValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        float dpValue =  pxValue / scale;
+        int dpIntValue = (int) dpValue;
+        if (dpValue - dpIntValue > 0.0f && dpValue - dpIntValue < 0.5f) {
+            return (dpIntValue + 0.5f);
+        }
+        return (int) (dpValue + 0.5f);
+    }
+
     public static int px2dip(Context context, float pxValue) {
         final float scale = context.getResources().getDisplayMetrics().density;
         return (int) (pxValue / scale + 0.5f);
@@ -613,7 +623,7 @@ public class HeroView extends FrameLayout implements IHero {
                                                 } else {
                                                     parentFrame.put("w", px2dip(context, right));
                                                 }
-                                                parentFrame.put("h", px2dip(context, bottom));
+                                                parentFrame.put("h", px2FloatDip(context, bottom));
                                                 JSONObject object = new JSONObject();
                                                 object.put("frame", parentFrame);
 
@@ -970,6 +980,13 @@ public class HeroView extends FrameLayout implements IHero {
     }
 
     public static void putValueToJson(JSONObject jsonObject, Object value) throws JSONException {
+        jsonObject.put("value", value);
+    }
+
+    public static void putValueToJson(View view, JSONObject jsonObject, Object value) throws JSONException {
+        if (HeroView.getName(view) != null) {
+            jsonObject.put("name", HeroView.getName(view));
+        }
         jsonObject.put("value", value);
     }
 
