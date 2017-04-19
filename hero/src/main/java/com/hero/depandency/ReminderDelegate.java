@@ -313,4 +313,19 @@ public class ReminderDelegate {
         }
     }
 
+    public static void releaseRemindDelegate(ReminderDelegate delegate) {
+        if (delegate != null) {
+            delegate.destroy();
+        }
+    }
+
+    public static void setReminder(IReminderDelegator delegator, ReminderInfo info) {
+        if (delegator.getReminderDelegate() != null) {
+            delegator.getReminderDelegate().setReminder(info);
+        }
+    }
+
+    public interface IReminderDelegator{
+        ReminderDelegate getReminderDelegate();
+    }
 }
