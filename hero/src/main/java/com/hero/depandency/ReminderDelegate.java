@@ -13,6 +13,8 @@ import android.provider.CalendarContract.Events;
 import android.provider.CalendarContract.Reminders;
 import android.util.Log;
 
+import com.hero.R;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,10 +66,12 @@ public class ReminderDelegate {
         long endMillis;
         String title;
         String description;
+        int reminderPriorMinutes;
 
-        public ReminderInfo(long startMillis,long endMillis,String title,String description){
+        public ReminderInfo(long startMillis,long endMillis, int reminderMinutes, String title,String description){
             this.startMillis = startMillis;
             this.endMillis = endMillis;
+            this.reminderPriorMinutes = reminderMinutes;
             this.title = title;
             this.description = description;
         }
@@ -90,7 +94,7 @@ public class ReminderDelegate {
                     insertEvent(context, calendarIDs.get(0), info, new Action() {
                         @Override
                         public void run() {
-                            insertReminder(context);
+                            insertReminder(context, info.reminderPriorMinutes);
                         }
                     });
                 }
@@ -100,7 +104,7 @@ public class ReminderDelegate {
             insertEvent(context, calendarIDs.get(0), info, new Action() {
                 @Override
                 public void run() {
-                    insertReminder(context);
+                    insertReminder(context, info.reminderPriorMinutes);
                 }
             });
         }
@@ -127,11 +131,11 @@ public class ReminderDelegate {
        queryHandler.insertEventInCalendar(context,info,calID,action);
     }
 
-    private void insertReminder(Context context){
+    private void insertReminder(Context context, int minutes){
         if (queryHandler == null){
             queryHandler = new CalendarQueryHandler(context.getContentResolver());
         }
-       queryHandler.insertReminder(context,null);
+       queryHandler.insertReminder(context, null, minutes);
     }
 
 
@@ -149,7 +153,7 @@ public class ReminderDelegate {
                             Uri uri = Calendars.CONTENT_URI;
                             String selection = "(" + Calendars.ACCOUNT_TYPE + " = ?)";
                             String[] selectionArgs = new String[]{CalendarContract.ACCOUNT_TYPE_LOCAL};
-                            startQuery(CALENDAR_TOKEN, action, uri, EVENT_PROJECTION, selection, selectionArgs, null);
+                            startQuery(CALENDAR_TOKEN, action, uri, EVENT_PROJECTION, null, null, null);
                         }
                         else {
                             Log.e(TAG,"Permission not granted!");
@@ -157,13 +161,60 @@ public class ReminderDelegate {
                     }
                 });
         }
-        void insertReminder(Context context,final Action action){
+
+        void insertCalendar(final Object action){
+            final Context context = contextWeakReference.get() == null? null: contextWeakReference.get();
+            if (context == null){
+                Log.e(TAG,"Activity been destroyed, can not set reminder");
+                return;
+            }
+            MPermissionUtils.requestPermissionsAndCall(context, new String[]{Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR}, new Action1<Boolean>() {
+                @Override
+                public void call(Boolean aBoolean) {
+                    if (aBoolean){
+                        final String account = "account_local";
+                        ContentValues value = new ContentValues();
+
+                        value.put(Calendars.OWNER_ACCOUNT, account);
+                        value.put(Calendars.NAME,account);
+                        value.put(Calendars.ACCOUNT_NAME, account);
+                        value.put(Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL);
+                        value.put(Calendars.CALENDAR_DISPLAY_NAME, account);
+                        value.put(Calendars.VISIBLE, 1);
+                        value.put(Calendars.CALENDAR_COLOR, context.getResources().getColor(R.color.calendarColor));
+                        value.put(Calendars.CALENDAR_ACCESS_LEVEL,Calendars.CAL_ACCESS_OWNER);
+                        value.put(Calendars.SYNC_EVENTS,1);
+                        value.put(Calendars.CALENDAR_TIME_ZONE,TimeZone.getDefault().getID());
+                        value.put(Calendars.OWNER_ACCOUNT, account);
+                        value.put(Calendars.CAN_ORGANIZER_RESPOND,0);
+
+                        try {
+                            Uri calendarUri = Calendars.CONTENT_URI;
+                            calendarUri = calendarUri.buildUpon()
+                                    .appendQueryParameter(CalendarContract.CALLER_IS_SYNCADAPTER, "true")
+                                    .appendQueryParameter(Calendars.ACCOUNT_NAME, account)
+                                    .appendQueryParameter(Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL)
+                                    .build();
+                            queryHandler.startInsert(CALENDAR_TOKEN, action, calendarUri, value);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else {
+                        Log.e(TAG,"Permission not granted!");
+                    }
+                }
+            });
+
+        }
+
+        void insertReminder(Context context, final Action action, final int minutes){
             MPermissionUtils.requestPermissionsAndCall(context, new String[]{Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR}, new Action1<Boolean>() {
                 @Override
                 public void call(Boolean aBoolean) {
                     if (aBoolean){
                         ContentValues values = new ContentValues();
-                        values.put(Reminders.MINUTES, 15);
+                        values.put(Reminders.MINUTES, minutes);
                         values.put(Reminders.EVENT_ID, eventID);
                         values.put(Reminders.METHOD, Reminders.METHOD_ALERT);
                         queryHandler.startInsert(REMINDER_TOKEN,null,Reminders.CONTENT_URI,values);
@@ -204,7 +255,7 @@ public class ReminderDelegate {
             }
             if (token == CALENDAR_TOKEN){
                 // Use the cursor to step through the returned records
-                while (cursor.moveToNext()) {
+                if (cursor.moveToFirst()) {
                     long calID ;
                     String displayName,accountName,ownerName ;
                     // Get the field values
@@ -219,6 +270,9 @@ public class ReminderDelegate {
                         Action action = (Action)cookie;
                         action.run();
                     }
+                } else {
+                    // create an account
+                    insertCalendar(cookie);
                 }
 
             }
@@ -241,6 +295,17 @@ public class ReminderDelegate {
             else if (REMINDER_TOKEN == token){
                 // Reminder set done
                 Log.d(TAG,"Reminder set done");
+            } else if (CALENDAR_TOKEN == token){
+                Log.d(TAG,"Calendar set done");
+                if (uri == null){
+                    return;
+                }
+                long id = Long.parseLong(uri.getLastPathSegment());
+                calendarIDs.add(id);
+                if (cookie instanceof Action){
+                    Action action = (Action)cookie;
+                    action.run();
+                }
             }
 
 
