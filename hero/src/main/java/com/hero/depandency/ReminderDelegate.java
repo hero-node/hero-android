@@ -16,7 +16,11 @@ import android.util.Log;
 import com.hero.R;
 
 import java.lang.ref.WeakReference;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -84,7 +88,7 @@ public class ReminderDelegate {
     public void setReminder(final ReminderInfo info){
         final Context context = contextWeakReference.get() == null?null: contextWeakReference.get();
         if (context == null){
-            Log.e(TAG,"Activity been destroyed, can not set reminder");
+            Log.e(TAG, "Activity been destroyed, can not set reminder");
             return;
         }
         if (calendarIDs.isEmpty()){
@@ -307,25 +311,23 @@ public class ReminderDelegate {
                     action.run();
                 }
             }
-
-
-
         }
     }
 
-    public static void releaseRemindDelegate(ReminderDelegate delegate) {
-        if (delegate != null) {
-            delegate.destroy();
+    public static ReminderDelegate.ReminderInfo generateReminderInfo(Context context, String dateStr, String title) {
+        String format = context.getResources().getString(R.string.defaultCalendarFormat);
+        int durationConfig = context.getResources().getInteger(R.integer.reminder_duration_hours);
+        final int duration = (60 * 60 * durationConfig) * 1000;
+        SimpleDateFormat formatter = new SimpleDateFormat(format);
+        try {
+            Date date = formatter.parse(dateStr);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            ReminderDelegate.ReminderInfo info = new ReminderDelegate.ReminderInfo(calendar.getTimeInMillis(), calendar.getTimeInMillis() + duration, 0, title, null);
+            return info;
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
-    }
-
-    public static void setReminder(IReminderDelegator delegator, ReminderInfo info) {
-        if (delegator.getReminderDelegate() != null) {
-            delegator.getReminderDelegate().setReminder(info);
-        }
-    }
-
-    public interface IReminderDelegator{
-        ReminderDelegate getReminderDelegate();
+        return null;
     }
 }

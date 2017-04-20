@@ -71,6 +71,7 @@ import com.hero.depandency.ACache;
 import com.hero.depandency.ContextUtils;
 import com.hero.depandency.ImageLoadUtils;
 import com.hero.depandency.LoadingTextView;
+import com.hero.depandency.ReminderDelegate;
 import com.hero.depandency.StringUtil;
 import com.hero.depandency.UploadUtils;
 
@@ -121,6 +122,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
     protected HeroWebView customWebView = null;
     private int viewIndex = 0;
     private Map<Integer, View> contextMenuHandler;
+    private ReminderDelegate reminderDelegate;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -174,6 +176,9 @@ public class HeroFragment extends Fragment implements IHeroContext {
         closePopWindow();
         shouldSendViewWillAppear = true;
         unregisterContextMenuHandler();
+        if (reminderDelegate != null) {
+            reminderDelegate.destroy();
+        }
         super.onDestroy();
     }
 
@@ -920,8 +925,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                                     dialog.show();
                                 }
                             }
-                        } else if(cmdJson.has("sendSms"))
-                        {
+                        } else if (cmdJson.has("sendSms")) {
                             final JSONObject showObj = cmdJson.getJSONObject("sendSms");
                             if (showObj != null) {
                                 String phone = showObj.has("phone") ? showObj.getString("phone") : "";
@@ -931,8 +935,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                                 sendIntent.putExtra("sms_body", content);
                                 startActivity(sendIntent);
                             }
-                        }
-                        else if ((cmdJson.has("delay"))) {
+                        } else if ((cmdJson.has("delay"))) {
                             final Object delayObj = cmdJson.get("delay");
                             double delayTime = cmdJson.getDouble("delayTime");
                             mWebview.postDelayed(new Runnable() {
@@ -960,6 +963,8 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             showLongProgressDialog(progressDialog, true, cmdJson.get("showLongLoading"));
                         }
                     }
+                } else if (json.has("remind")) {
+                    addReminder(json);
                 } else {
                     if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                         try {
@@ -1736,6 +1741,30 @@ public class HeroFragment extends Fragment implements IHeroContext {
 //            }
 //        }
 //    }
+
+    public void addReminder(JSONObject jsonObject) {
+        if (jsonObject.has("remind")) {
+            try {
+                JSONObject remindObj = jsonObject.getJSONObject("remind");
+                String date = remindObj.optString("date");
+                if (!TextUtils.isEmpty(date) && remindObj.has("title")) {
+                    ReminderDelegate.ReminderInfo info = ReminderDelegate.generateReminderInfo(getContext(), date, remindObj.optString("title"));
+                    if (info != null) {
+                        getReminderDelegate().setReminder(info);
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private ReminderDelegate getReminderDelegate() {
+        if (reminderDelegate == null) {
+            reminderDelegate = new ReminderDelegate(getContext());
+        }
+        return reminderDelegate;
+    }
 
     private void addCustomActionBar(IHero view, JSONObject titleView, boolean showHome) throws JSONException {
         addDescriptionToView(view);

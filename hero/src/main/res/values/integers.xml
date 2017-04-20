@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer name="activity_animation_duration">200</integer>
+    <!--the default reminder duration in hours-->
+    <integer name="reminder_duration_hours">12</integer>
 </resources>
