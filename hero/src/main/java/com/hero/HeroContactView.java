@@ -90,6 +90,9 @@ public class HeroContactView extends TextView implements IHero,HeroFragmentActiv
         if (context instanceof HeroFragmentActivity){
             mHost = (HeroFragmentActivity)context;
         }
+        if (getId() == NO_ID){
+            setId(IntentResolver.generateViewId());
+        }
 
     }
 

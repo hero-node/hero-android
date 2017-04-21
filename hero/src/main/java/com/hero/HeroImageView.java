@@ -235,6 +235,9 @@ public class HeroImageView extends ImageView implements IHero, HeroFragmentActiv
         if (getContext() instanceof HeroFragmentActivity){
             mHost = (HeroFragmentActivity)getContext();
         }
+        if (getId() == NO_ID){
+            setId(IntentResolver.generateViewId());
+        }
         this.setScaleType(ScaleType.FIT_XY);
         localFilePath = UploadUtils.getImageFilePath(getContext());
     }

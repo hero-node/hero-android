@@ -37,10 +37,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.util.SparseArrayCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.view.KeyEvent;
 import android.view.View;
 
@@ -52,13 +52,16 @@ public abstract class HeroFragmentActivity extends AppCompatActivity implements 
     JSONArray mRightItems;
 
     private static final String TAG = "HeroFragmentActivity";
+    private static final String NEXT_CANDIDATE_REQUEST_INDEX_TAG = "HeroFragmentActivity.Candidate";
+    private static final String ALLOCATED_REQUEST_INDEX_TAG = "HeroFragmentActivity.Allocated";
+    private static final String REQUEST_VIEW_ID_TAG = "HeroFragmentActivity.Request.ViewId";
 
     public interface IRequestView {
         void onActivityResult(int requestCode, int resultCode,Intent data);
     }
 
     int mNextCandidateRequestIndex;
-    SparseArrayCompat<IRequestView> requestViews;
+    SparseIntArray mRequestViews;
     static final int MAX_NUM_PENDING_RESULTS = 0xfff - 1;
 
     @Override
@@ -95,8 +98,28 @@ public abstract class HeroFragmentActivity extends AppCompatActivity implements 
             HeroApplication.getInstance().pushActivity(this);
         }
         hasPresentActivity = false;
-        if (requestViews == null) {
-            requestViews = new SparseArrayCompat<>();
+
+        if (savedInstanceState != null) {
+            // Check if there are any pending onActivityResult calls to view.
+            if (savedInstanceState.containsKey(NEXT_CANDIDATE_REQUEST_INDEX_TAG)) {
+                mNextCandidateRequestIndex =
+                        savedInstanceState.getInt(NEXT_CANDIDATE_REQUEST_INDEX_TAG);
+                int[] requestCodes = savedInstanceState.getIntArray(ALLOCATED_REQUEST_INDEX_TAG);
+                int[] viewIds = savedInstanceState.getIntArray(REQUEST_VIEW_ID_TAG);
+                if (requestCodes == null || viewIds == null ||
+                        requestCodes.length != viewIds.length) {
+                    Log.w(TAG, "Invalid requestCode mapping in savedInstanceState.");
+                } else {
+                    mRequestViews = new SparseIntArray(requestCodes.length);
+                    for (int i = 0; i < requestCodes.length; i++) {
+                        mRequestViews.put(requestCodes[i], viewIds[i]);
+                    }
+                }
+            }
+        }
+
+        if (mRequestViews == null) {
+            mRequestViews = new SparseIntArray();
             mNextCandidateRequestIndex = 0;
         }
     }
@@ -110,24 +133,47 @@ public abstract class HeroFragmentActivity extends AppCompatActivity implements 
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mRequestViews.size() > 0) {
+            outState.putInt(NEXT_CANDIDATE_REQUEST_INDEX_TAG, mNextCandidateRequestIndex);
+
+            int[] requestCodes = new int[mRequestViews.size()];
+            int[] viewIds = new int[mRequestViews.size()];
+            for (int i = 0; i < mRequestViews.size(); i++) {
+                requestCodes[i] = mRequestViews.keyAt(i);
+                viewIds[i] = mRequestViews.valueAt(i);
+            }
+            outState.putIntArray(ALLOCATED_REQUEST_INDEX_TAG, requestCodes);
+            outState.putIntArray(REQUEST_VIEW_ID_TAG, viewIds);
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         int requestIndex = requestCode>>12;
         if (requestIndex != 0) {
             requestIndex--;
 
-            IRequestView who = requestViews.get(requestIndex);
-            requestViews.remove(requestIndex);
-            if (who == null) {
+            int requestViewId = mRequestViews.get(requestIndex);
+            mRequestViews.delete(requestIndex);
+            if (requestViewId == 0) {
                 Log.w(TAG, "Activity result delivered for unknown Views.");
                 return;
             }
-            who.onActivityResult(requestCode & 0x0fff, resultCode, data);
+            View target = findViewById(requestViewId);
+            if (target instanceof IRequestView) {
+                ((IRequestView)target).onActivityResult(requestCode & 0x0fff, resultCode, data);
+            }
+            else {
+                Log.w(TAG, "Activity result can not delivered to view");
+            }
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void startActivityForResult(IRequestView requestView, Intent intent,int requestCode){
+    public void startActivityForResult(View requestView, Intent intent, int requestCode){
         this.startActivityForResult(requestView,intent,requestCode,null);
     }
 
@@ -135,14 +181,14 @@ public abstract class HeroFragmentActivity extends AppCompatActivity implements 
      *
      * Calls from Views, request the activity result and get the result from the callback
      *
-     * @Param requestView, views have to implement this interface to get the result
+     * @Param requestView, views have to implement interface to get the result
      * @Param intent, same with called from Activity/Fragment
      * @Param requestCode, same with called from Activity/Fragment, Please note it should no
      * more than 0x0FFF
      * @Param options, same with called from Activity/Fragment
      *
      * */
-    public void startActivityForResult(IRequestView requestView, Intent intent,
+    public void startActivityForResult(View requestView, Intent intent,
                                        int requestCode, @Nullable Bundle options){
         if (requestCode == -1) {
             ActivityCompat.startActivityForResult(this, intent, -1, options);
@@ -150,6 +196,10 @@ public abstract class HeroFragmentActivity extends AppCompatActivity implements 
         }
         if (!checkForValidRequestCode(requestCode)){
             Log.e(TAG,"request Code is invalid");
+            return;
+        }
+        if (!(requestView instanceof IRequestView)){
+            Log.e(TAG,"request view must implement the interface");
             return;
         }
         int requestIndex = allocateRequestIndex(requestView);
@@ -165,20 +215,19 @@ public abstract class HeroFragmentActivity extends AppCompatActivity implements 
     }
 
     // Allocates the next available startActivityForResult request index.
-    private int allocateRequestIndex(IRequestView view) {
+    private int allocateRequestIndex(View view) {
         // Sanity check that we havn't exhaused the request index space.
-        if (requestViews.size() >= MAX_NUM_PENDING_RESULTS) {
+        if (mRequestViews.size() >= MAX_NUM_PENDING_RESULTS) {
             throw new IllegalStateException("Too many pending Fragment activity results.");
         }
 
-        // Find an unallocated request index in the mPendingFragmentActivityResults map.
-        while (requestViews.indexOfKey(mNextCandidateRequestIndex) >= 0) {
+        while (mRequestViews.indexOfKey(mNextCandidateRequestIndex) >= 0) {
             mNextCandidateRequestIndex =
                     (mNextCandidateRequestIndex + 1) % MAX_NUM_PENDING_RESULTS;
         }
 
         int requestIndex = mNextCandidateRequestIndex;
-        requestViews.put(requestIndex, view);
+        mRequestViews.put(requestIndex, view.getId());
         mNextCandidateRequestIndex =
                 (mNextCandidateRequestIndex + 1) % MAX_NUM_PENDING_RESULTS;
 
