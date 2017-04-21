@@ -257,7 +257,9 @@ public class HeroWebView extends WebView implements IHero {
             if (json instanceof JSONObject && parentFragment != null && parentFragment.getTag() != null) {
                 ((JSONObject)json).put("fragment_tag", parentFragment.getTag());
             }
-            ((IHeroContext) this.getContext()).on((JSONObject) json);
+            if (this.getContext() instanceof IHeroContext) {
+                ((IHeroContext) this.getContext()).on(json);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
