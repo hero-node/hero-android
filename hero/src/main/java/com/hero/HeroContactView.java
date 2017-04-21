@@ -50,6 +50,7 @@ import android.text.TextUtils;
 import android.widget.TextView;
 
 import com.hero.depandency.ContactUtils;
+import com.hero.depandency.IntentResolver;
 import com.hero.depandency.MPermissionUtils;
 
 import org.json.JSONArray;
@@ -58,7 +59,10 @@ import org.json.JSONObject;
 
 import rx.functions.Action1;
 
-public class HeroContactView extends TextView implements IHero {
+import static android.app.Activity.RESULT_OK;
+import static com.hero.depandency.IntentResolver.REQUEST_CODE_PICK_CONTACT;
+
+public class HeroContactView extends TextView implements IHero,HeroFragmentActivity.IRequestView {
 
     private static final String TAG = "HeroContactView";
     public static final int SMS_POST_COUNT = 100;
@@ -69,6 +73,7 @@ public class HeroContactView extends TextView implements IHero {
     private JSONObject filterObject;
 
     private BroadcastReceiver broadcastReceiver;
+    private HeroFragmentActivity mHost;
 
     private Handler postDataHandler = new Handler() {
         @Override
@@ -82,6 +87,10 @@ public class HeroContactView extends TextView implements IHero {
     public HeroContactView(Context context) {
         super(context);
         this.setVisibility(INVISIBLE);
+        if (context instanceof HeroFragmentActivity){
+            mHost = (HeroFragmentActivity)context;
+        }
+
     }
 
     @Override
@@ -337,10 +346,31 @@ public class HeroContactView extends TextView implements IHero {
     }
 
     private void pickContact() {
-        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-        if (getContext() instanceof HeroActivity) {
-            ((HeroActivity) (getContext())).startActivityByView(intent, HeroActivity.REQUEST_CODE_PICK_CONTACT, this);
-        }
+
+        MPermissionUtils.requestPermissionAndCall(getContext(), Manifest.permission.READ_CONTACTS, new Action1<Boolean>() {
+            @Override
+            public void call(Boolean aBoolean) {
+                if (aBoolean) {
+                    Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+                    if (mHost != null){
+                        mHost.startActivityForResult(HeroContactView.this,intent, IntentResolver.REQUEST_CODE_PICK_CONTACT);
+                    }
+                } else {
+                    if (contactObject != null) {
+                        JSONObject value = new JSONObject();
+                        try {
+                            value.put("error", "fail");
+                            contactObject.put("value", value);
+                            ((IHeroContext) getContext()).on(contactObject);
+                        } catch (Exception e) {
+                        }
+                    }
+
+                }
+            }
+        });
+
+
     }
 
 
@@ -476,6 +506,19 @@ public class HeroContactView extends TextView implements IHero {
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (REQUEST_CODE_PICK_CONTACT == requestCode) {
+            if (resultCode == RESULT_OK) {
+                JSONObject object = IntentResolver.resolveContact(getContext(),data);
+                try {
+                    this.on(object);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
     public class SmsReceiveBroadcastReceiver extends BroadcastReceiver {
 
         private Context context;

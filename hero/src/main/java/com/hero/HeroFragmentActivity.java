@@ -34,13 +34,15 @@ package com.hero;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.util.SparseArrayCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-
-import com.hero.depandency.IImagePickHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,6 +50,16 @@ import org.json.JSONException;
 public abstract class HeroFragmentActivity extends AppCompatActivity implements IHeroContext {
     private boolean hasPresentActivity;
     JSONArray mRightItems;
+
+    private static final String TAG = "HeroFragmentActivity";
+
+    public interface IRequestView {
+        void onActivityResult(int requestCode, int resultCode,Intent data);
+    }
+
+    int mNextCandidateRequestIndex;
+    SparseArrayCompat<IRequestView> requestViews;
+    static final int MAX_NUM_PENDING_RESULTS = 0xfff - 1;
 
     @Override
     public void on(Object object) throws JSONException {
@@ -83,6 +95,10 @@ public abstract class HeroFragmentActivity extends AppCompatActivity implements 
             HeroApplication.getInstance().pushActivity(this);
         }
         hasPresentActivity = false;
+        if (requestViews == null) {
+            requestViews = new SparseArrayCompat<>();
+            mNextCandidateRequestIndex = 0;
+        }
     }
 
     @Override
@@ -93,6 +109,81 @@ public abstract class HeroFragmentActivity extends AppCompatActivity implements 
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        int requestIndex = requestCode>>12;
+        if (requestIndex != 0) {
+            requestIndex--;
+
+            IRequestView who = requestViews.get(requestIndex);
+            requestViews.remove(requestIndex);
+            if (who == null) {
+                Log.w(TAG, "Activity result delivered for unknown Views.");
+                return;
+            }
+            who.onActivityResult(requestCode & 0x0fff, resultCode, data);
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public void startActivityForResult(IRequestView requestView, Intent intent,int requestCode){
+        this.startActivityForResult(requestView,intent,requestCode,null);
+    }
+
+    /**
+     *
+     * Calls from Views, request the activity result and get the result from the callback
+     *
+     * @Param requestView, views have to implement this interface to get the result
+     * @Param intent, same with called from Activity/Fragment
+     * @Param requestCode, same with called from Activity/Fragment, Please note it should no
+     * more than 0x0FFF
+     * @Param options, same with called from Activity/Fragment
+     *
+     * */
+    public void startActivityForResult(IRequestView requestView, Intent intent,
+                                       int requestCode, @Nullable Bundle options){
+        if (requestCode == -1) {
+            ActivityCompat.startActivityForResult(this, intent, -1, options);
+            return;
+        }
+        if (!checkForValidRequestCode(requestCode)){
+            Log.e(TAG,"request Code is invalid");
+            return;
+        }
+        int requestIndex = allocateRequestIndex(requestView);
+        ActivityCompat.startActivityForResult(
+                this, intent, ((requestIndex + 1) << 12) + (requestCode & 0x0fff), options);
+    }
+
+    boolean checkForValidRequestCode(int requestCode) {
+        if ((requestCode & 0xfffff000) != 0) {
+            return false;
+        }
+        return true;
+    }
+
+    // Allocates the next available startActivityForResult request index.
+    private int allocateRequestIndex(IRequestView view) {
+        // Sanity check that we havn't exhaused the request index space.
+        if (requestViews.size() >= MAX_NUM_PENDING_RESULTS) {
+            throw new IllegalStateException("Too many pending Fragment activity results.");
+        }
+
+        // Find an unallocated request index in the mPendingFragmentActivityResults map.
+        while (requestViews.indexOfKey(mNextCandidateRequestIndex) >= 0) {
+            mNextCandidateRequestIndex =
+                    (mNextCandidateRequestIndex + 1) % MAX_NUM_PENDING_RESULTS;
+        }
+
+        int requestIndex = mNextCandidateRequestIndex;
+        requestViews.put(requestIndex, view);
+        mNextCandidateRequestIndex =
+                (mNextCandidateRequestIndex + 1) % MAX_NUM_PENDING_RESULTS;
+
+        return requestIndex;
+    }
     // override this method to show actionbar
     public boolean isActionBarShown() {
         return false;
