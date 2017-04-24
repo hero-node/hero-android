@@ -69,6 +69,7 @@ import java.util.Map;
 public class HeroWebView extends WebView implements IHero {
     static final String TAG = "HeroWebView";
     public final static boolean NEED_VERIFY_URL_HOST = false;
+    public final static String FRAGMENT_TAG_KEY = "fragment_tag";
     private HeroFragment parentFragment = null;
     private JSONArray hijackUrlArray;
     private String mUrl;
@@ -245,8 +246,14 @@ public class HeroWebView extends WebView implements IHero {
     public void on(String jsonStr) {
         try {
             Object json = new JSONTokener(jsonStr).nextValue();
-            if (json instanceof JSONObject && parentFragment != null && parentFragment.getTag() != null) {
-                ((JSONObject)json).put("fragment_tag", parentFragment.getTag());
+            if (parentFragment != null && parentFragment.getTag() != null) {
+                if (json instanceof JSONObject) {
+                    ((JSONObject) json).put(FRAGMENT_TAG_KEY, parentFragment.getTag());
+                } else if (json instanceof JSONArray) {
+                    JSONObject tag = new JSONObject();
+                    tag.put(FRAGMENT_TAG_KEY, parentFragment.getTag());
+                    ((JSONArray) json).put(tag);
+                }
             }
             if (this.getContext() instanceof IHeroContext) {
                 ((IHeroContext) this.getContext()).on(json);
