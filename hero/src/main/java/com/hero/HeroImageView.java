@@ -74,6 +74,7 @@ import android.widget.Toast;
 import com.hero.depandency.BitmapUtils;
 import com.hero.depandency.ContextUtils;
 import com.hero.depandency.ImageLoadUtils;
+import com.hero.depandency.IntentResolver;
 import com.hero.depandency.MPermissionUtils;
 import com.hero.depandency.MyFileUtils;
 import com.hero.depandency.TouchImageView;
@@ -91,10 +92,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static android.app.Activity.RESULT_OK;
+
 /**
  * Created by liuguoping on 15/9/23.
  */
-public class HeroImageView extends ImageView implements IHero {
+public class HeroImageView extends ImageView implements IHero, HeroFragmentActivity.IRequestView {
 
     public static final int BIG_FILE_SIZE = 1 * 1024 * 1024; // 1M
     public static final int BIG_IMAGE_QUALITY = 60; // %60
@@ -141,6 +144,8 @@ public class HeroImageView extends ImageView implements IHero {
     private int roundWidth = -1;
     private RectF drawRect;
     private Path drawPath;
+
+    private HeroFragmentActivity mHost;
 
     private Handler refreshHandler = new Handler() {
         @Override
@@ -227,6 +232,12 @@ public class HeroImageView extends ImageView implements IHero {
     }
 
     private void init() {
+        if (getContext() instanceof HeroFragmentActivity){
+            mHost = (HeroFragmentActivity)getContext();
+        }
+        if (getId() == NO_ID){
+            setId(IntentResolver.generateViewId());
+        }
         this.setScaleType(ScaleType.FIT_XY);
         localFilePath = UploadUtils.getImageFilePath(getContext());
     }
@@ -405,15 +416,7 @@ public class HeroImageView extends ImageView implements IHero {
             uploadName = jsonObject.getString("uploadName");
         }
 
-        if (jsonObject.has("imagePicked")) {
-            String returnPath = null;
-            if (jsonObject.has("imagePath")) {
-                returnPath = jsonObject.getString("imagePath");
-            } else {
-                returnPath = getTempFile().getAbsolutePath();
-            }
-            this.handlePickResult(jsonObject.getInt("imagePicked"), returnPath);
-        }
+
         if (jsonObject.has("getImage")) {
             if (!TextUtils.isEmpty(jsonObject.getString("getImage"))) {
                 localImageName = jsonObject.getString("getImage") + imageExtension;
@@ -520,8 +523,8 @@ public class HeroImageView extends ImageView implements IHero {
         Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
         pickUri=getTempFileUri(intent,getTempFile());
         intent.putExtra(MediaStore.EXTRA_OUTPUT, pickUri);
-        if (getContext() instanceof HeroActivity) {
-            ((HeroActivity) (getContext())).startActivityByView(intent, HeroActivity.REQUEST_CODE_CAMERA, this);
+        if (mHost != null) {
+            mHost.startActivityForResult(this, intent, IntentResolver.REQUEST_CODE_CAMERA);
         }
     }
 
@@ -537,8 +540,8 @@ public class HeroImageView extends ImageView implements IHero {
             intent.putExtra(MediaStore.EXTRA_OUTPUT, pickUri);
             intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
         }
-        if (getContext() instanceof HeroActivity) {
-            ((HeroActivity) (getContext())).startActivityByView(intent, HeroActivity.REQUEST_CODE_GALLERY, this);
+        if (mHost != null) {
+            mHost.startActivityForResult(this, intent, IntentResolver.REQUEST_CODE_GALLERY);
         }
     }
 
@@ -550,14 +553,15 @@ public class HeroImageView extends ImageView implements IHero {
         intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
         intent.putExtra("noFaceDetection", true);
         intent.putExtra("output", pickUri);
-        if (getContext() instanceof HeroActivity) {
-            ((HeroActivity) (getContext())).startActivityByView(intent, HeroActivity.REQUEST_CODE_PHOTO_CROP, this);
+        if (mHost != null) {
+            mHost.startActivityForResult(this, intent, IntentResolver.REQUEST_CODE_PHOTO_CROP);
         }
+
     }
 
     public void handlePickResult(int type, String path) {
         // data not used currently
-        if (needCrop && HeroActivity.REQUEST_CODE_CAMERA == type) {
+        if (needCrop && IntentResolver.REQUEST_CODE_CAMERA == type) {
             if (path != null) {
                 cropPhoto(path);
             }
@@ -919,4 +923,19 @@ public class HeroImageView extends ImageView implements IHero {
         return MPermissionUtils.checkAndRequestPermissions(getContext(), new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA}, MPermissionUtils.HERO_PERMISSION_CAMERA);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == IntentResolver.REQUEST_CODE_GALLERY && resultCode == RESULT_OK) {
+            if (data != null) {
+                Uri uri = data.getData();
+                String filePath = HeroActivity.getPathFromURI(getContext(), uri);
+                handlePickResult(requestCode, filePath);
+            }
+        }
+        if (requestCode == IntentResolver.REQUEST_CODE_CAMERA || requestCode == IntentResolver.REQUEST_CODE_PHOTO_CROP) {
+            handlePickResult(requestCode, getTempFile().getAbsolutePath());
+        }
+
+    }
 }
