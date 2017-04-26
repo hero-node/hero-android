@@ -69,6 +69,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 /**
  * Created by liuguoping on 15/9/23.
  * 为了和iOS兼容，暂时只支持Frame绝对布局方式
@@ -361,6 +363,21 @@ public class HeroView extends FrameLayout implements IHero {
                     view.setBackgroundColor(parseColor(jsonObject.getString("backgroundColor")));
                 }
             }
+            if (jsonObject.has("gradientBackgroundColor")) {
+                if (jsonObject.get("gradientBackgroundColor") instanceof JSONArray)
+                {
+                    JSONArray colors = jsonObject.getJSONArray("gradientBackgroundColor");
+                    if (colors.length()>1)
+                    {
+                        int color[] = {parseColor(colors.getString(0)),parseColor(colors.getString(1))};
+
+                        GradientDrawable bg = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, color);
+                        view.setBackground(bg);
+                    }
+
+                }
+            }
+
             if (jsonObject.has("hidden")) {
                 if (jsonObject.getBoolean("hidden")) {
                     view.setVisibility(INVISIBLE);
