@@ -36,7 +36,6 @@ import android.graphics.Typeface;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.TextUtils;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StrikethroughSpan;
@@ -168,18 +167,17 @@ public class HeroLabel extends TextView implements IHero {
     @Override
     protected void onTextChanged(final CharSequence text, final int start, final int before, final int after) {
         super.onTextChanged(text, start, before, after);
-        if (isAutoHeight && isAutoWidth && !TextUtils.equals(oldText,text)) {
+        if (isAutoHeight && isAutoWidth) {
             FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.getLayoutParams();
             if (params != null) {
                 updateSelfWidthHeight(measureSelfWidth(params.height), measureSelfHeight(params.width));
             }
-        }
-        else if (isAutoHeight && !TextUtils.equals(oldText,text)) {
+        } else if (isAutoHeight) {
             FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.getLayoutParams();
             if (params != null) {
                 updateSelfWidthHeight(INVALID_VALUE, measureSelfHeight(params.width));
             }
-        } else if (isAutoWidth && !TextUtils.equals(oldText,text)) {
+        } else if (isAutoWidth) {
             FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.getLayoutParams();
             if (params != null) {
                 updateSelfWidthHeight(measureSelfWidth(params.height), INVALID_VALUE);
