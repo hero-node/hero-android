@@ -31,8 +31,10 @@
 
 package com.hero;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 
 import org.json.JSONException;
@@ -42,6 +44,7 @@ import org.json.JSONObject;
  * Created by R9L7NGH on 2015/12/22.
  */
 public class HeroApp implements IHero {
+    public static final String ACTION_HOME = "hero.intent.action.HOME";
     private Object content;
     private Context context;
     private LocalBroadcastManager broadcastManager;
@@ -72,7 +75,13 @@ public class HeroApp implements IHero {
                     intent.putExtra(HEROAPP_EXTRA_BADGE_INDEX, data.optInt(HEROAPP_EXTRA_BADGE_INDEX));
                     intent.putExtra(HEROAPP_EXTRA_BADGE_VALUE, data.optString(HEROAPP_EXTRA_BADGE_VALUE));
                 } else if (object.has(HEROAPP_NEW_APP)) {
-                    // startActivity should be called in an activity
+                    intent = getHomeIntent(context);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    Bundle bundle = new Bundle();
+                    bundle.putString(HEROAPP_NEW_APP, object.optJSONObject(HEROAPP_NEW_APP).toString());
+                    intent.putExtras(bundle);
+                    context.startActivity(intent);
+
                     return;
                 } else if (object.has(HEROAPP_TAB_CHANGED)) {
                     intent.setAction(HEROAPP_TAB_CHANGED);
@@ -87,5 +96,14 @@ public class HeroApp implements IHero {
 
     public Object getContent() {
         return content;
+    }
+
+    public static Intent getHomeIntent(Context c) {
+        Activity home = HeroHomeActivity.getTheHomeActivity();
+        if (home != null) {
+            return new Intent(c, home.getClass());
+        } else {
+            return new Intent(ACTION_HOME);
+        }
     }
 }

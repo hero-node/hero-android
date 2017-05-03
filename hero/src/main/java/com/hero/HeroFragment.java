@@ -372,14 +372,13 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     if (key.equals("tabSelect")) {
                         returnToHome();
                     } else if (key.equals("newApp")) {
-                        Activity home = HeroHomeActivity.getTheHomeActivity();
-                        if (home != null) {
-                            intent = new Intent(getContext(), home.getClass());
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        Intent homeIntent = HeroApp.getHomeIntent(getContext());
+                        if (homeIntent != null) {
+                            homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             Bundle bundle = new Bundle();
                             bundle.putString("newApp", globalEvent.toString());
-                            intent.putExtras(bundle);
-                            startActivitySafely(intent);
+                            homeIntent.putExtras(bundle);
+                            startActivitySafely(homeIntent);
                         }
                     } else if (key.equals("HeroApp")) {
                         HeroApplication.getInstance().getHeroApp().on(globalEvent);
@@ -751,7 +750,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             activity.finish();
                         } else if (command.startsWith("rootBack")) {
                             // go home or go to the bottom present activity
-                            Activity home = HeroHomeActivity.getTheHomeActivity();
                             Intent intent1 = ((HeroFragmentActivity) getContext()).getPresentIntent();
                             boolean isPresentActivityInStack = HeroApplication.getInstance().isActivityInStack(intent1.getComponent().getClassName());
                             if (isPresentActivityInStack) {
@@ -1587,10 +1585,9 @@ public class HeroFragment extends Fragment implements IHeroContext {
     }
 
     private void returnToHome() {
-        Activity home = HeroHomeActivity.getTheHomeActivity();
-        if ((getActivity() instanceof HeroActivity) && home != null) {
+        Intent intent = HeroApp.getHomeIntent(getContext());
+        if ((getActivity() instanceof HeroActivity) && intent != null) {
             try {
-                Intent intent = new Intent(getContext(), home.getClass());
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             } catch (Exception e) {
