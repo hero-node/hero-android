@@ -33,11 +33,14 @@ package com.hero;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -130,12 +133,37 @@ public class HeroButton extends Button implements IHero, IHeroBackground {
         }
         if (jsonObject.has("imageN")) {
             isBackgroundValid = true;
-            int resId = ImageLoadUtils.getLocalImageIdByName(getContext(), jsonObject.getString("imageN"));
-            if (resId != 0) {
-                if (android.os.Build.VERSION.SDK_INT > 15) {
-                    this.setBackground(getResources().getDrawable(resId));
+            String imageUrl = jsonObject.optString("imageN");
+            if (!TextUtils.isEmpty(imageUrl)) {
+                if (imageUrl.startsWith("http")) {
+                    // set to transparent temporarily
+                    setBackgroundColor(Color.TRANSPARENT);
+                    ImageLoadUtils.LoadImageAsBitmap(getContext(), imageUrl, new ImageLoadUtils.LoadFinishHandler() {
+                        @Override
+                        public void onLoadFinished(Bitmap bitmap) {
+                            if (bitmap != null) {
+                                if (android.os.Build.VERSION.SDK_INT > 15) {
+                                    setBackground(new BitmapDrawable(getResources(), bitmap));
+                                } else {
+                                    setBackgroundDrawable(new BitmapDrawable(bitmap));
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onLoadFailed() {
+                            setBackground(createTransparentBackground());
+                        }
+                    });
                 } else {
-                    this.setBackgroundDrawable(getResources().getDrawable(resId));
+                    int resId = ImageLoadUtils.getLocalImageIdByName(getContext(), jsonObject.getString("imageN"));
+                    if (resId != 0) {
+                        if (android.os.Build.VERSION.SDK_INT > 15) {
+                            this.setBackground(getResources().getDrawable(resId));
+                        } else {
+                            this.setBackgroundDrawable(getResources().getDrawable(resId));
+                        }
+                    }
                 }
             }
         }

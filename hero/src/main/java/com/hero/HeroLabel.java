@@ -60,6 +60,7 @@ public class HeroLabel extends TextView implements IHero {
     public HeroLabel(Context context) {
         super(context);
         this.setGravity(Gravity.CENTER_VERTICAL);
+        this.setIncludeFontPadding(false);
     }
 
     //    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
