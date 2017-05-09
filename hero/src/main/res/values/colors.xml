@@ -19,4 +19,5 @@
     <color name="toastBackgroundColor">#DD37455C</color>
     <color name="switchBackground">#00bc8d</color>
     <color name="calendarColor">#00bc8d</color>
+    <color name="defaultListCellColor">#ffffff</color>
 </resources>
