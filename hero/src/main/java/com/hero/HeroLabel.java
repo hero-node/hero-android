@@ -125,6 +125,7 @@ public class HeroLabel extends TextView implements IHero {
             }
             else if (lines > 1){
                 this.setLines(lines);
+                this.setGravity(this.getGravity() | Gravity.TOP);
             }
         }
 
@@ -244,22 +245,22 @@ public class HeroLabel extends TextView implements IHero {
                 if (key.startsWith("color(")) {
                     String[] range = key.substring(6, key.length() - 1).split(",");
                     if (range.length > 1) {
-                        int start = Integer.parseInt(range[0]);
-                        int len = Integer.parseInt(range[1]);
+                        int start = Integer.parseInt(range[0].trim());
+                        int len = Integer.parseInt(range[1].trim());
                         addColoredSpan(spannableString, start, start + len, HeroView.parseColor(content));
                     }
                 } else if (key.startsWith("size(")) {
                     String[] range = key.substring(5, key.length() - 1).split(",");
                     if (range.length > 1) {
-                        int start = Integer.parseInt(range[0]);
-                        int len = Integer.parseInt(range[1]);
+                        int start = Integer.parseInt(range[0].trim());
+                        int len = Integer.parseInt(range[1].trim());
                         addSizedSpan(spannableString, start, start + len, Integer.parseInt(content));
                     }
                 } else if (key.startsWith("middleline(")) {
                     String[] range = key.substring("middleline(".length(), key.length() - 1).split(",");
                     if (range.length > 1) {
-                        int start = Integer.parseInt(range[0]);
-                        int len = Integer.parseInt(range[1]);
+                        int start = Integer.parseInt(range[0].trim());
+                        int len = Integer.parseInt(range[1].trim());
                         addStrikeSpan(spannableString, start, start + len);
                     }
                 }
