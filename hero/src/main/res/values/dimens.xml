@@ -25,4 +25,11 @@
 
     <dimen name="cellLeftMargin">15dp</dimen>
     <dimen name="drawerMenuWidth">240dp</dimen>
+
+    <dimen name="tab_icon_width">24dp</dimen>
+    <dimen name="tab_icon_height">24dp</dimen>
+    <dimen name="tabDotWidth">8dp</dimen>
+    <dimen name="tabDotMarginTop">4dp</dimen>
+    <dimen name="tabDotMarginLeft">16dp</dimen>
+
 </resources>

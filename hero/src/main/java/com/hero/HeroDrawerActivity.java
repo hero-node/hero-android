@@ -18,7 +18,7 @@ import org.json.JSONObject;
  * Created by xincai on 17-3-7.
  */
 
-public abstract class DrawerActivity extends HeroHomeActivity {
+public abstract class HeroDrawerActivity extends HeroHomeActivity {
 
     private HeroFragment mainFragment;
     private HeroFragment drawerFragment;
@@ -60,6 +60,10 @@ public abstract class DrawerActivity extends HeroHomeActivity {
 
     public boolean isDrawerOpen() {
         return drawerLayout != null && (drawerLayout.isDrawerOpen(Gravity.LEFT) || drawerLayout.isDrawerOpen(Gravity.RIGHT));
+    }
+
+    public int getHomeTabHeight() {
+        return 0;
     }
 
     public void openDrawer(boolean isOpen) {

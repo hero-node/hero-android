@@ -76,6 +76,7 @@ import java.util.List;
  * 为了和iOS兼容，暂时只支持Frame绝对布局方式
  */
 
+
 public class HeroView extends FrameLayout implements IHero {
 
     public HeroView(Context context) {
@@ -264,7 +265,8 @@ public class HeroView extends FrameLayout implements IHero {
             }
         }
         if (view.getContext() instanceof HeroHomeActivity) {
-            screen_height -= view.getContext().getResources().getDimensionPixelSize(R.dimen.tab_bar_height);
+            int tabHeight = ((HeroHomeActivity)(view.getContext())).getHomeTabHeight();
+            screen_height -= tabHeight;
         }
         if (view.getParent() != null) {
             if (((View) view.getParent()).getLayoutParams() != null) {

@@ -85,6 +85,10 @@ public abstract class HeroHomeActivity extends HeroFragmentActivity {
         super.onDestroy();
     }
 
+    public int getHomeTabHeight() {
+        return getResources().getDimensionPixelSize(R.dimen.tab_bar_height);
+    }
+
     @Override
     public void onBackPressed() {
         if (this.backPressed) {

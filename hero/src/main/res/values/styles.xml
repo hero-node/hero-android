@@ -74,4 +74,32 @@
         <item name="edge_size">50dip</item>
         <item name="shadow_left">@drawable/shadow_left</item>
     </style>
+
+    <style name="TabBarItems">
+        <item name="android:textSize">10dp</item>
+        <item name="android:textColor">@color/tab_text</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/tab_item_bg</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:button">@null</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:drawablePadding">2dp</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="TabRedDotText">
+        <item name="android:layout_width">@dimen/tabDotWidth</item>
+        <item name="android:layout_height">@dimen/tabDotWidth</item>
+        <item name="android:layout_marginTop">@dimen/tabDotMarginTop</item>
+        <item name="android:layout_marginLeft">@dimen/tabDotMarginLeft</item>
+        <item name="android:layout_gravity">center|top</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">8dp</item>
+        <item name="android:textColor">@color/heroWhite</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:background">@drawable/hero_shape_red_dot</item>
+    </style>
 </resources>

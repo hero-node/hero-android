@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--<item android:state_pressed="true">-->
+    <!--<layer-list>-->
+    <!--<item android:left="8dp" android:right="8dp">-->
+    <!--<shape>-->
+    <!--<solid android:color="@color/tabPressed" />-->
+    <!--</shape>-->
+    <!--</item>-->
+    <!--<item android:bottom="2dp">-->
+    <!--<shape>-->
+    <!--<solid android:color="@color/drWhite" />-->
+    <!--</shape>-->
+    <!--</item>-->
+    <!--</layer-list>-->
+    <!--</item>-->
+    <item android:state_checked="true">
+        <layer-list>
+            <item android:left="8dp" android:right="8dp">
+                <shape>
+                    <solid android:color="@color/heroWhite" />
+                </shape>
+            </item>
+            <item android:bottom="2dp">
+                <shape>
+                    <solid android:color="@color/heroWhite" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item>
+        <shape>
+            <solid android:color="@color/heroTransparent" />
+        </shape>
+    </item>
+</selector>
