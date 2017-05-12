@@ -1,4 +1,4 @@
-package com.hero.depandency;
+package com.hero;
 
 import android.app.ActionBar;
 import android.content.BroadcastReceiver;
@@ -19,14 +19,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-
-import com.hero.HeroActivity;
-import com.hero.HeroApp;
-import com.hero.HeroApplication;
-import com.hero.HeroFragment;
-import com.hero.HeroHomeActivity;
-import com.hero.HeroView;
-import com.hero.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -95,7 +87,7 @@ public abstract class HeroTabActivity extends HeroHomeActivity implements RadioG
         showLoadingReceiver = registerLocalReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                showLoadingSplash();
+                startLoading();
             }
         }, new IntentFilter(LOCAL_INTENT_SHOW_LOADING));
     }
@@ -131,8 +123,6 @@ public abstract class HeroTabActivity extends HeroHomeActivity implements RadioG
         unregisterLocalReceiver(showLoadingReceiver);
         showLoadingReceiver = null;
     }
-
-    protected abstract void showLoadingSplash();
 
     protected void initContent() {
         setContentView(R.layout.tab_activity_main);

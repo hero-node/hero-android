@@ -32,8 +32,10 @@
 package com.hero;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.multidex.MultiDexApplication;
 import android.webkit.CookieManager;
@@ -51,8 +53,20 @@ import java.util.Stack;
 public abstract class HeroApplication extends MultiDexApplication {
     protected CookieManager cookieManager;
     private static HeroApplication instance;
+    private static Context applicationContext;
     protected HeroApp heroApp;
     private Stack<Activity> activityStack;
+
+    public HeroApplication() {
+        super();
+    }
+
+    public HeroApplication(Context c, String homeAddress) {
+        applicationContext = c;
+        cookieManager = CookieManager.getInstance();
+        activityStack = new Stack<Activity>();
+        heroApp = new HeroApp(c);
+    }
 
     public static synchronized HeroApplication getInstance() {
         return HeroApplication.instance;
@@ -65,6 +79,36 @@ public abstract class HeroApplication extends MultiDexApplication {
         cookieManager = CookieManager.getInstance();
         heroApp = new HeroApp(this);
         activityStack = new Stack<Activity>();
+    }
+
+    public static void createInstance(Application c, final String homeAddress, final String referer) {
+        if (instance == null) {
+            instance = new HeroApplication(c, homeAddress) {
+                @Override
+                public String getHomeAddress() {
+                    return homeAddress;
+                }
+
+                @Override
+                public String getHttpReferer() {
+                    return referer;
+                }
+            };
+        }
+    }
+
+    public String getPackageName() {
+        if (applicationContext != null) {
+            return applicationContext.getPackageName();
+        }
+        return getBaseContext().getPackageName();
+    }
+
+    public PackageManager getPackageManager() {
+        if (applicationContext != null) {
+            return applicationContext.getPackageManager();
+        }
+        return getBaseContext().getPackageManager();
     }
 
     public static void clearAllCookies(Context context) {
