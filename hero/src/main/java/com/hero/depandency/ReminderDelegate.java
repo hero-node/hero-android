@@ -91,27 +91,39 @@ public class ReminderDelegate {
             Log.e(TAG, "Activity been destroyed, can not set reminder");
             return;
         }
-        if (calendarIDs.isEmpty()){
-            queryCalendarList(context, new Action() {
-                @Override
-                public void run() {
-                    insertEvent(context, calendarIDs.get(0), info, new Action() {
-                        @Override
-                        public void run() {
-                            insertReminder(context, info.reminderPriorMinutes);
-                        }
-                    });
+        MPermissionUtils.requestPermissionsAndCall(context, new String[]{Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR}, new Action1<Boolean>() {
+            @Override
+            public void call(Boolean aBoolean) {
+                if (aBoolean) {
+                    if (calendarIDs.isEmpty()){
+                        queryCalendarList(context, new Action() {
+                            @Override
+                            public void run() {
+                                insertEvent(context, calendarIDs.get(0), info, new Action() {
+                                    @Override
+                                    public void run() {
+                                        insertReminder(context, info.reminderPriorMinutes);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    else {
+                        insertEvent(context, calendarIDs.get(0), info, new Action() {
+                            @Override
+                            public void run() {
+                                insertReminder(context, info.reminderPriorMinutes);
+                            }
+                        });
+                    }
                 }
-            });
-        }
-        else {
-            insertEvent(context, calendarIDs.get(0), info, new Action() {
-                @Override
-                public void run() {
-                    insertReminder(context, info.reminderPriorMinutes);
+                else {
+                    Log.e(TAG,"Permission not granted!");
+                    return;
                 }
-            });
-        }
+            }
+        });
+
     }
 
     public void destroy(){
@@ -150,9 +162,7 @@ public class ReminderDelegate {
         }
 
         void queryAllCalendar(Context context,final Action action) {
-                MPermissionUtils.requestPermissionsAndCall(context, new String[]{Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR}, new Action1<Boolean>() {
-                    @Override
-                    public void call(Boolean aBoolean) {
+            boolean aBoolean = MPermissionUtils.isPermissionsGranted(context, new String[]{Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR});
                         if (aBoolean) {
                             Uri uri = Calendars.CONTENT_URI;
                             String selection = "(" + Calendars.ACCOUNT_TYPE + " = ?)";
@@ -162,8 +172,6 @@ public class ReminderDelegate {
                         else {
                             Log.e(TAG,"Permission not granted!");
                         }
-                    }
-                });
         }
 
         void insertCalendar(final Object action){
@@ -172,9 +180,7 @@ public class ReminderDelegate {
                 Log.e(TAG,"Activity been destroyed, can not set reminder");
                 return;
             }
-            MPermissionUtils.requestPermissionsAndCall(context, new String[]{Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR}, new Action1<Boolean>() {
-                @Override
-                public void call(Boolean aBoolean) {
+            boolean aBoolean = MPermissionUtils.isPermissionsGranted(context, new String[]{Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR});
                     if (aBoolean){
                         final String account = "account_local";
                         ContentValues value = new ContentValues();
@@ -207,15 +213,10 @@ public class ReminderDelegate {
                     else {
                         Log.e(TAG,"Permission not granted!");
                     }
-                }
-            });
-
         }
 
         void insertReminder(Context context, final Action action, final int minutes){
-            MPermissionUtils.requestPermissionsAndCall(context, new String[]{Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR}, new Action1<Boolean>() {
-                @Override
-                public void call(Boolean aBoolean) {
+            boolean aBoolean = MPermissionUtils.isPermissionsGranted(context, new String[]{Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR});
                     if (aBoolean){
                         ContentValues values = new ContentValues();
                         values.put(Reminders.MINUTES, minutes);
@@ -226,14 +227,9 @@ public class ReminderDelegate {
                     else {
                         Log.e(TAG,"Permission not granted!");
                     }
-                }
-            });
-
         }
         void insertEventInCalendar(Context context,final ReminderInfo info,final long calID,final Action action){
-            MPermissionUtils.requestPermissionsAndCall(context, new String[]{Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR}, new Action1<Boolean>() {
-                @Override
-                public void call(Boolean aBoolean) {
+            boolean aBoolean = MPermissionUtils.isPermissionsGranted(context, new String[]{Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR});
                     if (aBoolean){
                         ContentValues values = new ContentValues();
                         values.put(Events.DTSTART, info.startMillis);
@@ -247,9 +243,6 @@ public class ReminderDelegate {
                     else {
                         Log.e(TAG,"Permission not granted!");
                     }
-                }
-            });
-
         }
 
         @Override
