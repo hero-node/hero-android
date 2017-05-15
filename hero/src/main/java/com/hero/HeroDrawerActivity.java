@@ -105,7 +105,7 @@ public abstract class HeroDrawerActivity extends HeroHomeActivity {
                     mainFragment.setRetainInstance(false);
                     if (mainFragment != null) {
                         FragmentManager fm = getSupportFragmentManager();
-                        fm.beginTransaction().replace(R.id.mainContent, mainFragment).commit();
+                        fm.beginTransaction().replace(R.id.mainContent, mainFragment).commitAllowingStateLoss();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -150,7 +150,7 @@ public abstract class HeroDrawerActivity extends HeroHomeActivity {
         drawerFragment.setFullHeight(true);
         if (drawerFragment != null) {
             FragmentManager fm = getSupportFragmentManager();
-            fm.beginTransaction().replace(R.id.drawerContent, drawerFragment, "drawer").commit();
+            fm.beginTransaction().replace(R.id.drawerContent, drawerFragment, "drawer").commitAllowingStateLoss();
         }
     }
 

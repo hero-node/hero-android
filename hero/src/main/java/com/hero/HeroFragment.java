@@ -964,14 +964,16 @@ public class HeroFragment extends Fragment implements IHeroContext {
                 } else if (json.has("remind")) {
                     addReminder(json);
                 } else {
-                    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                        try {
-                            mWebview.evaluateJavascript("Hero.in(" + json.toString() + ")", null);
-                        } catch (IllegalStateException e) {
+                    if (mWebview != null) {
+                        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                            try {
+                                mWebview.evaluateJavascript("Hero.in(" + json.toString() + ")", null);
+                            } catch (IllegalStateException e) {
+                                mWebview.loadUrl("javascript:Hero.in(" + json.toString() + ")");
+                            }
+                        } else {
                             mWebview.loadUrl("javascript:Hero.in(" + json.toString() + ")");
                         }
-                    } else {
-                        mWebview.loadUrl("javascript:Hero.in(" + json.toString() + ")");
                     }
                 }
             } catch (JSONException e) {
