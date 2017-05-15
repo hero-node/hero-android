@@ -181,11 +181,11 @@ public abstract class HeroFragmentActivity extends AppCompatActivity implements 
      *
      * Calls from Views, request the activity result and get the result from the callback
      *
-     * @Param requestView, views have to implement interface to get the result
-     * @Param intent, same with called from Activity/Fragment
-     * @Param requestCode, same with called from Activity/Fragment, Please note it should no
+     * @param requestView, views have to implement interface to get the result
+     * @param intent, same with called from Activity/Fragment
+     * @param requestCode, same with called from Activity/Fragment, Please note it should no
      * more than 0x0FFF
-     * @Param options, same with called from Activity/Fragment
+     * @param options, same with called from Activity/Fragment
      *
      * */
     public void startActivityForResult(View requestView, Intent intent,

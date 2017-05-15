@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
+import android.view.View;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,7 +84,7 @@ public class IntentResolver {
     }
 
     /**
-     * Generate a value suitable for use in {@link #setId(int)}.
+     * Generate a value suitable for use in {@link View#setId(int)}.
      * This value will not collide with ID values generated at build time by aapt for R.id.
      *
      * @return a generated ID value
