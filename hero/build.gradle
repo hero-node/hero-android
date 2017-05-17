@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.dianrong.gradle.publisher'
 
 def VERSION_CODE = 1000005
 def VERSION_NAME = "1.0.5"
@@ -38,13 +37,6 @@ android {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/LICENSE.txt'
     }
-}
-
-publisher {
-    groupId "com.dianrong.android.hero"
-    versionCode VERSION_CODE
-    versionName VERSION_NAME
-    isSnapshot SNAPSHOT
 }
 
 dependencies {
