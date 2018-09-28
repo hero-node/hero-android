@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/official_wallet_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="直接复制粘贴以太坊官方钱包 keystore 文件内容至输入框。或者通过生产 keystore 内容的二维码，扫描录入。"
+        android:layout_margin="40dp"
+        android:textSize="14sp"
+        android:textColor="@color/c2"
+        />
+
+    <EditText
+        android:id="@+id/official_wallet_keystore_et"
+        android:layout_below="@+id/official_wallet_tv"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:padding="8dp"
+        android:textSize="14sp"
+        android:hint="keystore 文本内容"
+        android:textColorHint="@color/c1"
+        android:maxLines="5"
+        android:gravity="left"
+        android:background="@drawable/wallet_keystore_inputdata_background"
+        />
+
+    <EditText
+        android:id="@+id/official_wallet_keystore_password_et"
+        android:layout_below="@+id/official_wallet_keystore_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginTop="16dp"
+        android:textSize="16sp"
+        android:hint="keystore 密码"
+        android:textColorHint="@color/c1"
+        android:padding="8dp"
+        android:drawablePadding="12dp"
+        android:maxLines="1"
+        android:gravity="left|center_vertical"
+        android:background="@null"
+        android:drawableBottom="@drawable/sign_line"
+        />
+
+    <LinearLayout
+        android:id="@+id/official_wallet_agr_ll"
+        android:layout_below="@+id/official_wallet_keystore_password_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginLeft="40dp"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/official_wallet_agrselect_cb"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:checked="true"
+            style="@style/CustomWalletCheckbox"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="我已经仔细阅读并同意"
+            android:layout_marginLeft="8dp"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/official_wallet_service_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:text="服务及隐私条例"
+            android:textColor="@color/tab_blue"/>
+
+    </LinearLayout>
+
+    <Button
+        android:layout_below="@+id/official_wallet_agr_ll"
+        android:id="@+id/official_wallet_confirm_bt"
+        android:layout_width="match_parent"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_height="44dp"
+        android:background="@drawable/sign_confirm_button"
+        android:text="开始导入"
+        android:textColor="@color/heroWhite"
+        android:layout_marginTop="20dp"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/official_wallet_help_tv"
+        android:layout_below="@+id/official_wallet_confirm_bt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="什么是keystore？"
+        android:layout_marginTop="140dp"
+        android:textColor="@color/c1"
+        android:layout_centerHorizontal="true"
+        android:textSize="14sp"/>
+
+</RelativeLayout>

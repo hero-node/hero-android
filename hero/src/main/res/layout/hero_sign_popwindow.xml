@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sign_popwindow_rl"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:id="@+id/sign_content_rl"
+        android:layout_width="match_parent"
+        android:layout_height="440dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/heroWhite">
+
+        <TextView
+            android:id="@+id/sign_title_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:text="签名"
+            android:textColor="@color/c4"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/sign_line_iv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/sign_title_tv"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/sign_line" />
+
+        <LinearLayout
+            android:id="@+id/sign_content_transfer_ll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/sign_line_iv"
+            android:layout_margin="12dp"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="52dp"
+                    android:layout_height="wrap_content"
+                    android:text="TxHash:"
+                    android:textColor="@color/c4"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/sign_tra_hash_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
+                    android:text="0x4A21fddaCb8017B30a280e3d31d2409B87777777"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="52dp"
+                    android:layout_height="wrap_content"
+                    android:text="From:"
+                    android:textColor="@color/c4"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/sign_tra_fromaddress_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
+                    android:text="0x4A21fddaCb8017B30a280e31331d2409B877231"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="52dp"
+                    android:layout_height="wrap_content"
+                    android:text="To:"
+                    android:textColor="@color/c4"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/sign_tra_toaddress_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
+                    android:text="0x4A21fddaCb8017B30a280e31331d2409B877231"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="52dp"
+                    android:layout_height="wrap_content"
+                    android:text="Value:"
+                    android:textColor="@color/c4"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/sign_tra_value_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
+                    android:text="0 Ether（$0.00）"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nonce﹛Position﹜:"
+                    android:textColor="@color/c4"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/sign_tra_nonce_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="213443  I﹛52﹜"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Input Data:"
+                android:textColor="@color/c4"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/sign_tra_data_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="96dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/sign_inputdata_background"
+                android:padding="8dp"
+                android:scrollbars="vertical"
+                android:text="Function：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnjaFunction：asjdnja"
+                android:textSize="13sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sign_content_message_ll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/sign_title_tv"
+            android:layout_margin="12dp"
+            android:orientation="vertical"
+            android:visibility="invisible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Input Data:"
+                android:textColor="@color/c4"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/sign_tra_message_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="264dp"
+                android:layout_marginTop="8dp"
+                android:padding="8dp"
+                android:background="@drawable/sign_inputdata_background"
+                android:scrollbars="vertical"
+                android:text="0x4A21fddaCb8017B30a280e31331d2409B877231"
+                android:textSize="13sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/sign_content_transfer_ll"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <EditText
+                android:id="@+id/sign_password_et"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:layout_weight="1"
+                android:background="@drawable/sign_password_background"
+                android:hint="输入密码"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:padding="8dp"
+                android:textSize="13sp" />
+
+            <Button
+                android:id="@+id/sign_confirm_bt"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:layout_marginLeft="8dp"
+                android:layout_weight="2"
+                android:background="@drawable/sign_confirm_button"
+                android:text="确认"
+                android:textColor="@color/heroWhite"
+                android:textSize="15sp" />
+
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+</RelativeLayout>
+

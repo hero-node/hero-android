@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/home_menu_iv"
+        android:layout_width="48dp"
+        android:layout_height="36dp"
+        android:background="@drawable/login_tools"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="40dp"
+        android:layout_marginTop="52dp"/>
+
+    <!--<ImageView-->
+        <!--android:id="@+id/login_wallet_iv"-->
+        <!--android:layout_width="32dp"-->
+        <!--android:layout_height="24dp"-->
+        <!--android:layout_alignStart="@+id/login_hash_ev"-->
+        <!--android:layout_alignTop="@+id/login_node_iv"-->
+        <!--android:background="@drawable/login_wallet_icon" />-->
+
+    <ImageView
+        android:id="@+id/login_logo_iv"
+        android:layout_width="236dp"
+        android:layout_height="36dp"
+        android:background="@drawable/login_logo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="200dp"/>
+
+    <Button
+        android:id="@+id/fake_button"
+        android:text="跳转"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/login_hash_ev"
+        android:layout_width="match_parent"
+        android:layout_below="@+id/login_logo_iv"
+        android:textSize="22sp"
+        android:textColor="#0a1336"
+        android:layout_height="52dp"
+        android:background="@drawable/login_hash_bar"
+        android:lines="1"
+        android:singleLine="true"
+        android:layout_margin="40dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:layout_centerHorizontal="true"
+        android:maxEms="40"
+        android:imeOptions="actionDone"
+        android:inputType="textEmailAddress"
+        android:digits="1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM" />
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/icon_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/login_hash_ev"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="12dp"
+        android:layout_above="@+id/login_bottom"/>
+
+    <LinearLayout
+        android:id="@+id/login_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/login_bottom_page"
+                android:layout_width="28dp"
+                android:layout_height="24dp"
+                android:background="@drawable/login_page_icon"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/login_bottom_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textColor="#0a1336"
+                android:text="Hero Node"
+                android:layout_gravity="center" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/login_bottom_tools"
+                android:layout_width="28dp"
+                android:layout_height="20dp"
+                android:background="@drawable/login_tools"/>
+        </LinearLayout>
+    </LinearLayout>
+
+
+</RelativeLayout>

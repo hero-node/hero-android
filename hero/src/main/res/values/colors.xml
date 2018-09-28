@@ -9,6 +9,7 @@
     <color name="c7">#ffffff</color>
     <color name="c2">#999999</color>
     <color name="c3">#666666</color>
+    <color name="c4">#333333</color>
     <color name="listSectionColor">#f5f5f5</color>
     <color name="gestureErrorColor">#d70c18</color>
     <color name="defaultListDividerColor">#cccccc</color>
@@ -27,4 +28,8 @@
     <color name="heroTransparent">@android:color/transparent</color>
     <color name="tabPressed">#009671</color>
     <color name="tabNormal">#00bc8d</color>
+
+    <color name="tab_blue">#ff39adf9</color>
+    <color name="tab_gray">#ff666666</color>
+    <color name="warning_red">#9D2929</color>
 </resources>

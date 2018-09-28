@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/import_fragment_title_rl"
+        android:layout_width="match_parent"
+        android:layout_height="48dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="导入钱包"
+            android:textSize="20sp"
+            android:textColor="@color/c4"/>
+
+        <!--<ImageView-->
+            <!--android:layout_width="24dp"-->
+            <!--android:layout_height="24dp"-->
+            <!--android:layout_alignParentRight="true"-->
+            <!--android:layout_centerVertical="true"-->
+            <!--android:layout_marginRight="16dp"-->
+            <!--android:background="@drawable/wallet_scan"/>-->
+
+    </RelativeLayout>
+
+    <TabHost
+        android:layout_below="@+id/import_fragment_title_rl"
+        android:id="@+id/import_tabhost"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <TabWidget
+                android:id="@android:id/tabs"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.0"
+                />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/sign_line"/>
+
+            <FrameLayout
+                 android:id="@android:id/tabcontent"
+                 android:layout_width="fill_parent"
+                 android:layout_height="0.0dip"
+                 android:layout_weight="1.0" >
+
+            <include
+                android:id="@+id/import_item1"
+                layout="@layout/official_wallet_tab" />
+            <include
+                android:id="@+id/import_item2"
+                layout="@layout/private_key_tab" />
+
+            </FrameLayout>
+        </LinearLayout>
+
+    </TabHost>
+
+</RelativeLayout>

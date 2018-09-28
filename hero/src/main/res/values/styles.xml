@@ -102,4 +102,25 @@
         <item name="android:includeFontPadding">false</item>
         <item name="android:background">@drawable/hero_shape_red_dot</item>
     </style>
+
+    <style name="ActionSheetDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/anim_slide_up_dialog</item>
+        <item name="android:windowExitAnimation">@anim/anim_slide_down_dialog</item>
+    </style>
+
+    <style name="CustomWalletCheckbox" parent="@android:style/Widget.CompoundButton.CheckBox">
+        <item name="android:button">@drawable/wallet_agr_select</item>
+    </style>
+
+    <style name="CustomWaitDialog" parent="android:style/Theme.Dialog">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="PopMenuAnimTranslate">
+        <item name="android:windowEnterAnimation">@anim/dropdown_in</item>
+        <item name="android:windowExitAnimation">@anim/dropdown_out</item>
+    </style>
 </resources>

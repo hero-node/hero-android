@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <EditText
+        android:id="@+id/private_key_data_et"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:layout_margin="40dp"
+        android:padding="8dp"
+        android:textSize="14sp"
+        android:hint="明文私钥"
+        android:textColorHint="@color/c1"
+        android:maxLines="5"
+        android:gravity="left"
+        android:background="@drawable/wallet_keystore_inputdata_background"
+        />
+    <EditText
+        android:id="@+id/private_key_password_et"
+        android:layout_below="@+id/private_key_data_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:textSize="16sp"
+        android:hint="密码"
+        android:textColorHint="@color/c1"
+        android:padding="8dp"
+        android:drawablePadding="12dp"
+        android:maxLines="1"
+        android:gravity="left|center_vertical"
+        android:background="@null"
+        android:drawableBottom="@drawable/sign_line"/>
+
+    <EditText
+        android:id="@+id/private_key_password_confirm_et"
+        android:layout_below="@+id/private_key_password_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:textSize="16sp"
+        android:hint="重复密码"
+        android:textColorHint="@color/c1"
+        android:padding="8dp"
+        android:drawablePadding="12dp"
+        android:maxLines="1"
+        android:gravity="left|center_vertical"
+        android:background="@null"
+        android:drawableBottom="@drawable/sign_line"/>
+
+    <EditText
+        android:id="@+id/private_key_hint_et"
+        android:layout_below="@+id/private_key_password_confirm_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:textSize="16sp"
+        android:hint="密码提示信息（可不填）"
+        android:textColorHint="@color/c1"
+        android:padding="8dp"
+        android:drawablePadding="12dp"
+        android:maxLines="1"
+        android:gravity="left|center_vertical"
+        android:background="@null"
+        android:drawableBottom="@drawable/sign_line"
+        />
+
+    <LinearLayout
+        android:id="@+id/private_key_agr_ll"
+        android:layout_below="@+id/private_key_hint_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginLeft="40dp"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/private_key_agrselect_cb"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:checked="true"
+            style="@style/CustomWalletCheckbox"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="我已经仔细阅读并同意"
+            android:layout_marginLeft="8dp"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/private_key_service_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="服务及隐私条例"
+            android:textColor="@color/tab_blue"
+            android:textSize="16sp"/>
+
+    </LinearLayout>
+
+    <Button
+        android:layout_below="@+id/private_key_agr_ll"
+        android:id="@+id/private_key_confirm_bt"
+        android:layout_width="match_parent"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_height="44dp"
+        android:background="@drawable/sign_confirm_button"
+        android:text="开始导入"
+        android:textColor="@color/heroWhite"
+        android:layout_marginTop="20dp"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/private_key_help_tv"
+        android:layout_below="@+id/private_key_confirm_bt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="什么是私钥？"
+        android:layout_marginTop="108dp"
+        android:textColor="@color/c1"
+        android:layout_centerHorizontal="true"
+        android:textSize="14sp"/>
+
+</RelativeLayout>

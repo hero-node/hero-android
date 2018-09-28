@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/wallet_fragment_title_rl"
+        android:layout_width="match_parent"
+        android:layout_height="48dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="导出 Keystore"
+            android:textSize="20sp"
+            android:textColor="@color/c4"/>
+
+    </RelativeLayout>
+
+    <TabHost
+        android:layout_below="@+id/wallet_fragment_title_rl"
+        android:id="@+id/export_tabhost"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <TabWidget
+                android:id="@android:id/tabs"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.0"
+                />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/sign_line"/>
+
+            <FrameLayout
+                 android:id="@android:id/tabcontent"
+                 android:layout_width="fill_parent"
+                 android:layout_height="0.0dip"
+                 android:layout_weight="1.0" >
+
+            <include
+                android:id="@+id/export_item1"
+                layout="@layout/export_keystore_tab" />
+            <include
+                android:id="@+id/export_item2"
+                layout="@layout/export_qrcode_tab" />
+
+            </FrameLayout>
+        </LinearLayout>
+
+    </TabHost>
+
+</RelativeLayout>

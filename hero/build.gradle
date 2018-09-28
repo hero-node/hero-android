@@ -7,7 +7,7 @@ def SNAPSHOT = true
 
 android {
     compileSdkVersion 24
-    buildToolsVersion '24.0.2'
+    buildToolsVersion '26.0.2'
     publishNonDefault true
     defaultConfig {
         minSdkVersion 16
@@ -44,10 +44,16 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.2.0'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.android.support:support-v4:24.2.0'
+    compile 'com.android.support:design:24.2.0'
+    compile 'com.android.support:cardview-v7:24.2.0'
+
     compile 'com.dlazaro66.qrcodereaderview:qrcodereaderview:2.0.1'
     compile 'com.android.support:multidex:1.0.1'
     compile "com.tbruyelle.rxpermissions:rxpermissions:0.9.4@aar"
     compile "io.reactivex:rxjava:1.1.0"
+
+    compile 'org.web3j:core:3.3.1-android'
+    compile 'com.wang.avi:library:2.1.3'
 }
 
 ext {

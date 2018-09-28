@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/modifypwd_fragment_title_rl"
+        android:layout_width="match_parent"
+        android:layout_height="48dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:gravity="center"
+            android:text="修改密码"
+            android:textColor="@color/c4"
+            android:textSize="20sp" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/sign_line"
+            android:layout_alignParentBottom="true"/>
+
+        <TextView
+            android:id="@+id/wallet_save_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:padding="4dp"
+            android:layout_marginRight="16dp"
+            android:text="完成"
+            android:textSize="16sp"
+            android:textColor="@color/tab_blue"/>
+
+    </RelativeLayout>
+
+    <EditText
+        android:id="@+id/modifypwd_fragment_oldpassword_et"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/modifypwd_fragment_title_rl"
+        android:layout_centerHorizontal="true"
+        android:hint="当前密码"
+        android:background="@null"
+        android:maxLines="1"
+        android:drawableBottom="@drawable/sign_line"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginTop="52dp"
+        android:drawablePadding="12dp"
+        android:textSize="18sp"
+        />
+
+    <EditText
+        android:id="@+id/modifypwd_fragment_newpassword_et"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/modifypwd_fragment_oldpassword_et"
+        android:layout_centerHorizontal="true"
+        android:hint="新密码"
+        android:background="@null"
+        android:maxLines="1"
+        android:drawableBottom="@drawable/sign_line"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginTop="20dp"
+        android:drawablePadding="12dp"
+        android:textSize="18sp"
+        />
+
+    <EditText
+        android:id="@+id/modifypwd_fragment_newpassword_confirm_et"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/modifypwd_fragment_newpassword_et"
+        android:layout_centerHorizontal="true"
+        android:hint="重复密码"
+        android:background="@null"
+        android:maxLines="1"
+        android:drawableBottom="@drawable/sign_line"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginTop="20dp"
+        android:drawablePadding="12dp"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/modifypwd_fragment_forget_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="忘记密码？可导入助记词或私钥重置密码。"
+        android:layout_below="@+id/modifypwd_fragment_newpassword_confirm_et"
+        android:layout_alignLeft="@+id/modifypwd_fragment_newpassword_confirm_et"
+        android:layout_marginTop="12dp"
+        android:textColor="@color/c2"
+        />
+
+    <TextView
+        android:id="@+id/modifypwd_fragment_input_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="马上导入"
+        android:layout_below="@+id/modifypwd_fragment_newpassword_confirm_et"
+        android:layout_toRightOf="@+id/modifypwd_fragment_forget_tv"
+        android:layout_marginTop="12dp"
+        android:textColor="@color/tab_blue"
+        />
+
+</RelativeLayout>
