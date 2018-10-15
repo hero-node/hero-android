@@ -317,7 +317,7 @@ public class HeroSignatureWalletFragment extends HeroFragment {
             activity.dismissWaitDialog();
             Toast.makeText(activity, bundle.getString("message"), Toast.LENGTH_SHORT).show();
             if (bundle.getBoolean("isSucceed")) {
-                activity.onPostProcessed();
+                activity.onPostProcessed(bundle);
             }
             super.onPostExecute(o);
         }
