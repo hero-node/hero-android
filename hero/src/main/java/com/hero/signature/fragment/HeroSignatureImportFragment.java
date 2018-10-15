@@ -1,10 +1,13 @@
 package com.hero.signature.fragment;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -20,12 +23,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hero.HeroDrawerActivity;
 import com.hero.HeroFragment;
 import com.hero.R;
 import com.hero.signature.Constants;
 import com.hero.signature.HeroSignatureActivity;
 import com.hero.utils.FileUtils;
+import com.hero.utils.FingerprintHelper;
 
 import org.json.JSONObject;
 import org.web3j.crypto.CipherException;
@@ -74,6 +77,8 @@ public class HeroSignatureImportFragment extends HeroFragment {
 
     private CheckBox official_wallet_agrselect_cb;
 
+    private FingerprintHelper fingerprintHelper;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -85,7 +90,7 @@ public class HeroSignatureImportFragment extends HeroFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         initView();
-
+        fingerprintHelper = new FingerprintHelper(getActivity());
     }
 
     private void initView() {
@@ -183,7 +188,12 @@ public class HeroSignatureImportFragment extends HeroFragment {
             activity.dismissWaitDialog();
             Toast.makeText(activity, bundle.getString("message"), Toast.LENGTH_SHORT).show();
             if (bundle.getBoolean("isSucceed")) {
-                activity.onPostProcessed();
+                if (processType == PROCESS_TYPE_KEYSTORE) {
+                    bundle.putString("password", official_wallet_keystore_password_et.getText().toString());
+                } else if (processType == PROCESS_TYPE_PRIVATEKEY) {
+                    bundle.putString("password", private_key_password_et.getText().toString());
+                }
+                activity.onPostProcessed(bundle);
             }
             super.onPostExecute(o);
         }

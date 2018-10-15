@@ -1,11 +1,15 @@
-package com.hero.signature;
+package com.hero;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.security.keystore.KeyProperties;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -18,12 +22,13 @@ import android.widget.Toast;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hero.HeroActivity;
 import com.hero.HeroView;
 import com.hero.IHero;
 import com.hero.IHeroContext;
 import com.hero.R;
+import com.hero.signature.HeroSignatureActivity;
 import com.hero.utils.FileUtils;
+import com.hero.utils.FingerprintHelper;
 
 import org.apache.http.util.EncodingUtils;
 import org.json.JSONException;
@@ -40,23 +45,52 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
+import static com.hero.signature.Constants.KEYSTORE_FILE_PATH;
+
 /**
  * Created by Aron on 2018/7/9.
  */
-public class HeroSignature extends View implements IHero {
+public class HeroSignature extends View implements IHero, FingerprintHelper.SimpleAuthenticationCallback{
 
     private Integer transactionType = TRAN_MESSAGE;
     private static final int TRAN_MESSAGE = 1;
     private static final int TRAN_TRANSFER = 2;
     private static JSONObject jsonObject;
 
+    private FingerprintHelper fingerprintHelper;
+
+    private TextView fingerprint_tv;
+
+    private AlertDialog fingerprint_alertDialog;
+
+    private Context context;
+
+    private PopupWindow popupWindow;
+
     public HeroSignature(Context c) {
         super(c);
+        this.context = c;
+        this.fingerprintHelper = new FingerprintHelper(context);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        View view = View.inflate(context, R.layout.fingerprint_dialog, null);
+        fingerprint_tv = (TextView) view.findViewById(R.id.fingerprint_hint);
+        builder.setView(view);
+        // 创建对话框
+        fingerprint_alertDialog = builder.create();
+        fingerprint_alertDialog.setCanceledOnTouchOutside(true);
+        fingerprint_alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                fingerprintHelper.stopAuthenticate();
+            }
+        });
     }
 
     @Override
     public void on(JSONObject jsonObject) throws JSONException {
         HeroView.on(this, jsonObject);
+        fingerprint_tv.setText("指纹识别中");
         if (jsonObject.has("message"))
         {
             System.out.println(jsonObject.toString());
@@ -69,23 +103,37 @@ public class HeroSignature extends View implements IHero {
                 if (transactionType == TRAN_TRANSFER) {
                     contentView.findViewById(R.id.sign_content_transfer_ll).setVisibility(View.VISIBLE);
                     contentView.findViewById(R.id.sign_content_message_ll).setVisibility(View.INVISIBLE);
-                    if (!FileUtils.getKeystoreFile().exists()) {
-                        Intent intent = new Intent(getContext(), HeroSignatureActivity.class);
-                        intent.putExtra("jumptype", "1");
-                        getContext().startActivity(intent);
-                    }
+
                 } else {
                     contentView.findViewById(R.id.sign_content_transfer_ll).setVisibility(View.INVISIBLE);
                     contentView.findViewById(R.id.sign_content_message_ll).setVisibility(View.VISIBLE);
-                    if (!FileUtils.getKeystoreFile().exists()) {
-                        Intent intent = new Intent(getContext(), HeroSignatureActivity.class);
-                        intent.putExtra("jumptype", "1");
-                        getContext().startActivity(intent);
-                    }
                 }
+
+                if (!FileUtils.getKeystoreFile().exists()) {
+                    contentView.findViewById(R.id.sign_no_keystore_ll).setVisibility(View.VISIBLE);
+                    contentView.findViewById(R.id.sign_password_ll).setVisibility(View.INVISIBLE);
+                } else {
+                    contentView.findViewById(R.id.sign_no_keystore_ll).setVisibility(View.INVISIBLE);
+                    contentView.findViewById(R.id.sign_password_ll).setVisibility(View.VISIBLE);
+
+                    if (fingerprintHelper.checkFingerprintAvailable() == FingerprintHelper.FINGERPRINT_STATE_AVAILABLE) {
+                        contentView.findViewById(R.id.sign_fingerprint_ll).setVisibility(View.VISIBLE);
+                        contentView.findViewById(R.id.sign_fingerprint_line).setVisibility(View.VISIBLE);
+                        contentView.findViewById(R.id.sign_fingerprint_ll).setOnClickListener(new OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                fingerprintHelper.setPurpose(KeyProperties.PURPOSE_DECRYPT);
+                                fingerprintHelper.setCallback(HeroSignature.this);
+                                fingerprintHelper.authenticate();
+                                fingerprint_alertDialog.show();
+                            }
+                        });
+                    }
+
+                }
+
             } catch (IOException e) {
-
-
+                e.printStackTrace();
             }
 
             initSignView(contentView, jsonObject);
@@ -94,39 +142,43 @@ public class HeroSignature extends View implements IHero {
 
     private void initSignView(View view, JSONObject object) throws JSONException {
         ((TextView)view.findViewById(R.id.sign_tra_data_tv)).setMovementMethod(ScrollingMovementMethod.getInstance());
-        final PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setBackgroundDrawable(new ColorDrawable(Color.WHITE));
         // 设置PopupWindow是否能响应外部点击事件
         popupWindow.setOutsideTouchable(false);
         popupWindow.setTouchable(true);
         popupWindow.setAnimationStyle(R.style.ActionSheetDialogAnimation);
         popupWindow.showAtLocation(view, Gravity.BOTTOM,0,0);
-        JSONObject jsonObject = object.getJSONObject("transactionData");
 
-        //字段处理
-        if (jsonObject.has("hash")) {
-            ((TextView)view.findViewById(R.id.sign_tra_hash_tv)).setText(jsonObject.getString("hash"));
-        }
-        if (jsonObject.has("nonce") && jsonObject.has("position")) {
-            ((TextView)view.findViewById(R.id.sign_tra_nonce_tv)).setText(
-                    jsonObject.getInt("nonce") + "I﹛"+ jsonObject.getInt("position") + "﹜");
-        }
-        if (jsonObject.has("position")) {
-            ((TextView)view.findViewById(R.id.sign_tra_data_tv)).setText(jsonObject.getString("position"));
-        }
-        if (jsonObject.has("receiveAddress")) {
-            ((TextView)view.findViewById(R.id.sign_tra_toaddress_tv)).setText(jsonObject.getString("receiveAddress"));
+        if (object.has("transactionData")) {
+            JSONObject jsonObject = object.getJSONObject("transactionData");
 
+            //字段处理
+            if (jsonObject.has("hash")) {
+                ((TextView)view.findViewById(R.id.sign_tra_hash_tv)).setText(jsonObject.getString("hash"));
+            }
+            if (jsonObject.has("nonce") && jsonObject.has("position")) {
+                ((TextView)view.findViewById(R.id.sign_tra_nonce_tv)).setText(
+                        jsonObject.getInt("nonce") + "I﹛"+ jsonObject.getInt("position") + "﹜");
+            }
+            if (jsonObject.has("position")) {
+                ((TextView)view.findViewById(R.id.sign_tra_data_tv)).setText(jsonObject.getString("position"));
+            }
+            if (jsonObject.has("receiveAddress")) {
+                ((TextView)view.findViewById(R.id.sign_tra_toaddress_tv)).setText(jsonObject.getString("receiveAddress"));
+
+            }
+            if (jsonObject.has("sendAddress")) {
+                ((TextView)view.findViewById(R.id.sign_tra_fromaddress_tv)).setText(jsonObject.getString("sendAddress"));
+            }
+            if (jsonObject.has("value")) {
+                ((TextView)view.findViewById(R.id.sign_tra_value_tv)).setText(jsonObject.getString("value"));
+            }
+            if (jsonObject.has("data")) {
+                ((TextView)view.findViewById(R.id.sign_tra_data_tv)).setText(jsonObject.getString("value"));
+            }
         }
-        if (jsonObject.has("sendAddress")) {
-            ((TextView)view.findViewById(R.id.sign_tra_fromaddress_tv)).setText(jsonObject.getString("sendAddress"));
-        }
-        if (jsonObject.has("value")) {
-            ((TextView)view.findViewById(R.id.sign_tra_value_tv)).setText(jsonObject.getString("value"));
-        }
-        if (jsonObject.has("data")) {
-            ((TextView)view.findViewById(R.id.sign_tra_data_tv)).setText(jsonObject.getString("value"));
-        }
+
         final EditText password_et = (EditText) view.findViewById(R.id.sign_password_et);
 
         view.findViewById(R.id.sign_confirm_bt).setOnClickListener(new OnClickListener() {
@@ -137,9 +189,19 @@ public class HeroSignature extends View implements IHero {
                     Toast.makeText(getContext(),"请输入正确的密码", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                new MyTask((HeroSignatureActivity) getContext(), password_et.getText().toString()).execute();
+                new MyTask((HeroActivity) context, password_et.getText().toString()).execute();
                 popupWindow.dismiss();
 
+            }
+        });
+
+        view.findViewById(R.id.sign_import_bt).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+                Intent intent = new Intent(getContext(), HeroSignatureActivity.class);
+                intent.putExtra("jumptype", "1");
+                getContext().startActivity(intent);
             }
         });
 
@@ -147,12 +209,12 @@ public class HeroSignature extends View implements IHero {
 
     private static class MyTask extends AsyncTask {
 
-        private WeakReference<HeroSignatureActivity> activityReference;
+        private WeakReference<HeroActivity> activityReference;
 
         private String passwordString;
 
         // only retain a weak reference to the activity
-        MyTask(HeroSignatureActivity context, String passwordString) {
+        MyTask(HeroActivity context, String passwordString) {
             activityReference = new WeakReference<>(context);
             this.passwordString = passwordString;
         }
@@ -167,7 +229,7 @@ public class HeroSignature extends View implements IHero {
                 return;
             }
             Bundle bundle = (Bundle) o;
-            HeroSignatureActivity activity = activityReference.get();
+            HeroActivity activity = activityReference.get();
             if (activity == null || activity.isFinishing())
                 return;
             Toast.makeText(activity, bundle.getString("message"), Toast.LENGTH_SHORT).show();
@@ -187,7 +249,7 @@ public class HeroSignature extends View implements IHero {
         protected Object doInBackground(Object[] objects) {
             Bundle bundle = new Bundle();
             try {
-                File file = new File("/data/user/0/com.hero.sample/files/keystore.json");
+                File file = new File(KEYSTORE_FILE_PATH);
                 String fileString;
                 FileInputStream fis = new FileInputStream(file);
                 int length = fis.available();
@@ -209,16 +271,15 @@ public class HeroSignature extends View implements IHero {
                     signatureDataObject.put("V",(char) signatureData.getV());
                     jsonObject.put("signatureData", signatureDataObject);
                 } else {
-                    throw new CipherException("旧密码错误");
+                    throw new CipherException("密码错误");
                 }
                 bundle.putBoolean("isSucceed", true);
                 bundle.putString("message", "签名成功");
-            }catch (CipherException ce) {
+            } catch (CipherException ce) {
                 bundle.putBoolean("isSucceed", false);
                 bundle.putString("message", "签名失败");
                 ce.printStackTrace();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 bundle.putBoolean("isSucceed", false);
                 bundle.putString("message", "签名失败");
                 e.printStackTrace();
@@ -227,4 +288,24 @@ public class HeroSignature extends View implements IHero {
         }
     }
 
+    @Override
+    public void onAuthenticationSucceeded(String value) {
+        Toast.makeText(context, "指纹认证成功", Toast.LENGTH_SHORT).show();
+        if (fingerprint_alertDialog != null && fingerprint_alertDialog.isShowing()) {
+            fingerprint_alertDialog.dismiss();
+        }
+
+        new MyTask((HeroActivity) getContext(), value).execute();
+        popupWindow.dismiss();
+    }
+
+    @Override
+    public void onAuthenticationFailed() {
+        fingerprint_tv.setText("指纹识别失败，请重试");
+    }
+
+    @Override
+    public void onAuthenticationError(String errString) {
+        fingerprint_tv.setText(errString);
+    }
 }

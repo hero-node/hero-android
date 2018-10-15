@@ -1,11 +1,14 @@
 package com.hero.signature;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.security.keystore.KeyProperties;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -15,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hero.HeroDrawerActivity;
@@ -30,12 +34,14 @@ import com.hero.signature.fragment.HeroSignatureModifyPwdFragment;
 import com.hero.signature.fragment.HeroSignatureQRcodeFragment;
 import com.hero.signature.fragment.HeroSignatureWalletFragment;
 import com.hero.utils.FileUtils;
+import com.hero.utils.FingerprintHelper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSignatureHomeFragment.OnClickListener, HeroSignatureWalletFragment.OnClickListener{
+public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSignatureHomeFragment.OnClickListener,
+        HeroSignatureWalletFragment.OnClickListener, FingerprintHelper.SimpleAuthenticationCallback {
 
     private HeroSignatureHomeFragment homeFragment = new HeroSignatureHomeFragment();
 
@@ -59,6 +65,12 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
 
     private String walletFileString = null;
 
+    private FingerprintHelper fingerprintHelper;
+
+    private TextView fingerprint_tv;
+
+    private AlertDialog fingerprint_alertDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //设置透明的状态栏和控制面板
@@ -79,15 +91,35 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
         fragmentManager = getSupportFragmentManager();
+        fingerprintHelper = new FingerprintHelper(this);
+        fingerprintHelper.setCallback(this);
+        fingerprintHelper.generateKey();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(HeroSignatureActivity.this);
+        View view = View.inflate(HeroSignatureActivity.this, R.layout.fingerprint_dialog, null);
+        fingerprint_tv = (TextView) view.findViewById(R.id.fingerprint_hint);
+        builder.setView(view);
+        // 创建对话框
+        fingerprint_alertDialog = builder.create();
+        fingerprint_alertDialog.setCanceledOnTouchOutside(false);
+        fingerprint_alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                fingerprintHelper.stopAuthenticate();
+            }
+        });
+
         super.onCreate(savedInstanceState);
         initMainContent();
         heroWaitDialog = new HeroWaitDialog(this);
 
         Intent intent = getIntent();
-        if (intent != null) {
-            int jump = intent.getExtras().getInt("jumpType");
-            if (jump == 1) {
-                gotoFragment(walletHomeFragment, Constants.WALLETHOME_TAG);
+        if (intent != null && intent.getExtras() != null) {
+            if (intent.getExtras().containsKey("jumpType")) {
+                int jump = intent.getExtras().getInt("jumpType");
+                if (jump == 1) {
+                    gotoFragment(walletHomeFragment, Constants.WALLETHOME_TAG);
+                }
             }
         }
     }
@@ -154,9 +186,47 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
 //        initPopupWindow();
     }
 
-    public void onPostProcessed() {
+    public void onPostProcessed(Bundle bundle) {
         checkKeystoreFile();
 //        gotoFragment(walletHomeFragment, Constants.WALLETHOME_TAG);
+
+        if (bundle!= null && bundle.containsKey("password") && fingerprintHelper.checkFingerprintAvailable() == FingerprintHelper.FINGERPRINT_STATE_AVAILABLE) {
+            final String password = bundle.getString("password");
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            View view = View.inflate(this, R.layout.hero_confirm_dialog, null);
+            TextView content = (TextView) view.findViewById(R.id.confirm_dialog_content);
+            TextView buttonConfirm = (TextView) view.findViewById(R.id.confirm_dialog_confirm);
+            TextView buttonCancel = (TextView) view.findViewById(R.id.confirm_dialog_cancel);
+            view.findViewById(R.id.confirm_dialog_password_et).setVisibility(View.GONE);
+            view.findViewById(R.id.confirm_dialog_ok).setVisibility(View.GONE);
+            content.setText("是否使用本机指纹识别");
+            builder.setView(view);
+            // 创建对话框
+            final AlertDialog alertDialog = builder.create();
+            alertDialog.setCanceledOnTouchOutside(false);
+            buttonConfirm.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    fingerprintHelper.generateKey();
+                    fingerprintHelper.setPurpose(KeyProperties.PURPOSE_ENCRYPT);
+                    fingerprintHelper.setData(password);
+                    fingerprintHelper.authenticate();
+                    fingerprint_alertDialog.show();
+
+                    alertDialog.dismiss();
+                }
+
+            });
+            buttonCancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    alertDialog.dismiss();
+                }
+            });
+            alertDialog.show();
+        }
     }
 
     // 跳转钱包入口
@@ -224,6 +294,12 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
     protected void onDestroy() {
         if (heroWaitDialog != null && heroWaitDialog.isShowing()) {
             heroWaitDialog.dismiss();
+        }
+        if (fingerprintHelper != null) {
+            fingerprintHelper.stopAuthenticate();
+        }
+        if (fingerprint_alertDialog != null && fingerprint_alertDialog.isShowing()) {
+            fingerprint_alertDialog.dismiss();
         }
         super.onDestroy();
     }
@@ -304,4 +380,21 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
         }
     }
 
+    @Override
+    public void onAuthenticationSucceeded(String value) {
+        Toast.makeText(this, "指纹认证成功", Toast.LENGTH_SHORT).show();
+        if (fingerprint_alertDialog != null && fingerprint_alertDialog.isShowing()) {
+            fingerprint_alertDialog.dismiss();
+        }
+    }
+
+    @Override
+    public void onAuthenticationFailed() {
+        fingerprint_tv.setText("指纹识别失败，请重试");
+    }
+
+    @Override
+    public void onAuthenticationError(String errString) {
+        fingerprint_tv.setText(errString);
+    }
 }
