@@ -55,6 +55,7 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
     private Integer transactionType = TRAN_MESSAGE;
     private static final int TRAN_MESSAGE = 1;
     private static final int TRAN_TRANSFER = 2;
+    private static final int TRAN_JUMPTOWALLET = 3;
     private static JSONObject jsonObject;
 
     private FingerprintHelper fingerprintHelper;
@@ -104,11 +105,15 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                     contentView.findViewById(R.id.sign_content_transfer_ll).setVisibility(View.VISIBLE);
                     contentView.findViewById(R.id.sign_content_message_ll).setVisibility(View.INVISIBLE);
 
-                } else {
+                } else if (transactionType == TRAN_MESSAGE) {
                     contentView.findViewById(R.id.sign_content_transfer_ll).setVisibility(View.INVISIBLE);
                     contentView.findViewById(R.id.sign_content_message_ll).setVisibility(View.VISIBLE);
+                } else if (transactionType == TRAN_JUMPTOWALLET) {
+                    Intent intent = new Intent(context, HeroSignatureActivity.class);
+                    intent.putExtra("jumpType", 1);
+                    context.startActivity(intent);
+                    return;
                 }
-
                 if (!FileUtils.getKeystoreFile().exists()) {
                     contentView.findViewById(R.id.sign_no_keystore_ll).setVisibility(View.VISIBLE);
                     contentView.findViewById(R.id.sign_password_ll).setVisibility(View.INVISIBLE);

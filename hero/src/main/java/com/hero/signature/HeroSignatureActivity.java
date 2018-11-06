@@ -118,7 +118,7 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
             if (intent.getExtras().containsKey("jumpType")) {
                 int jump = intent.getExtras().getInt("jumpType");
                 if (jump == 1) {
-                    gotoFragment(walletHomeFragment, Constants.WALLETHOME_TAG);
+                    checkKeystoreFile();
                 }
             }
         }
