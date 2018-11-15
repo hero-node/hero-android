@@ -81,7 +81,7 @@ public class HeroApp implements IHero {
         if (object.has("key")) {
             String key = object.optString("key");
             if (HEROAPP_APP.equals(key)) {
-                Intent intent = new Intent(context, HeroTabChildActivity.class);
+                Intent intent = new Intent(context, HeroTabActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 Bundle bundle = new Bundle();
                 bundle.putString(HEROAPP_APP, object.toString());
@@ -90,7 +90,7 @@ public class HeroApp implements IHero {
 
                 return;
             } else if (HEROAPP_NEW_APP.equals(key)) {
-                Intent intent = new Intent(context, HeroTabChildActivity.class);
+                Intent intent = new Intent(context, HeroTabActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 Bundle bundle = new Bundle();
                 bundle.putString(HEROAPP_NEW_APP, object.toString());
