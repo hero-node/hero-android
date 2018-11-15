@@ -355,6 +355,9 @@ public class HeroFragment extends Fragment implements IHeroContext {
             });
         } else {
             try {
+//                if (json.has("signMessage")) {
+//                    mWebview.loadUrl("javascript:callWebJS('" + json.toString() + "')");
+//                }
                 if (json.has("globle") || json.has("global")) {
                     JSONObject globalEvent;
                     if (json.has("globle") ) {
@@ -365,27 +368,30 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     String key = globalEvent.getString("key");
                     LocalBroadcastManager manager = LocalBroadcastManager.getInstance(self.getContext());
                     Intent intent = new Intent(key);
-                    intent.setAction(key);
+//                    intent.setAction(globalEvent.toString());
                     if (globalEvent.has("value")) {
                         intent.putExtra("value", globalEvent.getString("value"));
                     }
-                    if (key.equals("tabSelect")) {
-                        returnToHome();
-                    } else if (key.equals("newApp")) {
-                        Intent homeIntent = HeroApp.getHomeIntent(getContext());
-                        if (homeIntent != null) {
-                            homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            Bundle bundle = new Bundle();
-                            bundle.putString("newApp", globalEvent.toString());
-                            homeIntent.putExtras(bundle);
-                            startActivitySafely(homeIntent);
-                        }
-                    } else if (key.equals("HeroApp")) {
-                        HeroApplication.getInstance().getHeroApp().on(globalEvent);
-                    }
-                    if (!key.equals("newApp") && !key.equals("HeroApp")) {
-                        manager.sendBroadcast(intent);
-                    }
+                    intent.putExtra("jsonObject", globalEvent.toString());
+                    manager.sendBroadcast(intent);
+
+//                    if (key.equals("tabSelect")) {
+//                        returnToHome();
+//                    } else if (key.equals("newApp")) {
+//                        Intent homeIntent = HeroApp.getHomeIntent(getContext());
+//                        if (homeIntent != null) {
+//                            homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                            Bundle bundle = new Bundle();
+//                            bundle.putString("newApp", globalEvent.toString());
+//                            homeIntent.putExtras(bundle);
+//                            startActivitySafely(homeIntent);
+//                        }
+//                    } else if (key.equals("HeroApp")) {
+//                        HeroApplication.getInstance().getHeroApp().on(globalEvent);
+//                    }
+//                    if (!key.equals("newApp") && !key.equals("HeroApp")) {
+//                        manager.sendBroadcast(intent);
+//                    }
                 }
                 if (json.has("ui") || json.has("ui_cache")) {
                     boolean isCache = false;
@@ -685,6 +691,27 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             }
                         } else if (command.startsWith("magicGoto:")){
                             String url = command.replace("magicGoto:", "");
+                            if (getContext() instanceof HeroFragmentActivity) {
+                                Intent intent = ((HeroFragmentActivity) getContext()).getGotoIntent();
+                                intent.putExtra("url", url);
+                                View magicView = null;
+                                if (mCache != null) {
+                                    JSONObject nextCache = mCache.getAsJSONObject(url);
+                                    // only find magic view when next page has a cache
+                                    if (nextCache != null) {
+                                        magicView = findMagicView();
+                                    }
+                                }
+                                if (getActivity() instanceof HeroOneActivity) {
+                                    int requestCode = HeroActivity.getAutoGenerateRequestCode();
+                                    requestCodes.add(requestCode);
+                                    magicGoto(getActivity(), intent, magicView, requestCode);
+                                } else {
+                                    magicGoto(getActivity(), intent, magicView, -1);
+                                }
+                            }
+                        } else if (command.startsWith("gotoWithLoading:")){
+                            String url = command.replace("gotoWithLoading:", "");
                             if (getContext() instanceof HeroFragmentActivity) {
                                 Intent intent = ((HeroFragmentActivity) getContext()).getGotoIntent();
                                 intent.putExtra("url", url);

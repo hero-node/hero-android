@@ -32,10 +32,15 @@
 package com.hero;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
+
+import com.fasterxml.jackson.databind.util.JSONPObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,10 +53,12 @@ public class HeroApp implements IHero {
     private Object content;
     private Context context;
     private LocalBroadcastManager broadcastManager;
+    private IntentFilter intentFilter;
 
     public static final String HEROAPP_BADGE = "badgeValue";
     public static final String HEROAPP_TAB_CHANGED = "tabSelect";
     public static final String HEROAPP_NEW_APP = "newApp";
+    public static final String HEROAPP_APP = "HeroAPP";
 
     public static final String HEROAPP_EXTRA_BADGE_VALUE = "badgeValue";
     public static final String HEROAPP_EXTRA_BADGE_INDEX = "index";
@@ -59,40 +66,77 @@ public class HeroApp implements IHero {
     public HeroApp(Context c) {
         context = c;
         broadcastManager = LocalBroadcastManager.getInstance(c);
+        intentFilter = new IntentFilter();
+        intentFilter.addAction(HEROAPP_TAB_CHANGED);
+        intentFilter.addAction(HEROAPP_NEW_APP);
+        intentFilter.addAction(HEROAPP_APP);
+        broadcastManager.registerReceiver(broadcastReceiver, intentFilter);
     }
 
     @Override
     public void on(final JSONObject object) throws JSONException {
         if (object.has("tabs")) {
             content = object;
-        } else {
-            // send a local broadcast
-            if ("HeroApp".equals(object.optString("key"))) {
-                Intent intent = new Intent();
-                if (object.has(HEROAPP_BADGE)) {
-                    JSONObject data = object.getJSONObject(HEROAPP_BADGE);
-                    intent.setAction(HEROAPP_BADGE);
-                    intent.putExtra(HEROAPP_EXTRA_BADGE_INDEX, data.optInt(HEROAPP_EXTRA_BADGE_INDEX));
-                    intent.putExtra(HEROAPP_EXTRA_BADGE_VALUE, data.optString(HEROAPP_EXTRA_BADGE_VALUE));
-                } else if (object.has(HEROAPP_NEW_APP)) {
-                    intent = getHomeIntent(context);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    Bundle bundle = new Bundle();
-                    bundle.putString(HEROAPP_NEW_APP, object.optJSONObject(HEROAPP_NEW_APP).toString());
-                    intent.putExtras(bundle);
-                    context.startActivity(intent);
+        }
+        if (object.has("key")) {
+            String key = object.optString("key");
+            if (HEROAPP_APP.equals(key)) {
+                Intent intent = new Intent(context, HeroTabChildActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                Bundle bundle = new Bundle();
+                bundle.putString(HEROAPP_APP, object.toString());
+                intent.putExtras(bundle);
+                context.startActivity(intent);
 
-                    return;
-                } else if (object.has(HEROAPP_TAB_CHANGED)) {
-                    intent.setAction(HEROAPP_TAB_CHANGED);
-                    if (object.has("value")) {
-                        intent.putExtra("value", object.getString("value"));
+                return;
+            } else if (HEROAPP_NEW_APP.equals(key)) {
+                Intent intent = new Intent(context, HeroTabChildActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                Bundle bundle = new Bundle();
+                bundle.putString(HEROAPP_NEW_APP, object.toString());
+                intent.putExtras(bundle);
+                context.startActivity(intent);
+
+                return;
+            } else if (HEROAPP_BADGE.equals(key)) {
+                Intent broadcastIntent = new Intent();
+                JSONObject data = object.getJSONObject(HEROAPP_BADGE);
+                broadcastIntent.setAction(HEROAPP_BADGE);
+                broadcastIntent.putExtra(HEROAPP_EXTRA_BADGE_INDEX, data.optInt(HEROAPP_EXTRA_BADGE_INDEX));
+                broadcastIntent.putExtra(HEROAPP_EXTRA_BADGE_VALUE, data.optString(HEROAPP_EXTRA_BADGE_VALUE));
+
+                broadcastManager.sendBroadcast(broadcastIntent);
+            } else if (HEROAPP_TAB_CHANGED.equals(key)) {
+                Intent intent = getHomeIntent(context);
+                if ((context instanceof HeroActivity) && intent != null) {
+                    try {
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        context.startActivity(intent);
+                        return;
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
-                broadcastManager.sendBroadcast(intent);
             }
         }
     }
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+         @Override
+         public void onReceive(Context context, Intent intent) {
+             if (intent != null && intent.getAction().equals(HEROAPP_NEW_APP)
+                     || intent.getAction().equals(HEROAPP_TAB_CHANGED)
+                     || intent.getAction().equals(HEROAPP_APP)) {
+                 try {
+                     String stringExtra = intent.getExtras().getString("jsonObject");
+                     JSONObject jsonObject = new JSONObject(stringExtra);
+                     HeroApplication.getInstance().getHeroApp().on(jsonObject);
+                 } catch (JSONException e) {
+                     e.printStackTrace();
+                 }
+             }
+         }
+    };
 
     public Object getContent() {
         return content;

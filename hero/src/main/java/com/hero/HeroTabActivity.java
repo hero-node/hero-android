@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class HeroTabActivity extends HeroHomeActivity implements RadioGroup.OnCheckedChangeListener, View.OnClickListener {
+public class HeroTabActivity extends HeroHomeActivity implements RadioGroup.OnCheckedChangeListener, View.OnClickListener {
     public static final String LOCAL_INTENT_TAB_CHANGE = "tabSelect";
     public static final String LOCAL_INTENT_FINISH_LOADING = "finishLoading";
     public static final String LOCAL_INTENT_SHOW_LOADING = "showLoading";
@@ -450,5 +450,15 @@ public abstract class HeroTabActivity extends HeroHomeActivity implements RadioG
         if (receiver != null && manager != null) {
             manager.unregisterReceiver(receiver);
         }
+    }
+
+    @Override
+    protected void startLoading() {
+
+    }
+
+    @Override
+    protected void finishLoading() {
+
     }
 }

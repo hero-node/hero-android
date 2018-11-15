@@ -84,10 +84,16 @@ public class HeroWebView extends WebView implements IHero {
         // the WRITE_SECURE_SETTINGS permission because it's a system permission
         try {
             this.getSettings().setJavaScriptEnabled(true);
+
+
+            //add
+            this.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         this.addJavascriptInterface(this, "native");
+//        this.addJavascriptInterface(this,"npc");
 //        if (Build.VERSION.SDK_INT < 17) {
 //            this.removeJavascriptInterface("searchBoxJavaBridge_");
 //        }
@@ -166,7 +172,13 @@ public class HeroWebView extends WebView implements IHero {
                     }
                     view.loadData(content, "text/html;charset=UTF-8", null);
                 }
-                Log.i(TAG, "onReceivedError deprecated " + failingUrl);
+
+                try {
+                    JSONObject object = new JSONObject("{common:'webViewDidFinishLoad'}");
+                    HeroView.sendActionToContext(getContext(), object);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -181,7 +193,7 @@ public class HeroWebView extends WebView implements IHero {
                 if (view.getParent() != null && parentFragment != null) {
                     parentFragment.showToolBar(true);
                     try {
-                        JSONObject object = new JSONObject("{common:{event:'finish'}}");
+                        JSONObject object = new JSONObject("{common:'webViewDidFinishLoad'}");
                         HeroView.sendActionToContext(getContext(), object);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -205,6 +217,22 @@ public class HeroWebView extends WebView implements IHero {
             }
         });
         this.setWebChromeClient(new WebChromeClient() {
+
+            @Override
+            public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
+                return super.onJsConfirm(view, url, message, result);
+            }
+
+            @Override
+            public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
+                return super.onJsPrompt(view, url, message, defaultValue, result);
+            }
+
+            @Override
+            public boolean onJsBeforeUnload(WebView view, String url, String message, JsResult result) {
+                return super.onJsBeforeUnload(view, url, message, result);
+            }
+
             @Override
             public void onReceivedTitle(WebView view, String title) {
                 super.onReceivedTitle(view, title);
@@ -244,6 +272,27 @@ public class HeroWebView extends WebView implements IHero {
 
     @JavascriptInterface
     public void on(String jsonStr) {
+        try {
+            Object json = new JSONTokener(jsonStr).nextValue();
+            if (parentFragment != null && parentFragment.getTag() != null) {
+                if (json instanceof JSONObject) {
+                    ((JSONObject) json).put(FRAGMENT_TAG_KEY, parentFragment.getTag());
+                } else if (json instanceof JSONArray) {
+                    JSONObject tag = new JSONObject();
+                    tag.put(FRAGMENT_TAG_KEY, parentFragment.getTag());
+                    ((JSONArray) json).put(tag);
+                }
+            }
+            if (this.getContext() instanceof IHeroContext) {
+                ((IHeroContext) this.getContext()).on(json);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @JavascriptInterface
+    public void npc(String jsonStr) {
         try {
             Object json = new JSONTokener(jsonStr).nextValue();
             if (parentFragment != null && parentFragment.getTag() != null) {

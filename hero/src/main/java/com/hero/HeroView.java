@@ -158,6 +158,25 @@ public class HeroView extends FrameLayout implements IHero {
         }
     }
 
+    public static int calcStr(View view, String x, float p) {
+        int xInt;
+        if (x.split("\\+").length > 1) {
+            String x1 = x.split("\\+")[0];
+            String x2 = x.split("\\+")[1];
+            xInt = (int)((x1.endsWith("x") ? Float.parseFloat(x1.substring(0, x1.length() - 1)) * p : dip2px(view.getContext(), Float.parseFloat(x1))) + (x2.endsWith("x") ? Float.parseFloat(x2.substring(0, x2.length() - 1)) * p : dip2px(view.getContext(), Float.parseFloat(x2))));
+        } else if (x.split("-").length > 1){
+            String x1 = x.split("-")[0];
+            if (x1 != null && x1.length() == 0) {
+                x1 = "0";
+            }
+            String x2 = x.split("-")[1];
+            xInt = (int)((x1.endsWith("x") ? Float.parseFloat(x1.substring(0, x1.length() - 1)) * p : dip2px(view.getContext(), Float.parseFloat(x1))) - (x2.endsWith("x") ? Float.parseFloat(x2.substring(0, x2.length() - 1)) * p : dip2px(view.getContext(), Float.parseFloat(x2))));
+        } else {
+            xInt = (int)(x.endsWith("x") ? Float.parseFloat(x.substring(0, x.length() - 1)) * p : dip2px(view.getContext(), Float.parseFloat(x)));
+        }
+        return xInt;
+    }
+
     public static List<View> getLayoutListener(View view, boolean createIfNull) {
         List<View> layoutListener = (List) view.getTag(R.id.kLayoutListenner);
         if (layoutListener == null) {
@@ -408,11 +427,11 @@ public class HeroView extends FrameLayout implements IHero {
                 final FrameLayout.LayoutParams p = new FrameLayout.LayoutParams(0, 0);
                 int w_screen = HeroView.getParentWidth(view);
                 int h_screen = HeroView.getParentHeight(view);
-                if (x != null) {
-                    p.leftMargin = x.endsWith("x") ? (int) (Float.parseFloat(x.substring(0, x.length() - 1)) * w_screen) : dip2px(view.getContext(), Float.parseFloat(x));
+                if (x!= null) {
+                    p.leftMargin = calcStr(view, x, w_screen);
                 }
-                if (y != null) {
-                    p.topMargin = y.endsWith("x") ? (int) (Float.parseFloat(y.substring(0, y.length() - 1)) * h_screen) : dip2px(view.getContext(), Float.parseFloat(y));
+                if (y!= null) {
+                    p.topMargin = calcStr(view, y, h_screen);
                 }
                 if (l != null) {
                     p.leftMargin = l.endsWith("x") ? (int) (Float.parseFloat(l.substring(0, l.length() - 1)) * w_screen) : dip2px(view.getContext(), Float.parseFloat(l));

@@ -272,6 +272,9 @@ public class HeroButton extends Button implements IHero, IHeroBackground {
         if (jsonObject.has("ripple")) {
             HeroView.setRipple(this);
         }
+        // 设置取消button的默认动画交互效果
+        // 防止在android端 button永远处于最上层的问题
+        this.setStateListAnimator(null);
     }
 
     public void setBackground(int color) {
