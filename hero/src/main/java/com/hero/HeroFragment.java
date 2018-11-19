@@ -989,20 +989,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
                                     }
                                 }
                             }, (long) (delayTime * 1000));
-                        } else if ((cmdJson.has("viewWillAppear"))) {
-                            if (mActionDatas == null) {
-                                mActionDatas = new JSONObject();
-                            }
-                            mActionDatas.put("viewWillAppear", cmdJson.get("viewWillAppear"));
-                            on(cmdJson.get("viewWillAppear"));
-                            evaluateJavaScript(VIEW_WILL_APPEAR_EXPRESSION);
-                        } else if ((cmdJson.has("viewWillDisappear"))) {
-                            if (mActionDatas == null) {
-                                mActionDatas = new JSONObject();
-                            }
-                            mActionDatas.put("viewWillDisappear", cmdJson.get("viewWillDisappear"));
-                        } else if (cmdJson.has("showLongLoading")) {
-                            showLongProgressDialog(progressDialog, true, cmdJson.get("showLongLoading"));
                         }
                     }
                 } else if (json.has("remind")) {

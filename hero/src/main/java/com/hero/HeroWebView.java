@@ -61,6 +61,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
@@ -119,6 +120,29 @@ public class HeroWebView extends WebView implements IHero {
 
         final Context theContext = context;
         this.setWebViewClient(new WebViewClient() {
+
+
+
+            @Override
+            public void onLoadResource(WebView view, String url) {
+                super.onLoadResource(view, url);
+//                Log.i("test test","vonLoadResourceonLoadResourceonLoadResource");
+//
+//                try {
+//                    InputStream home = getResources().getAssets().open("hero-provider.js");
+//                    String content = null;
+//                    try {
+//                        content = inputStreamTOString(home);
+//                    } catch (Exception e) {
+//                        Log.d("Error", e.getMessage());
+//                    }
+//                    view.loadUrl("javascript:" + content);
+////                    view.loadData(content, "text/html;charset=UTF-8", null);
+//                } catch (IOException IOE) {
+//
+//                }
+            }
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (!isUrlAuthenticated(url)) {
@@ -195,6 +219,8 @@ public class HeroWebView extends WebView implements IHero {
                 if (view.getParent() != null && parentFragment != null) {
                     parentFragment.showToolBar(true);
                     try {
+                        HeroFragment.evaluateJavaScript(view, HeroFragment.VIEW_WILL_APPEAR_EXPRESSION);
+
                         JSONObject object = new JSONObject("{common:'webViewDidFinishLoad'}");
                         HeroView.sendActionToContext(getContext(), object);
                     } catch (JSONException e) {
