@@ -242,7 +242,7 @@ public class HeroSignatureHomeFragment extends HeroFragment {
     public String getGotoCommand(String hashcode) {
 //        String url = "http://106.14.187.240/_/ipfs/files/";
 //        return "[{command:'goto:" + url + hashcode + "/#/'}]";
-        return "[{command:'goto:" + "http://10.0.0.26:3000/home.html" + "'}]";
+        return "[{command:'goto:" + "http://10.122.16.189:3000/example/hero-home/home.html" + "'}]";
 //        return "[{command:'goto:" + "http://10.0.0.35:3000/_/ipfs/files/" + "QmYeVNmPu7fHwwHZUiaGqxPo5mEHp2LXa6mTSJsjGcHE5Q" + "/#/'}]";
     }
 

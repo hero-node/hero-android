@@ -218,6 +218,7 @@ public class HeroWebView extends WebView implements IHero {
                 super.onPageFinished(view, url);
                 if (view.getParent() != null && parentFragment != null) {
                     parentFragment.showToolBar(true);
+                }else{
                     try {
                         HeroFragment.evaluateJavaScript(view, HeroFragment.VIEW_WILL_APPEAR_EXPRESSION);
 
