@@ -34,7 +34,9 @@ package com.hero;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -88,7 +90,7 @@ public class HeroActivity extends HeroFragmentActivity {
     protected void initContent() {
         mainFragment = new HeroFragment();
         mainFragment.setArguments(getIntent().getExtras());
-        setContentView(R.layout.base_activity);
+        setContentView(R.layout.hero_base_activity);
         if (mainFragment != null) {
             FragmentManager fm = getSupportFragmentManager();
             fm.beginTransaction().replace(R.id.layoutRoot, mainFragment).commit();
@@ -182,5 +184,15 @@ public class HeroActivity extends HeroFragmentActivity {
     public void finish() {
         super.finish();
         activitySwitchAnimation(this, R.anim.activity_still, R.anim.activity_slide_out);
+    }
+
+    public static void startHeroActivity(Context context, String url) {
+        Intent intent = new Intent(context, HeroActivity.class);
+        intent.putExtra("url", url);
+        try {
+            context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }

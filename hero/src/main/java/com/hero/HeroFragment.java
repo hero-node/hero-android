@@ -61,6 +61,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebView;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -82,7 +83,9 @@ import org.json.JSONObject;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 
 public class HeroFragment extends Fragment implements IHeroContext {
     public static final String ARGUMENTS_URL = "url";
@@ -123,6 +126,11 @@ public class HeroFragment extends Fragment implements IHeroContext {
     private int viewIndex = 0;
     private Map<Integer, View> contextMenuHandler;
     private ReminderDelegate reminderDelegate;
+    private Queue<JSONObject> pendingDialogQueue;
+
+    public static final String VIEW_WILL_APPEAR_EXPRESSION = "document.readyState === 'complete' && window.Hero && Hero.viewWillAppear()";
+    public static final String VIEW_WILL_DISAPPEAR_EXPRESSION = "window.Hero && Hero.viewWillDisappear()";
+    public static final int VIEW_WILL_APPEAR_DELAY = 400;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -201,14 +209,15 @@ public class HeroFragment extends Fragment implements IHeroContext {
     @Override
     public void onResume() {
         super.onResume();
-        if (mActionDatas != null && shouldSendViewWillAppear && !isHidden) {
-            if (mActionDatas.has("viewWillAppear")) {
+        if (!isHidden) {
+            if (mActionDatas != null && shouldSendViewWillAppear && mActionDatas.has("viewWillAppear")) {
                 try {
                     self.on(mActionDatas.get("viewWillAppear"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
+            evaluateJavaScript(VIEW_WILL_APPEAR_EXPRESSION);
         }
     }
 
@@ -226,6 +235,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     e.printStackTrace();
                 }
             }
+            evaluateJavaScript(VIEW_WILL_APPEAR_EXPRESSION);
         } else if (hidden) {
             if (mActionDatas != null && mActionDatas.has("viewWillDisappear")) {
                 try {
@@ -234,10 +244,12 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     e.printStackTrace();
                 }
             }
+            evaluateJavaScript(VIEW_WILL_DISAPPEAR_EXPRESSION);
         }
 
         super.onHiddenChanged(hidden);
     }
+
 
     public FrameLayout getView() {
         return mLayout;
@@ -368,30 +380,11 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     String key = globalEvent.getString("key");
                     LocalBroadcastManager manager = LocalBroadcastManager.getInstance(self.getContext());
                     Intent intent = new Intent(key);
-//                    intent.setAction(globalEvent.toString());
                     if (globalEvent.has("value")) {
                         intent.putExtra("value", globalEvent.getString("value"));
                     }
                     intent.putExtra("jsonObject", globalEvent.toString());
                     manager.sendBroadcast(intent);
-
-//                    if (key.equals("tabSelect")) {
-//                        returnToHome();
-//                    } else if (key.equals("newApp")) {
-//                        Intent homeIntent = HeroApp.getHomeIntent(getContext());
-//                        if (homeIntent != null) {
-//                            homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                            Bundle bundle = new Bundle();
-//                            bundle.putString("newApp", globalEvent.toString());
-//                            homeIntent.putExtras(bundle);
-//                            startActivitySafely(homeIntent);
-//                        }
-//                    } else if (key.equals("HeroApp")) {
-//                        HeroApplication.getInstance().getHeroApp().on(globalEvent);
-//                    }
-//                    if (!key.equals("newApp") && !key.equals("HeroApp")) {
-//                        manager.sendBroadcast(intent);
-//                    }
                 }
                 if (json.has("ui") || json.has("ui_cache")) {
                     boolean isCache = false;
@@ -462,6 +455,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     if (ui.has("tintColor")) {
                         titleBackgroundColor = HeroView.parseColor("#" + ui.getString("tintColor"));
                         setTitleBackgroundColor(titleBackgroundColor);
+                        setStatusBarColor(titleBackgroundColor);
                     }
                     mLayout.removeAllViews();
                     customWebView = null;
@@ -874,9 +868,13 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     } else if (cmdObj instanceof JSONObject) {
                         JSONObject cmdJson = (JSONObject) cmdObj;
                         if (cmdJson.has("show")) {
-                            final JSONObject showObj = cmdJson.getJSONObject("show");
+                            final JSONObject showObj = cmdJson.optJSONObject("show");
                             if (showObj != null) {
-                                boolean isCustom = false;
+                                if (isPopWindowShown()) {
+                                    // if a dialog is shown, put the object to pending queue
+                                    addPendingDialogContent(showObj);
+                                    return;
+                                }
                                 if (showObj.has("class")) {
                                     String closeImage = null;
                                     if (showObj.has("closeImage")) {
@@ -945,9 +943,27 @@ public class HeroFragment extends Fragment implements IHeroContext {
                                             });
                                         }
                                     }
+                                    closePopWindow();
                                     AlertDialog dialog = builder.create();
-                                    dialog.setCanceledOnTouchOutside(false);
+                                    if (showObj.has("cancelable")) {
+                                        dialog.setCanceledOnTouchOutside(showObj.getBoolean("cancelable"));
+                                    } else {
+                                        dialog.setCanceledOnTouchOutside(false);
+                                    }
                                     dialog.show();
+                                    customDialog = dialog;
+                                }
+                                if (customDialog != null) {
+                                    customDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                        @Override
+                                        public void onDismiss(DialogInterface dialog) {
+                                            Object nextView = getPendingDialogContent();
+                                            // show the content in queue
+                                            if (nextView != null && nextView instanceof JSONObject) {
+                                                showPendingDialog((JSONObject) nextView);
+                                            }
+                                        }
+                                    });
                                 }
                             }
                         } else if (cmdJson.has("sendSms")) {
@@ -979,6 +995,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             }
                             mActionDatas.put("viewWillAppear", cmdJson.get("viewWillAppear"));
                             on(cmdJson.get("viewWillAppear"));
+                            evaluateJavaScript(VIEW_WILL_APPEAR_EXPRESSION);
                         } else if ((cmdJson.has("viewWillDisappear"))) {
                             if (mActionDatas == null) {
                                 mActionDatas = new JSONObject();
@@ -991,17 +1008,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                 } else if (json.has("remind")) {
                     addReminder(json);
                 } else {
-                    if (mWebview != null) {
-                        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                            try {
-                                mWebview.evaluateJavascript("Hero.in(" + json.toString() + ")", null);
-                            } catch (IllegalStateException e) {
-                                mWebview.loadUrl("javascript:Hero.in(" + json.toString() + ")");
-                            }
-                        } else {
-                            mWebview.loadUrl("javascript:Hero.in(" + json.toString() + ")");
-                        }
-                    }
+                    evaluateJavaScript("Hero.in(" + json.toString() + ")");
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -1018,6 +1025,24 @@ public class HeroFragment extends Fragment implements IHeroContext {
             } catch (NoSuchMethodError e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void evaluateJavaScript(String expression) {
+        if (mWebview != null) {
+            evaluateJavaScript(mWebview, expression);
+        }
+    }
+
+    public static void evaluateJavaScript(WebView webView, String expression) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            try {
+                webView.evaluateJavascript(expression, null);
+            } catch (IllegalStateException e) {
+                webView.loadUrl("javascript:" + expression);
+            }
+        } else {
+            webView.loadUrl("javascript:" + expression);
         }
     }
 
@@ -1388,6 +1413,13 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     // views on dialog can extend to navigation bar
                     HeroView.setExtendToNavigationBar((View) view);
                     view.on(json);
+                    // as defined, a view added to dialog is always center, its left and top should be ignored
+                    ViewGroup.LayoutParams params = ((View) view).getLayoutParams();
+                    if (params != null && params instanceof FrameLayout.LayoutParams) {
+                        ((FrameLayout.LayoutParams) params).leftMargin = 0;
+                        ((FrameLayout.LayoutParams) params).topMargin = 0;
+                        ((FrameLayout.LayoutParams) params).gravity = Gravity.CENTER_HORIZONTAL;
+                    }
 
                     if (view instanceof ViewGroup) {
                         final int count = ((ViewGroup) view).getChildCount();
@@ -1414,6 +1446,37 @@ public class HeroFragment extends Fragment implements IHeroContext {
             }
         }
         return dialog;
+    }
+
+    private boolean isPopWindowShown() {
+        return (customDialog != null && customDialog.isShowing());
+    }
+
+    private JSONObject getPendingDialogContent() {
+        if (pendingDialogQueue == null || pendingDialogQueue.size() == 0) {
+            return null;
+        }
+        JSONObject view = pendingDialogQueue.poll();
+        return view;
+    }
+
+    private void addPendingDialogContent(JSONObject view) {
+        if (pendingDialogQueue == null) {
+            pendingDialogQueue = new LinkedList<>();
+        }
+        pendingDialogQueue.offer(view);
+    }
+
+    private void showPendingDialog(JSONObject content) {
+        JSONObject show = new JSONObject();
+        JSONObject command = new JSONObject();
+        try {
+            show.put("show", content);
+            command.put("command", show);
+            this.on(command);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void showPopWindow() {
@@ -1571,13 +1634,10 @@ public class HeroFragment extends Fragment implements IHeroContext {
     }
 
     public void setupToolbarRightItems(JSONObject data) {
+
         if (rightItemsLayout != null) {
-            if (mRightItems == null) {
-                rightItemsLayout.removeAllViews();
-            } else {
-                if (mRightItems.length() > 0) {
-                    rightItemsLayout.removeAllViews();
-                }
+            rightItemsLayout.removeAllViews();
+            if (mRightItems != null) {
                 for (int i = 0; i < mRightItems.length(); i++) {
                     JSONObject item = null;
                     String title;
@@ -1810,6 +1870,14 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     getActionBar().setCustomView((View) view, p);
                     setActivityTitle("");
                 }
+            }
+        }
+    }
+
+    private void setStatusBarColor(int color) {
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+            if (getActivity() != null) {
+                getActivity().getWindow().setStatusBarColor(color);
             }
         }
     }

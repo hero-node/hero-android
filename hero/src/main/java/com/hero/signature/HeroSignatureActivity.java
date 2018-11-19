@@ -36,6 +36,9 @@ import com.hero.signature.fragment.HeroSignatureWalletFragment;
 import com.hero.utils.FileUtils;
 import com.hero.utils.FingerprintHelper;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -54,8 +57,6 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
     private HeroSignatureExportFragment exportFragment = new HeroSignatureExportFragment();
 
     private HeroSignatureQRcodeFragment qRcodeFragment = new HeroSignatureQRcodeFragment();
-
-//    private WebViewFragment webViewFragment = new WebViewFragment();
 
     private HeroFragment heroFragment = new HeroFragment();
 
@@ -360,7 +361,13 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
             if (result.getContents() == null) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+                try {
+                    String scanCommand = "[{command:'goto:" + result.getContents() + "'}]";
+                    JSONArray tabsArray = new JSONArray(scanCommand);
+                    on(tabsArray);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);

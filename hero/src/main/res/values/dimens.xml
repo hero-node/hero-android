@@ -32,4 +32,6 @@
     <dimen name="tabDotMarginTop">4dp</dimen>
     <dimen name="tabDotMarginLeft">16dp</dimen>
 
+    <dimen name="s3">16dp</dimen>
+
 </resources>

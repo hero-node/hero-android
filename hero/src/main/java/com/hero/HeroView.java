@@ -59,6 +59,7 @@ import android.widget.FrameLayout;
 
 import com.hero.depandency.AnimationHelper;
 import com.hero.depandency.ContextUtils;
+import com.hero.depandency.IntentResolver;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,6 +67,7 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -827,6 +829,12 @@ public class HeroView extends FrameLayout implements IHero {
                     Log.w("not implement", "tinyColor");
                 }
             }
+
+            // 防止其他控件被button遮盖
+            if (!(view instanceof HeroButton)){
+                view.bringToFront();
+            }
+
         } catch (JSONException e) {
             e.printStackTrace();
 
@@ -926,6 +934,12 @@ public class HeroView extends FrameLayout implements IHero {
                 size = view.getContext().getResources().getDimension(R.dimen.button_elevation_size);
             }
             view.setElevation(size);
+        }
+    }
+
+    public static void setZIndex(View view, float size) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            view.setTranslationZ(size);
         }
     }
 
