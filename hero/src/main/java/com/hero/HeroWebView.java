@@ -219,14 +219,13 @@ public class HeroWebView extends WebView implements IHero {
                 if (view.getParent() != null && parentFragment != null) {
                     parentFragment.showToolBar(true);
                 }else{
-                    try {
-                        HeroFragment.evaluateJavaScript(view, HeroFragment.VIEW_WILL_APPEAR_EXPRESSION);
-
-                        JSONObject object = new JSONObject("{common:'webViewDidFinishLoad'}");
-                        HeroView.sendActionToContext(getContext(), object);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                    HeroFragment.evaluateJavaScript(view, HeroFragment.VIEW_WILL_APPEAR_EXPRESSION);
+                }
+                try {
+                    JSONObject object = new JSONObject("{common:'webViewDidFinishLoad'}");
+                    HeroView.sendActionToContext(getContext(), object);
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             }
 

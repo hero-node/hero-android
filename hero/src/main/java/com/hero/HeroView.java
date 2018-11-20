@@ -801,6 +801,9 @@ public class HeroView extends FrameLayout implements IHero {
             if (jsonObject.has("autolayout")) {
                 Log.w("not implement", "autolayout");
             }
+            if (jsonObject.has("zIndex")) {
+                HeroView.setZIndex(view,jsonObject.getInt("zIndex"));
+            }
             if (!(view instanceof IHeroBackground)) {
                 // IHeroBackground will handle the attributes after its background created
                 if (jsonObject.has("raised")) {
@@ -837,12 +840,6 @@ public class HeroView extends FrameLayout implements IHero {
                     Log.w("not implement", "tinyColor");
                 }
             }
-
-            // 防止其他控件被button遮盖
-            if (!(view instanceof HeroButton)){
-                view.bringToFront();
-            }
-
         } catch (JSONException e) {
             e.printStackTrace();
 
