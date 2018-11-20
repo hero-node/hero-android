@@ -938,4 +938,6 @@ public class HeroImageView extends ImageView implements IHero, HeroFragmentActiv
         }
 
     }
+
+
 }

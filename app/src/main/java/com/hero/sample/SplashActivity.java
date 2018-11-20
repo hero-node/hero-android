@@ -6,12 +6,18 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
 import com.hero.signature.HeroSignatureActivity;
 import com.tiger.cash.R;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by Aron on 2018/7/25.
@@ -32,11 +38,7 @@ public class SplashActivity extends Activity {
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.TRANSPARENT);
-//            window.setNavigationBarColor(Color.TRANSPARENT);
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-
-//            //隐藏底部导航栏
-//            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
         setContentView(R.layout.splash_activity_layout);
 
@@ -57,9 +59,30 @@ public class SplashActivity extends Activity {
     }
 
     private void gotoMain() {
-        Intent mainIntent = new Intent(SplashActivity.this, HeroSignatureActivity.class);
-        SplashActivity.this.startActivity(mainIntent);
-        overridePendingTransition(R.anim.fragment_slide_left_in, R.anim.fragment_slide_right_out);
+        try {
+            LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+            Intent intent = new Intent("newApp");
+            JSONObject jsonObject = new JSONObject();
+            JSONArray jsonArray = new JSONArray();
+            JSONObject jsonObjectInArray = new JSONObject();
+            jsonObjectInArray.put("title","home");
+            jsonObjectInArray.put("url","http://10.122.16.217:3000/example/hero-home/home.html");
+            jsonArray.put(jsonObjectInArray);
+            jsonObject.put("tabs",jsonArray);
+            jsonObject.put("key","newApp");
+
+            Log.i("Hero",jsonObject.toString());
+            intent.putExtra("jsonObject", jsonObject.toString());
+            manager.sendBroadcast(intent);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         SplashActivity.this.finish();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 }

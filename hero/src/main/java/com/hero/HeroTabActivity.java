@@ -171,6 +171,12 @@ public class HeroTabActivity extends HeroHomeActivity implements RadioGroup.OnCh
                 contentTags.add(tag);
                 urlMap.put(tag, contentArray.getJSONObject(j).getString("url"));
             }
+
+            if (urlMap.size() <= 1) {
+                tabHost.setVisibility(View.GONE);
+            } else {
+                tabHost.setVisibility(View.VISIBLE);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -449,6 +455,15 @@ public class HeroTabActivity extends HeroHomeActivity implements RadioGroup.OnCh
     protected void unregisterLocalReceiver(BroadcastReceiver receiver) {
         if (receiver != null && manager != null) {
             manager.unregisterReceiver(receiver);
+        }
+    }
+
+    @Override
+    public int getHomeTabHeight() {
+        if (urlMap.size() <= 1) {
+            return 0;
+        } else {
+            return super.getHomeTabHeight();
         }
     }
 

@@ -31,6 +31,7 @@
 
 package com.hero;
 
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -86,6 +87,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+
+import static com.hero.HeroActivity.backgroundColor;
 
 public class HeroFragment extends Fragment implements IHeroContext {
     public static final String ARGUMENTS_URL = "url";
@@ -322,7 +325,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
     }
 
     private void initWebView() {
-        mWebview = new HeroWebView(getActivity(), getResources().getColor(R.color.defaultWebBackground));
+        mWebview = new HeroWebView(getActivity(), getResources().getColor(R.color.heroWhite));
         mLayout.addView(mWebview);
         mWebview.setFragment(this);
         FrameLayout.LayoutParams webViewParams = new FrameLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
@@ -331,7 +334,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
     }
 
     private HeroWebView newWebView() {
-        HeroWebView webView = new HeroWebView(getActivity(), getResources().getColor(R.color.defaultWebBackground));
+        HeroWebView webView = new HeroWebView(getActivity(), getResources().getColor(R.color.heroWhite));
         webView.setVisibility(View.GONE);
         mLayout.addView(webView);
         webView.setFragment(this);
@@ -344,6 +347,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
         return view;
     }
 
+    @SuppressLint("ResourceAsColor")
     public void on(final Object object) throws JSONException {
         if (object == null) return;
         if (object instanceof JSONArray) {
@@ -367,9 +371,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
             });
         } else {
             try {
-//                if (json.has("signMessage")) {
-//                    mWebview.loadUrl("javascript:callWebJS('" + json.toString() + "')");
-//                }
                 if (json.has("globle") || json.has("global")) {
                     JSONObject globalEvent;
                     if (json.has("globle") ) {
@@ -450,12 +451,16 @@ public class HeroFragment extends Fragment implements IHeroContext {
                         }
                     }
                     if (ui.has("backgroundColor")) {
-                        mLayout.setBackgroundColor(HeroView.parseColor("#" + ui.getString("backgroundColor")));
+                        backgroundColor = HeroView.parseColor("#" + ui.getString("backgroundColor"));
+                        mLayout.setBackgroundColor(backgroundColor);
                     }
+                    setTitleBackgroundColor(backgroundColor);
+                    setStatusBarColor(backgroundColor);
+
                     if (ui.has("tintColor")) {
                         titleBackgroundColor = HeroView.parseColor("#" + ui.getString("tintColor"));
-                        setTitleBackgroundColor(titleBackgroundColor);
-                        setStatusBarColor(titleBackgroundColor);
+//                        setTitleBackgroundColor(titleBackgroundColor);
+//                        setStatusBarColor(titleBackgroundColor);
                     }
                     mLayout.removeAllViews();
                     customWebView = null;

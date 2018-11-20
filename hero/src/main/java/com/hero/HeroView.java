@@ -285,10 +285,14 @@ public class HeroView extends FrameLayout implements IHero {
                 screen_height -= toolBarHeight;
             }
         }
-        if (view.getContext() instanceof HeroHomeActivity) {
+        if (view.getContext() instanceof HeroTabActivity) {
+            int tabHeight = ((HeroTabActivity)(view.getContext())).getHomeTabHeight();
+            screen_height -= tabHeight;
+        } else if (view.getContext() instanceof HeroHomeActivity) {
             int tabHeight = ((HeroHomeActivity)(view.getContext())).getHomeTabHeight();
             screen_height -= tabHeight;
         }
+
         if (view.getParent() != null) {
             if (((View) view.getParent()).getLayoutParams() != null) {
                 height = ((View) view.getParent()).getLayoutParams().height;
@@ -370,6 +374,7 @@ public class HeroView extends FrameLayout implements IHero {
 
     public static void on(final View view, JSONObject jsonObject) {
         final Context context = view.getContext();
+        Log.i("Hero jsonObject is", jsonObject.toString());
         try {
             if (jsonObject.has("class")) {
                 view.setTag(R.id.kHeroJson, jsonObject);
@@ -437,36 +442,28 @@ public class HeroView extends FrameLayout implements IHero {
                 }
                 if (l != null) {
                     p.leftMargin = calcStr(view, l, w_screen);
-//                    p.leftMargin = l.endsWith("x") ? (int) (Float.parseFloat(l.substring(0, l.length() - 1)) * w_screen) : dip2px(view.getContext(), Float.parseFloat(l));
                 }
                 if (t != null) {
                     p.topMargin = calcStr(view, t, h_screen);
-//                    p.topMargin = t.endsWith("x") ? (int) (Float.parseFloat(t.substring(0, t.length() - 1)) * h_screen) : dip2px(view.getContext(), Float.parseFloat(t));
                 }
                 if (w != null) {
                     p.width = calcStr(view, w, w_screen);
-//                    p.width = w.endsWith("x") ? (int) (Float.parseFloat(w.substring(0, w.length() - 1)) * w_screen) : dip2px(view.getContext(), Float.parseFloat(w));
                 }
                 if (h != null) {
                     p.height = calcStr(view, h, h_screen);
-//                    p.height = h.endsWith("x") ? (int) (Float.parseFloat(h.substring(0, h.length() - 1)) * h_screen) : dip2px(view.getContext(), Float.parseFloat(h));
                 }
                 if (r != null) {
                     if (l == null && x == null) {
                         p.leftMargin = w_screen - p.width - calcStr(view, r, w_screen);
-//                        p.leftMargin = w_screen - p.width - (r.endsWith("x") ? (int) (Float.parseFloat(r.substring(0, r.length() - 1)) * w_screen) : dip2px(view.getContext(), Float.parseFloat(r)));
                     } else {
                         p.width = w_screen - p.leftMargin - calcStr(view, r, w_screen);
-//                        p.width = w_screen - p.leftMargin - (r.endsWith("x") ? (int) (Float.parseFloat(r.substring(0, r.length() - 1)) * w_screen) : dip2px(view.getContext(), Float.parseFloat(r)));
                     }
                 }
                 if (b != null) {
                     if (t == null && y == null) {
                         p.topMargin = h_screen - p.height - calcStr(view, b, h_screen);
-//                        p.topMargin = h_screen - p.height - (b.endsWith("x") ? (int) (Float.parseFloat(b.substring(0, b.length() - 1)) * h_screen) : dip2px(view.getContext(), Float.parseFloat(b)));
                     } else {
                         p.height = h_screen - p.topMargin - calcStr(view, b, h_screen);
-//                        p.height = h_screen - p.topMargin - (b.endsWith("x") ? (int) (Float.parseFloat(b.substring(0, b.length() - 1)) * h_screen) : dip2px(view.getContext(), Float.parseFloat(b)));
                     }
                 }
 

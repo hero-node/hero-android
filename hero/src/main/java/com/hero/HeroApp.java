@@ -75,6 +75,8 @@ public class HeroApp implements IHero {
 
     @Override
     public void on(final JSONObject object) throws JSONException {
+        Log.i("Hero jsonObject is", object.toString());
+
         if (object.has("tabs")) {
             content = object;
         }

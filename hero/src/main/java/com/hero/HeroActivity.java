@@ -31,6 +31,7 @@
 
 package com.hero;
 
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -38,9 +39,12 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentManager;
@@ -49,11 +53,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import static com.hero.HeroFragment.toolbar;
+
 public class HeroActivity extends HeroFragmentActivity {
     public static final int RESULT_CODE_DISMISS = -1009;
     private static int autoGenerateRequestCode = 1000;
 
     public static final boolean SHOW_ACTIVITY_ANIM = true;
+
+    public static int backgroundColor = R.color.heroWhite;
 
     HeroActivity self = this;
     JSONArray mRightItems;
@@ -87,6 +95,7 @@ public class HeroActivity extends HeroFragmentActivity {
         initContent();
     }
 
+    @SuppressLint("ResourceAsColor")
     protected void initContent() {
         mainFragment = new HeroFragment();
         mainFragment.setArguments(getIntent().getExtras());
@@ -97,6 +106,16 @@ public class HeroActivity extends HeroFragmentActivity {
         }
         if (getActionBar() != null) {
             getActionBar().setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_TITLE);
+            if (android.os.Build.VERSION.SDK_INT >= 19) {
+                getActionBar().setStackedBackgroundDrawable(new ColorDrawable(backgroundColor));
+            }
+        } else {
+            if (toolbar != null) {
+                toolbar.setBackgroundColor(backgroundColor);
+            }
+        }
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(backgroundColor);
         }
     }
 

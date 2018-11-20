@@ -21,7 +21,7 @@
     <color name="switchBackground">#00bc8d</color>
     <color name="calendarColor">#00bc8d</color>
     <color name="defaultListCellColor">#ffffff</color>
-    <color name="heroWhite">#ffffff</color>
+    <color name="heroWhite">#f2f2f2</color>
     <color name="heroGreen">#00bc8d</color>
     <color name="heroDotColor">#00bc8d</color>
     <color name="heroRedDotColor">#d70c18</color>
