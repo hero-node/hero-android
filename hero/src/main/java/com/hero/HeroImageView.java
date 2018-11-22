@@ -137,7 +137,7 @@ public class HeroImageView extends ImageView implements IHero, HeroFragmentActiv
     public static final int MESSAGE_FILE_DELETED = 10;
 
     // for rounded corner image view
-    private static final int DEFAULT_BORDER_COLOR = Color.WHITE;
+    private static final int DEFAULT_BORDER_COLOR = Color.TRANSPARENT;
     private Paint paint;
     private int borderColor;
     private int borderWidth = -1;

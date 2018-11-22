@@ -53,8 +53,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static com.hero.HeroFragment.toolbar;
-
 public class HeroActivity extends HeroFragmentActivity {
     public static final int RESULT_CODE_DISMISS = -1009;
     private static int autoGenerateRequestCode = 1000;
@@ -110,9 +108,9 @@ public class HeroActivity extends HeroFragmentActivity {
                 getActionBar().setStackedBackgroundDrawable(new ColorDrawable(backgroundColor));
             }
         } else {
-            if (toolbar != null) {
-                toolbar.setBackgroundColor(backgroundColor);
-            }
+//            if (toolbar != null) {
+//                toolbar.setBackgroundColor(backgroundColor);
+//            }
         }
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setStatusBarColor(backgroundColor);
