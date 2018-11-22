@@ -446,6 +446,10 @@ public class HeroImageView extends ImageView implements IHero, HeroFragmentActiv
                 moveDeleteView();
             }
         }
+
+        if (jsonObject.has("ripple")) {
+            HeroView.setRipple(this);
+        }
     }
 
     public int getResId(String name, String defType) {
