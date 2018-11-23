@@ -126,21 +126,6 @@ public class HeroWebView extends WebView implements IHero {
             @Override
             public void onLoadResource(WebView view, String url) {
                 super.onLoadResource(view, url);
-//                Log.i("test test","vonLoadResourceonLoadResourceonLoadResource");
-//
-//                try {
-//                    InputStream home = getResources().getAssets().open("hero-provider.js");
-//                    String content = null;
-//                    try {
-//                        content = inputStreamTOString(home);
-//                    } catch (Exception e) {
-//                        Log.d("Error", e.getMessage());
-//                    }
-//                    view.loadUrl("javascript:" + content);
-////                    view.loadData(content, "text/html;charset=UTF-8", null);
-//                } catch (IOException IOE) {
-//
-//                }
             }
 
             @Override

@@ -43,14 +43,19 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.support.annotation.ColorInt;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewCompat;
 import android.text.TextUtils;
 import android.view.ContextMenu;
@@ -61,6 +66,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.AbsListView;
@@ -87,8 +94,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-
-import static com.hero.HeroActivity.backgroundColor;
 
 public class HeroFragment extends Fragment implements IHeroContext {
     public static final String ARGUMENTS_URL = "url";
@@ -119,6 +124,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
     protected View toolbar;
     private TextView toolbarTitleView;
     private ImageView toolbarImageView;
+    private ImageView backImageView;
     private ViewGroup rootLayout;
     private ViewGroup toolbarContainer;
     private RelativeLayout popLayout = null;
@@ -130,10 +136,13 @@ public class HeroFragment extends Fragment implements IHeroContext {
     private Map<Integer, View> contextMenuHandler;
     private ReminderDelegate reminderDelegate;
     private Queue<JSONObject> pendingDialogQueue;
+    private Window window;
 
     public static final String VIEW_WILL_APPEAR_EXPRESSION = "document.readyState === 'complete' && window.Hero && Hero.viewWillAppear()";
     public static final String VIEW_WILL_DISAPPEAR_EXPRESSION = "window.Hero && Hero.viewWillDisappear()";
     public static final int VIEW_WILL_APPEAR_DELAY = 400;
+    public static int backgroundColor = R.color.heroWhite;
+    public static int tintColor = android.R.color.background_dark;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -262,6 +271,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
         return mWebview;
     }
 
+    @SuppressLint("ResourceAsColor")
     protected void initViews(ViewGroup viewGroup) {
         mLayout = (FrameLayout) viewGroup.findViewById(R.id.mainLayout);
         toolbar = viewGroup.findViewById(R.id.layoutToolbar);
@@ -272,7 +282,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
         rootLayout = (ViewGroup) viewGroup.findViewById(R.id.rootLayout);
         toolbarContainer = (ViewGroup) viewGroup.findViewById(R.id.toolbarContainer);
         mainContentView = viewGroup.findViewById(R.id.mainScrollView);
-        ImageView backImageView = (ImageView) toolbar.findViewById(R.id.leftImage);
+        backImageView = (ImageView) toolbar.findViewById(R.id.leftImage);
         if (((HeroFragmentActivity) getActivity()).isBackIconShown()) {
             backImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -295,6 +305,32 @@ public class HeroFragment extends Fragment implements IHeroContext {
         } else {
             backImageView.setVisibility(View.GONE);
         }
+        Drawable originDrawable = ContextCompat.getDrawable(getActivity(),
+                R.drawable.ic_back);
+
+        backImageView.setImageDrawable(tintDrawable(originDrawable, tintColor));
+        toolbarTitleView.setTextColor(tintColor);
+
+
+        mLayout.setBackgroundColor(backgroundColor);
+        setTitleBackgroundColor(backgroundColor);
+        setStatusBarColor(backgroundColor);
+
+        if (window == null) {
+            window = getActivity().getWindow();
+        }
+
+        // 浅色
+        if (!isColorDark(backgroundColor)) {
+            // 黑色
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        } else {
+            int flag = ((window.getDecorView().getSystemUiVisibility()) & (~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR));
+            window.getDecorView().setSystemUiVisibility(flag);
+        }
+
     }
 
     public void loadUrl(String url) {
@@ -345,6 +381,11 @@ public class HeroFragment extends Fragment implements IHeroContext {
         IHero view = HeroView.fromJson(getContext(), jsonObject);
         HeroView.setFragmentTag((View) view, HeroFragment.this.getTag());
         return view;
+    }
+
+    public static boolean isColorDark(@ColorInt int color) {
+        double darkness = 1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255;
+        return darkness >= 0.5;
     }
 
     @SuppressLint("ResourceAsColor")
@@ -452,16 +493,32 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     }
                     if (ui.has("backgroundColor")) {
                         backgroundColor = HeroView.parseColor("#" + ui.getString("backgroundColor"));
-                        mLayout.setBackgroundColor(backgroundColor);
-                    }
-                    setTitleBackgroundColor(backgroundColor);
-                    setStatusBarColor(backgroundColor);
 
+                        mLayout.setBackgroundColor(backgroundColor);
+                        setTitleBackgroundColor(backgroundColor);
+                        setStatusBarColor(backgroundColor);
+                        // 浅色
+                        if (!isColorDark(backgroundColor)) {
+                            // 黑色
+                            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+                        } else {
+                            int flag = ((window.getDecorView().getSystemUiVisibility()) & (~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR));
+                            window.getDecorView().setSystemUiVisibility(flag);
+                        }
+                    }
+
+                    // TODO
                     if (ui.has("tintColor")) {
                         titleBackgroundColor = HeroView.parseColor("#" + ui.getString("tintColor"));
-//                        setTitleBackgroundColor(titleBackgroundColor);
-//                        setStatusBarColor(titleBackgroundColor);
+                        tintColor = HeroView.parseColor("#" + ui.getString("tintColor"));
+                        Drawable originDrawable = ContextCompat.getDrawable(getActivity(),
+                                R.drawable.ic_back);
+                        backImageView.setImageDrawable(tintDrawable(originDrawable, tintColor));
+                        toolbarTitleView.setTextColor(tintColor);
                     }
+
                     mLayout.removeAllViews();
                     customWebView = null;
                     if (getActionBar() == null) {
@@ -672,7 +729,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             if (url.startsWith("tel:")) {
                                 Intent callIntent = new Intent(Intent.ACTION_DIAL);
                                 callIntent.setData(Uri.parse(url.replaceAll("/", "")));
-                                startActivitySafely(callIntent);
                             } else {
                                 if (getContext() instanceof HeroFragmentActivity) {
                                     Intent intent = ((HeroFragmentActivity) getContext()).getGotoIntent();//new Intent(getContext(), HeroActivity.class);
@@ -1035,6 +1091,19 @@ public class HeroFragment extends Fragment implements IHeroContext {
         } else {
             webView.loadUrl("javascript:" + expression);
         }
+    }
+
+    /**
+     * 对目标Drawable 进行着色
+     *
+     * @param drawable 目标Drawable
+     * @param color    着色的颜色值
+     * @return 着色处理后的Drawable
+     */
+    public static Drawable tintDrawable(@NonNull Drawable drawable, int color) {
+        Drawable wrappedDrawable = DrawableCompat.wrap(drawable);
+        DrawableCompat.setTint(wrappedDrawable, color);
+        return wrappedDrawable;
     }
 
     @Override

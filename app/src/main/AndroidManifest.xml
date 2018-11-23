@@ -37,6 +37,9 @@
         android:launchMode="singleTask" android:screenOrientation="portrait"
         android:name="com.hero.sample.TigerApp"
         android:theme="@style/AppTheme">
+
+        <meta-data android:name="android.max_aspect"  android:value="ratio_float"/>
+
         <activity
             android:name="com.hero.sample.SplashActivity"
             android:screenOrientation="portrait">
