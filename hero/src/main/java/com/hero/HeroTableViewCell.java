@@ -39,6 +39,7 @@ import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.hero.depandency.ImageLoadUtils;
@@ -280,7 +281,7 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
             TextView textView = (TextView) findViewById(R.id.textView2);
             if (textView != null) {
                 textView.setText(jsonObject.getString("textValue"));
-                findViewById(R.id.arrow).setVisibility(GONE);
+                findViewById(R.id.arrow).setVisibility(View.GONE);
             }
         } else {
             TextView textView = (TextView) findViewById(R.id.textView2);
@@ -299,6 +300,21 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
             if (textView != null) {
                 textView.setVisibility(View.GONE);
                 textView.setText("");
+            }
+        }
+
+        if (jsonObject.has("boolValue")) {
+            Switch switchButton = (Switch) findViewById(R.id.switchButton);
+            if (switchButton != null) {
+                switchButton.setVisibility(View.VISIBLE);
+                switchButton.setChecked(jsonObject.getBoolean("boolValue"));
+                findViewById(R.id.arrow).setVisibility(View.GONE);
+            }
+        } else {
+            Switch switchButton = (Switch) findViewById(R.id.switchButton);
+            if (switchButton != null) {
+                switchButton.setVisibility(View.GONE);
+                switchButton.setChecked(false);
             }
         }
         if (jsonObject.has("image")) {
