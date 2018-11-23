@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
@@ -13,12 +14,19 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.hero.depandency.ImageLoadUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -187,10 +195,11 @@ public class HeroTabActivity extends HeroHomeActivity implements RadioGroup.OnCh
         try {
             for (int j = 0; j < contentArray.length(); j++) {
                 String title = contentArray.getJSONObject(j).optString("title");
-                RadioButton button = (RadioButton) LayoutInflater.from(this).inflate(R.layout.tab_items, rg, false);
+                final RadioButton button = (RadioButton) LayoutInflater.from(this).inflate(R.layout.tab_items, rg, false);
                 if (!TextUtils.isEmpty(title)) {
                     button.setText(title);
                 }
+
                 if (contentArray.getJSONObject(j).has("imageId") && contentArray.getJSONObject(j).has("imageIdSeleted")) {
                     int id = contentArray.getJSONObject(j).getInt("imageId");
                     int idSeleted = contentArray.getJSONObject(j).getInt("imageIdSeleted");
@@ -202,6 +211,17 @@ public class HeroTabActivity extends HeroHomeActivity implements RadioGroup.OnCh
                     if (id != 0) {
                         StateListDrawable tabIcon = generateTabIcon(id, id);
                         button.setCompoundDrawables(null, tabIcon, null, null);
+                    } else {
+                        Glide.with(this).load(imageName).into(new SimpleTarget<GlideDrawable>() {
+                            @Override
+                            public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
+                                StateListDrawable drawable = new StateListDrawable();
+                                drawable.addState(new int[] {android.R.attr.state_checked}, resource);
+                                drawable.addState(new int[] {}, resource);
+                                drawable.setBounds(0, 0, getResources().getDimensionPixelSize(R.dimen.tab_icon_width), getResources().getDimensionPixelSize(R.dimen.tab_icon_height));
+                                button.setCompoundDrawables(null, drawable, null, null);
+                            }
+                        });
                     }
                 }
                 button.setTag(contentTags.get(j));
