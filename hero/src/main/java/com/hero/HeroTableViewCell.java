@@ -288,6 +288,19 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
                 textView.setText("");
             }
         }
+        if (jsonObject.has("detail")) {
+            TextView textView = (TextView) findViewById(R.id.textViewDetail);
+            if (textView != null) {
+                textView.setVisibility(View.VISIBLE);
+                textView.setText(jsonObject.getString("detail"));
+            }
+        } else {
+            TextView textView = (TextView) findViewById(R.id.textViewDetail);
+            if (textView != null) {
+                textView.setVisibility(View.GONE);
+                textView.setText("");
+            }
+        }
         if (jsonObject.has("image")) {
             ImageView imageView = (ImageView) findViewById(R.id.imageView);
             if (imageView != null) {
