@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -32,10 +34,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.hero.HeroFragment.tintColor;
 
 public class HeroTabActivity extends HeroHomeActivity implements RadioGroup.OnCheckedChangeListener, View.OnClickListener {
     public static final String LOCAL_INTENT_TAB_CHANGE = "tabSelect";
@@ -197,9 +203,15 @@ public class HeroTabActivity extends HeroHomeActivity implements RadioGroup.OnCh
                 String title = contentArray.getJSONObject(j).optString("title");
                 final RadioButton button = (RadioButton) LayoutInflater.from(this).inflate(R.layout.tab_items, rg, false);
                 if (!TextUtils.isEmpty(title)) {
+                    int[] colors = new int[] {tintColor, tintColor, R.color.c2};
+                    int[][] states = new int[3][];
+                    states[0] = new int[] { android.R.attr.state_pressed};
+                    states[1] = new int[] { android.R.attr.state_checked};
+                    states[2] = new int[] {};
+                    ColorStateList colorStateList = new ColorStateList(states, colors);
+                    button.setTextColor(colorStateList);
                     button.setText(title);
                 }
-
                 if (contentArray.getJSONObject(j).has("imageId") && contentArray.getJSONObject(j).has("imageIdSeleted")) {
                     int id = contentArray.getJSONObject(j).getInt("imageId");
                     int idSeleted = contentArray.getJSONObject(j).getInt("imageIdSeleted");
@@ -212,12 +224,18 @@ public class HeroTabActivity extends HeroHomeActivity implements RadioGroup.OnCh
                         StateListDrawable tabIcon = generateTabIcon(id, id);
                         button.setCompoundDrawables(null, tabIcon, null, null);
                     } else {
-                        Glide.with(this).load(imageName).into(new SimpleTarget<GlideDrawable>() {
+                        Glide.with(this).load(imageName).downloadOnly(new SimpleTarget<File>() {
+
                             @Override
-                            public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
+                            public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
+                                Drawable d = Drawable.createFromPath(resource.getPath());
+                                Drawable originDrawable = Drawable.createFromPath(resource.getPath());
+
                                 StateListDrawable drawable = new StateListDrawable();
-                                drawable.addState(new int[] {android.R.attr.state_checked}, resource);
-                                drawable.addState(new int[] {}, resource);
+                                Drawable tintDrawable = HeroFragment.tintDrawable(d, tintColor);
+                                drawable.addState(new int[] {android.R.attr.state_pressed}, tintDrawable);
+                                drawable.addState(new int[] {android.R.attr.state_checked}, tintDrawable);
+                                drawable.addState(new int[] {}, originDrawable);
                                 drawable.setBounds(0, 0, getResources().getDimensionPixelSize(R.dimen.tab_icon_width), getResources().getDimensionPixelSize(R.dimen.tab_icon_height));
                                 button.setCompoundDrawables(null, drawable, null, null);
                             }
@@ -451,12 +469,14 @@ public class HeroTabActivity extends HeroHomeActivity implements RadioGroup.OnCh
 
     private StateListDrawable generateTabIcon(int id, int idSeleted) {
         StateListDrawable drawable = new StateListDrawable();
-        Drawable icons[] = new Drawable[2];
-        icons[0] = getResources().getDrawable(idSeleted);
-        icons[1] = getResources().getDrawable(id);
+        Drawable icons[] = new Drawable[3];
+        icons[2] = HeroFragment.tintDrawable(getResources().getDrawable(idSeleted), tintColor);
+        icons[1] = HeroFragment.tintDrawable(getResources().getDrawable(idSeleted), tintColor);
+        icons[0] = getResources().getDrawable(id);
 
-        drawable.addState(new int[] {android.R.attr.state_checked}, icons[0]);
-        drawable.addState(new int[] {}, icons[1]);
+        drawable.addState(new int[] {android.R.attr.state_pressed}, icons[2]);
+        drawable.addState(new int[] {android.R.attr.state_checked}, icons[1]);
+        drawable.addState(new int[] {}, icons[0]);
         drawable.setBounds(0, 0, getResources().getDimensionPixelSize(R.dimen.tab_icon_width), getResources().getDimensionPixelSize(R.dimen.tab_icon_height));
         return drawable;
     }

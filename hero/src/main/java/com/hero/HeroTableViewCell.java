@@ -38,6 +38,7 @@ import android.widget.AbsListView;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.hero.depandency.ImageLoadUtils;
@@ -290,6 +291,10 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
         if (jsonObject.has("image")) {
             ImageView imageView = (ImageView) findViewById(R.id.imageView);
             if (imageView != null) {
+                int imageSize = jsonObject.has("height") ? HeroView.dip2px(getContext(), jsonObject.getInt("height")) : getContext().getResources().getDimensionPixelSize(R.dimen.list_footer_height);
+                LinearLayout.LayoutParams p;
+                p = new LinearLayout.LayoutParams(imageSize, imageSize);
+                imageView.setLayoutParams(p);
                 imageView.setVisibility(VISIBLE);
                 ImageLoadUtils.LoadImage(imageView, jsonObject.getString("image"));
             }

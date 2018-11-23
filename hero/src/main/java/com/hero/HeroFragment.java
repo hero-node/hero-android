@@ -1745,6 +1745,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
         }
     }
 
+    @SuppressLint("ResourceAsColor")
     private TextView createTextButton(JSONObject object, ViewGroup parent, final JSONObject clickEvent) {
         String text = object.optString("title");
         TextView textButton = (TextView) LayoutInflater.from(getContext()).inflate(R.layout.action_button, parent, false);
@@ -1757,6 +1758,8 @@ public class HeroFragment extends Fragment implements IHeroContext {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        } else {
+            textButton.setTextColor(tintColor);
         }
         parent.addView(textButton);
 
@@ -1779,7 +1782,10 @@ public class HeroFragment extends Fragment implements IHeroContext {
         ImageView imageView = (ImageView) view.findViewById(R.id.actionImage);
         String image = data.optString("image");
         if (image != null) {
-            imageView.setImageResource(ImageLoadUtils.getLocalImageIdByName(getContext(), image));
+            Drawable originDrawable = ContextCompat.getDrawable(getActivity(),
+                    ImageLoadUtils.getLocalImageIdByName(getContext(), image));
+            imageView.setImageDrawable(tintDrawable(originDrawable, tintColor));
+
             final JSONObject clickEvent = data.optJSONObject("click");
             if (clickEvent != null) {
                 imageView.setOnClickListener(new View.OnClickListener() {
