@@ -49,6 +49,8 @@ import com.hero.depandency.MPermissionUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import rx.functions.Action1;
+
 /**
  * Created by liuguoping on 15/9/23.
  */
@@ -71,22 +73,27 @@ public class HeroScanBarCodeView extends FrameLayout implements IHero, QRCodeRea
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (!requestCameraPermission()) {
-            Toast.makeText(getContext(), R.string.open_camera_fail, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (Camera.getNumberOfCameras() > 0) {
-            qrCodeView = new QRCodeReaderView(this.getContext());
-            qrCodeView.setOnQRCodeReadListener(this);
-            qrCodeView.setBackCamera();
-            qrCodeView.setAutofocusInterval(2000L);
-            if (previewLayout != null) {
-                previewLayout.addView(qrCodeView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            } else {
-                this.addView(qrCodeView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        MPermissionUtils.requestPermissionAndCall(getContext(), Manifest.permission.CAMERA, new Action1<Boolean>() {
+            @Override
+            public void call(Boolean aBoolean) {
+                if (aBoolean) {
+                    if (Camera.getNumberOfCameras() > 0) {
+                        qrCodeView = new QRCodeReaderView(getContext());
+                        qrCodeView.setOnQRCodeReadListener(HeroScanBarCodeView.this);
+                        qrCodeView.setBackCamera();
+                        qrCodeView.setAutofocusInterval(2000L);
+                        if (previewLayout != null) {
+                            previewLayout.addView(qrCodeView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                        } else {
+                            HeroScanBarCodeView.this.addView(qrCodeView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                        }
+                        qrCodeView.startCamera();
+                    }
+                } else {
+                    Toast.makeText(getContext(), R.string.open_camera_fail, Toast.LENGTH_SHORT).show();
+                }
             }
-            qrCodeView.startCamera();
-        }
+        });
     }
 
 
@@ -111,10 +118,6 @@ public class HeroScanBarCodeView extends FrameLayout implements IHero, QRCodeRea
             }
         }
 
-    }
-
-    private boolean requestCameraPermission() {
-        return MPermissionUtils.checkAndRequestPermission(getContext(), Manifest.permission.CAMERA, MPermissionUtils.HERO_PERMISSION_CAMERA);
     }
 
 }
