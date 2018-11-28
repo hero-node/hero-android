@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.hero.HeroApplication;
 import com.hero.signature.HeroSignatureActivity;
 import com.tiger.cash.R;
 
@@ -27,6 +28,10 @@ public class SplashActivity extends Activity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        if (HeroApplication.getInstance() != null) {
+            HeroApplication.getInstance().pushActivity(this);
+        }
+
         //设置透明的状态栏和控制面板
         getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -77,7 +82,6 @@ public class SplashActivity extends Activity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        SplashActivity.this.finish();
     }
 
     @Override

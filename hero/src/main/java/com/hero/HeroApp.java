@@ -37,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -84,21 +85,17 @@ public class HeroApp implements IHero {
             String key = object.optString("key");
             if (HEROAPP_APP.equals(key)) {
                 Intent intent = new Intent(context, HeroTabActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 Bundle bundle = new Bundle();
                 bundle.putString(HEROAPP_APP, object.toString());
                 intent.putExtras(bundle);
-                context.startActivity(intent);
-
+                ActivityCompat.startActivity(HeroApplication.getInstance().getTopActivity(), intent, bundle);
                 return;
             } else if (HEROAPP_NEW_APP.equals(key)) {
                 Intent intent = new Intent(context, HeroTabActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 Bundle bundle = new Bundle();
                 bundle.putString(HEROAPP_NEW_APP, object.toString());
                 intent.putExtras(bundle);
-                context.startActivity(intent);
-
+                ActivityCompat.startActivity(HeroApplication.getInstance().getTopActivity(), intent, bundle);
                 return;
             } else if (HEROAPP_BADGE.equals(key)) {
                 Intent broadcastIntent = new Intent();

@@ -282,7 +282,6 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
             TextView textView = (TextView) findViewById(R.id.textView2);
             if (textView != null) {
                 textView.setText(jsonObject.getString("textValue"));
-                findViewById(R.id.arrow).setVisibility(View.GONE);
             }
         } else {
             TextView textView = (TextView) findViewById(R.id.textView2);
@@ -290,6 +289,19 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
                 textView.setText("");
             }
         }
+
+        if (jsonObject.has("accessoryType")) {
+            TextView textView = (TextView) findViewById(R.id.arrow);
+            if (textView != null && jsonObject.getString("accessoryType").equals("DisclosureIndicator")) {
+                findViewById(R.id.arrow).setVisibility(View.VISIBLE);
+            }
+        } else {
+            TextView textView = (TextView) findViewById(R.id.arrow);
+            if (textView != null) {
+                findViewById(R.id.arrow).setVisibility(View.GONE);
+            }
+        }
+        
         if (jsonObject.has("detail")) {
             TextView textView = (TextView) findViewById(R.id.textViewDetail);
             if (textView != null) {
@@ -336,12 +348,14 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
         }
         if (jsonObject.has("needPadding")) {
             LinearLayout linearLayout = (LinearLayout) findViewById(R.id.separatorLine);
-            FrameLayout.LayoutParams p;
-            p = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,1);
-            p.gravity = Gravity.BOTTOM;
-            p.setMargins(80,0,0,0);
-            linearLayout.setLayoutParams(p);
-            linearLayout.setVisibility(VISIBLE);
+            if (linearLayout != null) {
+                FrameLayout.LayoutParams p;
+                p = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,1);
+                p.gravity = Gravity.BOTTOM;
+                p.setMargins(80,0,0,0);
+                linearLayout.setLayoutParams(p);
+                linearLayout.setVisibility(VISIBLE);
+            }
         } else {
             // TODO:Aron
 //            LinearLayout linearLayout = (LinearLayout) findViewById(R.id.separatorLine);

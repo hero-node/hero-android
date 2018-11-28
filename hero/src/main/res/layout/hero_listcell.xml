@@ -89,8 +89,7 @@
         android:textColor="@color/switch_thumb_normal_material_dark"
         android:gravity="center_vertical|right"
         android:text=">"
-        android:visibility="gone"
-        />
+        android:visibility="gone" />
     <Switch
         android:id="@+id/switchButton"
         android:layout_width="match_parent"
