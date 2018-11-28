@@ -82,6 +82,7 @@ public class SplashActivity extends Activity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        SplashActivity.this.finish();
     }
 
     @Override
