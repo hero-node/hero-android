@@ -32,8 +32,10 @@
 package com.hero;
 
 import android.content.Context;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
@@ -129,7 +131,6 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
                 }
                 return null;
             } else if (json.has("class")) {
-//                Log.i("HeroTableViewCell", "HeroTableViewCell init from class " + json);
                 try {
                     IHero v = HeroView.fromJson(context, json);
                     holder.clazz = v.getClass();
@@ -183,7 +184,6 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
                 cell.setLayoutParams(p);
                 cell.on(json);
             }
-
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
@@ -200,14 +200,15 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
         return cell;
     }
 
-    private static int getLayoutType(JSONObject json) {
+    public static int getLayoutType(JSONObject json) {
         if (json.has("sectionTitle")) {
             return R.layout.hero_list_section_title;
         } else if (json.has("sectionFootTitle")) {
             return R.layout.hero_list_section_footer;
         } else if (json.has("emptySeparator")) {
             return R.layout.hero_list_section_separator;
-        } else if (json.has("AccessoryType")) {
+        }
+        else if (json.has("AccessoryType")) {
             // Deprecated
             try {
                 String type = json.getString("AccessoryType");
@@ -332,6 +333,19 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
             if (imageView != null) {
                 imageView.setVisibility(GONE);
             }
+        }
+        if (jsonObject.has("needPadding")) {
+            LinearLayout linearLayout = (LinearLayout) findViewById(R.id.separatorLine);
+            FrameLayout.LayoutParams p;
+            p = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,1);
+            p.gravity = Gravity.BOTTOM;
+            p.setMargins(80,0,0,0);
+            linearLayout.setLayoutParams(p);
+            linearLayout.setVisibility(VISIBLE);
+        } else {
+            // TODO:Aron
+//            LinearLayout linearLayout = (LinearLayout) findViewById(R.id.separatorLine);
+//            linearLayout.setVisibility(VISIBLE);
         }
     }
 

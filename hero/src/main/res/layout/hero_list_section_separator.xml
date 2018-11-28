@@ -3,7 +3,13 @@
              android:layout_width="match_parent"
              android:layout_height="@dimen/list_separator_height"
              android:clickable="false"
-             android:background="@color/listSectionColor"
-    >
+             android:background="@color/listSectionColor">
 
+    <LinearLayout
+        android:id="@+id/separatorLine"
+        android:layout_height="0.5dp"
+        android:layout_width="match_parent"
+        android:background="@color/defaultListDividerColor"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom"/>
 </FrameLayout>

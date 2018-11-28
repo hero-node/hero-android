@@ -33,8 +33,6 @@ package com.hero;
 
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +43,6 @@ import android.widget.FrameLayout;
 import android.widget.SectionIndexer;
 
 import com.hero.depandency.IndexBar;
-import com.hero.depandency.StringUtil;
 import com.hero.depandency.XListView;
 import com.hero.depandency.XListViewFooter;
 
@@ -112,10 +109,8 @@ public class HeroTableView extends XListView implements IHero {
         this.setAdapter(adapter);
         this.setOnItemClickListener(adapter);
 
-        ColorDrawable colorDrawable = new ColorDrawable();
-        colorDrawable.setColor(getContext().getResources().getColor(R.color.defaultListDividerColor));
-        this.setDivider(colorDrawable);
-        this.setDividerHeight(1);
+        this.setDivider(null);
+
 //        this.setRecyclerListener(new RecyclerListener() {
 //            @Override
 //            public void onMovedToScrapHeap(View view) {
@@ -246,19 +241,21 @@ public class HeroTableView extends XListView implements IHero {
             }
         }
 
-        if (jsonObject.has("separatorColor")) {
-            Drawable drawable = this.getDivider();
-            ColorDrawable colorDrawable;
-            if (drawable instanceof ColorDrawable) {
-                colorDrawable = (ColorDrawable) drawable;
-            } else {
-                colorDrawable = new ColorDrawable();
-            }
-            String colorString = jsonObject.getString("separatorColor");
-            colorDrawable.setColor(StringUtil.stringToColor(colorString));
-            this.setDivider(colorDrawable);
-            this.setDividerHeight(1);
-        }
+//        if (jsonObject.has("separatorColor")) {
+//            Drawable drawable = this.getDivider();
+//            ColorDrawable colorDrawable;
+//            if (drawable instanceof ColorDrawable) {
+//                colorDrawable = (ColorDrawable) drawable;
+//            } else {
+//                colorDrawable = new ColorDrawable();
+//            }
+//            String colorString = jsonObject.getString("separatorColor");
+//            colorDrawable.setColor(StringUtil.stringToColor(colorString));
+//            InsetDrawable insetDrawable = new InsetDrawable(colorDrawable, 0, 0, 1000, 0);
+//            this.setDivider(insetDrawable);
+//            this.setDividerHeight(1);
+//        }
+
         if (jsonObject.has("fragmentData")) {
             JSONObject fragmentData = jsonObject.getJSONObject("fragmentData");
             String dataCommand = fragmentData.getString("command");
@@ -455,11 +452,12 @@ public class HeroTableView extends XListView implements IHero {
                                 return dataSource.getJSONObject(i);
                             }
                             count++;
-                        } else {
+                        }
+                        else {
                             // only show the separator when section more than 1
                             if (dataSource.length() > 1) {
                                 if (count == position) {
-                                    JSONObject json = new JSONObject();
+                                    JSONObject json = dataSource.getJSONObject(i);
                                     json.put("emptySeparator", "1");
                                     return json;
                                 }
@@ -506,14 +504,22 @@ public class HeroTableView extends XListView implements IHero {
         public View getView(int position, View view, ViewGroup parent) {
             JSONObject item = null;
             item = (JSONObject) this.getItem(position);
+            if (position + 1 < itemCount) {
+                try {
+                    JSONObject itemNext = null;
+                    itemNext = (JSONObject) this.getItem(position + 1);
+                    int nextLayoutType = HeroTableViewCell.getLayoutType(itemNext);
+                    int layoutType = HeroTableViewCell.getLayoutType(item);
+                    if (nextLayoutType == layoutType) {
+                        item.put("needPadding",true);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
             View itemView = HeroTableViewCell.getView(context, view, item);
             HeroView.setFragmentTag(itemView, HeroView.getFragmentTag(HeroTableView.this));
             itemView.setTag(R.id.kListViewPosition, position);
-//            if (recycleEditContents.get(position) != null) {
-//                if (itemView instanceof EditText) {
-//                    ((EditText) itemView).setText(recycleEditContents.get(position));
-//                }
-//            }
             return itemView;
         }
 
