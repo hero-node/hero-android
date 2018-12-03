@@ -44,6 +44,7 @@ import android.webkit.DownloadListener;
 import android.webkit.JavascriptInterface;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -60,9 +61,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Map;
 
 /**
@@ -87,8 +90,6 @@ public class HeroWebView extends WebView implements IHero {
         // the WRITE_SECURE_SETTINGS permission because it's a system permission
         try {
             this.getSettings().setJavaScriptEnabled(true);
-
-
             //add
             this.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
 
@@ -120,6 +121,7 @@ public class HeroWebView extends WebView implements IHero {
 
         final Context theContext = context;
         this.setWebViewClient(new WebViewClient() {
+
 
 
 
@@ -218,6 +220,15 @@ public class HeroWebView extends WebView implements IHero {
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
                 setWindowAttribute();
+                //JS注入
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    view.evaluateJavascript(getFromAssets("hero-provider.js"), new ValueCallback<String>() {
+                        @Override
+                        public void onReceiveValue(String value) {
+
+                        }
+                    });
+                }
             }
 
             @Override
@@ -263,6 +274,28 @@ public class HeroWebView extends WebView implements IHero {
                     super.onProgressChanged(view, newProgress);
             }
         });
+    }
+
+    public String getFromAssets(String fileName){
+        String jsStr = "";
+        try {
+            InputStream in = getResources().getAssets().open(fileName);
+            byte buff[] = new byte[1024];
+            ByteArrayOutputStream fromFile = new ByteArrayOutputStream();
+            do {
+                int numRead = in.read(buff);
+                if (numRead <= 0) {
+                    break;
+                }
+                fromFile.write(buff, 0, numRead);
+            } while (true);
+            jsStr = fromFile.toString();
+            in.close();
+            fromFile.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return jsStr;
     }
 
     public static String inputStreamTOString(InputStream in) throws Exception{
