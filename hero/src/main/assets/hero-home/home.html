@@ -1,0 +1,229 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./app/autoRefresh.js"></script>
+  <script src='/socket.io/socket.io.js'></script>
+  <script src="./app/config.js"></script>
+  <script src="./app/shareViews.js"></script>
+  <script src="./app/herohelper.js"></script>
+  <script src="./app/hero.js"></script>
+  <script>
+
+    Hero.on = function(data){
+      if (data.click === 'wallet') {
+        this.datas([{
+                    name:'signature',
+                    transactionType:3
+                    },
+                    {
+                      name:'menu',
+                      hidden:true
+                    },
+                    {
+                      name:'list',
+                      hidden:true
+                    }])
+      }
+      if (data.click === 'node') {
+        this.datas([{
+                      name:'toast',
+                      text:'节点信息暂未开放'
+                  },
+                  {
+                    name:'menu',
+                    hidden:true},
+                  {
+                    name:'list',
+                    hidden:true
+                  }])
+      }
+    };
+    Hero.viewWillAppear = function() {
+      var history = localStorage.hero_home_history?JSON.parse(localStorage.hero_home_history):[
+        {title:'Hero test',icon:path+'/images/saibiwo_icon.png',url:host+'/example/hero-home/test.html'},
+        {title:'Hero Chat',icon:path+'/images/saibiwo_icon.png',url:host+'/example/hero-chat/message.html'},
+        {title:'Hero Contacts',icon:path+'/images/saibiwo_icon.png',url:host+'/example/hero-chat/Contacts.html'},
+        {title:'Hero Me',icon:path+'/images/saibiwo_icon.png',url:host+'/example/hero-chat/me.html'},
+        {title:'Hero Store',icon:path+'/images/saibiwo_icon.png',url:host+'/example/hero-store/home.html'},
+        {title:'Hero OTC',icon:path+'/images/saibiwo_icon.png',url:host+'/example/hero-apollo/otc.html'},
+        {title:'Hero trade',icon:path+'/images/saibiwo_icon.png',url:host+'/example/hero-apollo/trade.html'},
+        {title:'Hero game',icon:path+'/images/saibiwo_icon.png',url:host+'/example/gather-blessing/home.html'},
+        {title:'糗事百科',icon:path+'/images/saibiwo_icon.png',url:'https://heronode.io'},
+        {title:'大象公会',icon:path+'/images/saibiwo_icon.png',url:'https://heronode.io'},
+        {title:'百度',icon:path+'/images/saibiwo_icon.png',url:'https://news.baidu.com/index.html'},
+        {title:'36Kr',icon:path+'/images/saibiwo_icon.png',url:'https://heronode.io/index.html'},
+        {title:'incentives',icon:path+'/images/saibiwo_icon.png',url:'https://heronode.io/incentives'},
+        {title:'incentives test',icon:path+'/images/saibiwo_icon.png',url:host+'/example/hero-home/test1.html'},
+        {title:'fomo3D',icon:path+'/images/saibiwo_icon.png',url:'https://exitscam.me/play'},
+        {title:'One',icon:path+'/images/saibiwo_icon.png',url:'https://heronode.iio'},
+      ];
+      var historyViews = [];
+      for (var i = 0; i < history.length; i++) {
+        var item = history[i];
+        var itemView = {
+          class:'HeroView',
+          frame:{x:i%5/5+'x',y:parseInt(i/5)*68+'',w:'0.2x',h:'68'},
+          subViews:[
+            {
+              class:'HeroButton',
+              frame:{w:'1x',h:'1x'},
+              ripple:true,
+              backgroundColor:'ffffff',
+              click:{command:'gotoWithLoading:'+item.url}
+            },
+            {
+              class:'HeroImageView',
+              frame:{w:'33',h:'33',x:'0.5x-16.5',y:'10'},
+              image:item.icon
+            },
+            {
+              class:'HeroLabel',
+              frame:{w:'1x',h:'22',b:'0'},
+              text:item.title,
+              size:10,
+              alignment:'center',
+              textColor:'666666'
+            }
+          ]
+        }
+        historyViews.push(itemView);
+      };
+      setTimeout(function(){
+        Hero.datas({name:'historyContent',subViews:historyViews});
+      },500)
+    };
+    Hero.viewWillDisAppear = function() {
+    };
+    Hero.viewDidload = function() {
+    };
+    Hero.ui = {
+      nav:{
+        navigationBarHidden:true
+      },
+      views:
+      [
+        {
+          class:'HeroWebView',
+          // enable:false,
+          frame:{w:'1x',h:'1x'},
+          url:path+'/p2pview.html',
+          alpha:0.5
+        },
+        {
+          class:'HeroImageView',
+          frame:{x:'0.5x-100',y:'0.5x-110',w:'200',h:'40'},
+          image:path+'/images/logo.png'
+        },
+        {
+          class:'HeroView',
+          frame:{x:'0.1x',y:'0.5x-50',r:'0.1x',h:'50'},
+          borderColor:'666666',
+          cornerRadius:10,
+          borderWidth:0.5,
+        },
+        {
+          class:'HeroView',
+          name:'historyContent',
+          frame:{x:'25',r:'25',y:'0.5x+50',b:'44'},
+        },
+        {
+          class:'HeroView',
+          frame:{r:'40',t:'88',w:'50',h:'50'},
+          backgroundColor:'ff0000',
+          subViews:[
+            {
+              class:'HeroButton',
+              ripple:true,
+              backgroundColor:'ffffff',
+              frame:{w:'1x',h:'1x'},
+              click:{datas:[{name:'menu',hidden:false}]}
+            },
+            {
+              class:'HeroImageView',
+              frame:{x:'0.5x-20',y:'0.5x-15',w:'40',h:'30'},
+              image:path+'/images/tools.png',
+            }
+          ]
+        },
+        {
+          class:'HeroView',
+          frame:{w:'1x',h:'1x'},
+          backgroundColor:'aaaaaaaa',
+          hidden:true,
+          name:'menu',
+          subViews:[
+            {
+              class:'HeroButton',
+              frame:{w:'1x',h:'1x'},
+              click:{datas:[{name:'menu',hidden:true}]}
+            },
+            {
+              class:'HeroView',
+              frame:{r:'44',t:'128',w:'140',h:'100'},
+              subViews:[
+                {
+                  class:'HeroImageView',
+                  frame:{w:'1x',h:'1x'},
+                  image:path+'/images/menu_background.png'
+                },
+                {
+                  class:'HeroButton',
+                  frame:{x:'5',t:'14',r:'6',h:'40'},
+                  ripple:true,
+                  backgroundColor:'ffffff',
+                  click:{click:'wallet'}
+                },
+                {
+                  class:'HeroImageView',
+                  frame:{x:'12',t:'24',w:'26',h:'18'},
+                  image:path+'/images/wallet_icon.png',
+                },
+                {
+                  class:'HeroLabel',
+                  frame:{x:'50',t:'24',r:'10',h:'20'},
+                  text:'我的钱包',
+                  size:14,
+                },
+                {
+                  class:'HeroButton',
+                  frame:{x:'5',t:'55',r:'6',h:'40'},
+                  ripple:true,
+                  backgroundColor:'ffffff',
+                  click:{click:'node'}
+                },
+                {
+                  class:'HeroImageView',
+                  frame:{x:'12',t:'65',w:'26',h:'18'},
+                  image:path+'/images/node_icon.png',
+                },
+                {
+                  class:'HeroLabel',
+                  frame:{x:'50',t:'65',r:'10',h:'20'},
+                  text:'节点信息',
+                  size:14,
+                  click:{click:'node2'}
+                },
+                {
+                  class:'HeroView',
+                  frame:{x:'5',t:'54',r:'6',h:'0.5'},
+                  backgroundColor:'eeeeee'
+                }
+              ]
+            }
+          ]
+        },
+        {
+          class:'HeroToast',
+          name:'toast',
+        },
+        {
+  				class:'HeroSignature',
+  				name:'signature'
+  			}
+      ]
+    };
+
+  </script>
+</body>
+</html>
