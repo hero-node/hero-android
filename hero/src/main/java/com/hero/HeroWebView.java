@@ -32,11 +32,15 @@
 package com.hero;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -44,6 +48,7 @@ import android.webkit.DownloadListener;
 import android.webkit.JavascriptInterface;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
+import android.webkit.MimeTypeMap;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -63,9 +68,16 @@ import org.json.JSONTokener;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -82,25 +94,18 @@ public class HeroWebView extends WebView implements IHero {
     private String postData;
     private String method;
     private static final String METHOD_POST = HttpPost.METHOD_NAME;
-
-    public HeroWebView(Context context) {
-        super(context);
-        // On some phones SecurityException will be thrown for lacking WRITE_SECURE_SETTINGS permission,
-        // but the method doesn't need a secure permission at all, furthermore, we can't ask for
-        // the WRITE_SECURE_SETTINGS permission because it's a system permission
+    private boolean injectHero;
+    private HashMap modules;
+    public HeroWebView(Context context, int initColor, final boolean injectHero) {
+        this(context);
         try {
             this.getSettings().setJavaScriptEnabled(true);
-            //add
             this.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
         this.addJavascriptInterface(this, "native");
-//        this.addJavascriptInterface(this,"npc");
-//        if (Build.VERSION.SDK_INT < 17) {
-//            this.removeJavascriptInterface("searchBoxJavaBridge_");
-//        }
+        this.setInjectHero(injectHero);
         String userAgent = this.getSettings().getUserAgentString();
         userAgent += " Android/" + ContextUtils.getSystemVersion() + " hero-android/" + ContextUtils.getVersionCode(this.getContext()) + " imei/" + ContextUtils.getIMEI(context) + " androidId/" + ContextUtils.getAndroidId(context);
         userAgent += " Brand/" + ContextUtils.getDeviceBrand() +" Model/" + ContextUtils.getDeviceName();
@@ -118,16 +123,25 @@ public class HeroWebView extends WebView implements IHero {
         this.getSettings().setAppCacheEnabled(true);
         this.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
         this.setDownloadListener(new MyWebViewDownLoadListener());
-
         final Context theContext = context;
         this.setWebViewClient(new WebViewClient() {
-
-
-
-
+            @Nullable
             @Override
-            public void onLoadResource(WebView view, String url) {
-                super.onLoadResource(view, url);
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                String url = request.getUrl().toString();
+                if (url.startsWith("https://localhost:3000")){
+                    try {
+                        InputStream in = getResources().getAssets().open(request.getUrl().getPath().substring(1));
+                        WebResourceResponse resourceResponse = new WebResourceResponse(
+                                MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(url))
+                                , "UTF-8", in);
+                        return resourceResponse;
+                    } catch (IOException e) {
+                        Log.d("WebViewDebug",e.getMessage()+e.toString());
+                        e.printStackTrace();
+                    }
+                }
+                return super.shouldInterceptRequest(view, request);
             }
 
             @Override
@@ -166,13 +180,6 @@ public class HeroWebView extends WebView implements IHero {
             }
 
             @Override
-            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                super.onReceivedError(view, request, error);
-
-                Log.i(TAG, "onReceivedError " + error);
-            }
-
-            @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 super.onReceivedError(view, errorCode, description, failingUrl);
                 InputStream page404 = getResources().openRawResource(R.raw.page_404);
@@ -185,7 +192,6 @@ public class HeroWebView extends WebView implements IHero {
                     }
                     view.loadData(content, "text/html;charset=UTF-8", null);
                 }
-
                 try {
                     JSONObject object = new JSONObject("{common:'webViewDidFinishLoad'}");
                     HeroView.sendActionToContext(getContext(), object);
@@ -195,21 +201,16 @@ public class HeroWebView extends WebView implements IHero {
             }
 
             @Override
-            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
-                super.onReceivedHttpError(view, request, errorResponse);
-                Log.i(TAG, "onReceivedHttpError " + errorResponse);
-            }
-
-            @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                setWindowAttribute();
                 if (view.getParent() != null && parentFragment != null) {
                     parentFragment.showToolBar(true);
                 }else{
                     HeroFragment.evaluateJavaScript(view, HeroFragment.VIEW_WILL_APPEAR_EXPRESSION);
                 }
                 try {
-                    JSONObject object = new JSONObject("{common:'webViewDidFinishLoad'}");
+                    JSONObject object = new JSONObject("{command:'webViewDidFinishLoad'}");
                     HeroView.sendActionToContext(getContext(), object);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -219,16 +220,6 @@ public class HeroWebView extends WebView implements IHero {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
-                setWindowAttribute();
-                //JS注入
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    view.evaluateJavascript(getFromAssets("hero-provider.js"), new ValueCallback<String>() {
-                        @Override
-                        public void onReceiveValue(String value) {
-
-                        }
-                    });
-                }
             }
 
             @Override
@@ -251,12 +242,10 @@ public class HeroWebView extends WebView implements IHero {
             public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
                 return super.onJsPrompt(view, url, message, defaultValue, result);
             }
-
             @Override
             public boolean onJsBeforeUnload(WebView view, String url, String message, JsResult result) {
                 return super.onJsBeforeUnload(view, url, message, result);
             }
-
             @Override
             public void onReceivedTitle(WebView view, String title) {
                 super.onReceivedTitle(view, title);
@@ -267,13 +256,16 @@ public class HeroWebView extends WebView implements IHero {
                     }
                 }
             }
-
-
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
-                    super.onProgressChanged(view, newProgress);
+                super.onProgressChanged(view, newProgress);
             }
         });
+        this.setBackgroundColor(initColor);
+    }
+
+    public HeroWebView(Context context) {
+        super(context);
     }
 
     public String getFromAssets(String fileName){
@@ -311,10 +303,6 @@ public class HeroWebView extends WebView implements IHero {
         return new String(outStream.toByteArray(),"UTF-8");
     }
 
-    public HeroWebView(Context context, int initColor) {
-        this(context);
-        this.setBackgroundColor(initColor);
-    }
 
     @JavascriptInterface
     public void on(String jsonStr) {
@@ -339,35 +327,81 @@ public class HeroWebView extends WebView implements IHero {
 
     @JavascriptInterface
     public void npc(String jsonStr) {
+        Log.d("WebViewDebug","npc"+jsonStr);
         try {
-            Object json = new JSONTokener(jsonStr).nextValue();
-            if (parentFragment != null && parentFragment.getTag() != null) {
-                if (json instanceof JSONObject) {
-                    ((JSONObject) json).put(FRAGMENT_TAG_KEY, parentFragment.getTag());
-                } else if (json instanceof JSONArray) {
-                    JSONObject tag = new JSONObject();
-                    tag.put(FRAGMENT_TAG_KEY, parentFragment.getTag());
-                    ((JSONArray) json).put(tag);
-                }
+            String str = jsonStr.replaceAll("heronpc://","");
+            Log.d("WebViewDebug","npc"+str);
+            String module = str.split("\\?")[0];
+            Log.d("WebViewDebug","npc"+module);
+            JSONObject json = (JSONObject)new JSONTokener(str.split("\\?")[1]).nextValue();
+            if (modules == null){
+                modules = new HashMap();
             }
-            if (this.getContext() instanceof IHeroContext) {
-                ((IHeroContext) this.getContext()).on(json);
+            if (!modules.containsKey(module)){
+                json.put("class",module);
+                IHero m = HeroView.fromJson(this.getContext(),json);
+                m.on(json);
+                modules.put(module,m);
+            }else{
+                ((IHero)modules.get(module)).on(json);
             }
         } catch (JSONException e) {
             e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
-
     @Override
     public void loadUrl(String url) {
         if (BuildConfig.DEBUG && url.startsWith("http")) {
+            this.setWebContentsDebuggingEnabled(true);
             if (url.contains("?")) {
                 url = url + "&test=true";
             } else {
                 url = url + "?test=true";
             }
         }
+        mUrl = url;
         if (!isUrlAuthenticated(url)) {
+            return;
+        }
+        if (injectHero){
+            final String _url = url;
+            final WebView _webview = this;
+            new Thread() {
+                public void run() {
+                    try {
+                        URL oracle = new URL(_url);
+                        BufferedReader in = new BufferedReader(
+                                new InputStreamReader(oracle.openStream()));
+                        StringBuilder response = new StringBuilder();
+                        String inputLine;
+                        while ((inputLine = in.readLine()) != null)
+                            response.append(inputLine+"\n");
+                        in.close();
+                        String _content = response.toString();
+                        _content = _content.replaceAll("<head>","<head><script src='https://localhost:3000/hero-home/hero-provider.js'></script>");
+                        _content = _content.replaceAll("Content-Security-Policy","Hero Web3 Provider");
+                        final String  content = _content;
+                        _webview.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _webview.loadDataWithBaseURL(_url,content,"text/html","",null);
+                            }
+                        });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
             return;
         }
         Map header = null;
@@ -438,6 +472,10 @@ public class HeroWebView extends WebView implements IHero {
 
     public void setFragment(HeroFragment fragment) {
         parentFragment = fragment;
+    }
+
+    public void setInjectHero(boolean injectHero) {
+        this.injectHero = injectHero;
     }
 
     private class MyWebViewDownLoadListener implements DownloadListener {

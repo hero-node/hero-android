@@ -1,15 +1,13 @@
 package com.hero.signature.fragment;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +21,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hero.HeroFragment;
 import com.hero.R;
 import com.hero.signature.Constants;
 import com.hero.signature.HeroSignatureActivity;
@@ -51,7 +48,7 @@ import static com.hero.signature.Constants.SCRYPT;
 /**
  * Created by Aron on 2018/7/17.
  */
-public class HeroSignatureImportFragment extends HeroFragment {
+public class HeroSignatureImportFragment extends android.support.v4.app.Fragment {
 
     private View layout;
 

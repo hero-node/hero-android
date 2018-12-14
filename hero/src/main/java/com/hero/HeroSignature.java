@@ -92,6 +92,18 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
     public void on(JSONObject jsonObject) throws JSONException {
         HeroView.on(this, jsonObject);
         fingerprint_tv.setText("指纹识别中");
+        if (jsonObject.has("accounts")){
+
+        }
+        if (jsonObject.has("wallet")){
+            Intent intent = new Intent(context, HeroSignatureActivity.class);
+            intent.putExtra("jumpType", 1);
+            context.startActivity(intent);
+            return;
+        }
+        if (jsonObject.has("transaction")){
+
+        }
         if (jsonObject.has("message"))
         {
             System.out.println(jsonObject.toString());
@@ -299,7 +311,6 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
         if (fingerprint_alertDialog != null && fingerprint_alertDialog.isShowing()) {
             fingerprint_alertDialog.dismiss();
         }
-
         new MyTask((HeroActivity) getContext(), value).execute();
         popupWindow.dismiss();
     }

@@ -1,5 +1,6 @@
 package com.hero.signature.fragment;
 
+import android.app.Fragment;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -16,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hero.HeroFragment;
 import com.hero.R;
 import com.hero.utils.ZxingUtils;
 
@@ -25,7 +25,7 @@ import org.web3j.crypto.WalletFile;
 /**
  * Created by Aron on 2018/8/06.
  */
-public class HeroSignatureExportFragment extends HeroFragment {
+public class HeroSignatureExportFragment extends android.support.v4.app.Fragment {
 
     private View layout;
 

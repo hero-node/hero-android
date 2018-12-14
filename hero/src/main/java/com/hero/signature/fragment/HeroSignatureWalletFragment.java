@@ -1,6 +1,7 @@
 package com.hero.signature.fragment;
 
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -39,7 +40,7 @@ import java.lang.ref.WeakReference;
 /**
  * Created by Aron on 2018/7/24.
  */
-public class HeroSignatureWalletFragment extends HeroFragment {
+public class HeroSignatureWalletFragment extends android.support.v4.app.Fragment {
 
     private View layout;
 

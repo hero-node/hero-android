@@ -1,5 +1,6 @@
 package com.hero.signature.fragment;
 
+import android.app.Fragment;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -23,7 +24,7 @@ import org.web3j.crypto.WalletFile;
 /**
  * Created by Aron on 2018/08/05.
  */
-public class HeroSignatureQRcodeFragment extends HeroFragment {
+public class HeroSignatureQRcodeFragment extends android.support.v4.app.Fragment {
 
     private View layout;
 

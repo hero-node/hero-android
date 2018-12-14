@@ -58,6 +58,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -117,6 +118,9 @@ public class HeroFragment extends Fragment implements IHeroContext {
     private boolean shouldSendViewWillAppear;
     private boolean isHidden = false;
     private boolean isNavigationBarHidden = false;
+    private boolean showLoading;
+    private boolean injectJS;
+
     private ArrayList<Integer> requestCodes = new ArrayList<Integer>();
     private ACache mCache;
     protected ProgressDialog progressDialog;
@@ -147,14 +151,21 @@ public class HeroFragment extends Fragment implements IHeroContext {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        contextMenuHandler = new HashMap<>();
+        progressDialog = createProgressDialog(getContext());
         Bundle bundle = getArguments();
-        if (bundle != null) mUrl = bundle.getString(ARGUMENTS_URL);
+        if (bundle != null) {
+            mUrl = bundle.getString(ARGUMENTS_URL);
+            showLoading = bundle.getBoolean("showLoading");
+            if (showLoading){
+                showProgressDialog(progressDialog,true);
+            }
+            injectJS = bundle.getBoolean("injectJS");
+        }
         shouldSendViewWillAppear = false;
         if (((HeroFragmentActivity) getActivity()).isActionBarShown()) {
             setHasOptionsMenu(true);
         }
-        contextMenuHandler = new HashMap<>();
-        progressDialog = createProgressDialog(getContext());
     }
 
     @Override
@@ -361,7 +372,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
     }
 
     private void initWebView() {
-        mWebview = new HeroWebView(getActivity(), getResources().getColor(R.color.heroWhite));
+        mWebview = new HeroWebView(getActivity(), getResources().getColor(R.color.heroWhite),injectJS);
         mLayout.addView(mWebview);
         mWebview.setFragment(this);
         FrameLayout.LayoutParams webViewParams = new FrameLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
@@ -370,7 +381,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
     }
 
     private HeroWebView newWebView() {
-        HeroWebView webView = new HeroWebView(getActivity(), getResources().getColor(R.color.heroWhite));
+        HeroWebView webView = new HeroWebView(getActivity(), getResources().getColor(R.color.heroWhite),injectJS);
         webView.setVisibility(View.GONE);
         mLayout.addView(webView);
         webView.setFragment(this);
@@ -770,21 +781,16 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             if (getContext() instanceof HeroFragmentActivity) {
                                 Intent intent = ((HeroFragmentActivity) getContext()).getGotoIntent();
                                 intent.putExtra("url", url);
-                                View magicView = null;
-                                if (mCache != null) {
-                                    JSONObject nextCache = mCache.getAsJSONObject(url);
-                                    // only find magic view when next page has a cache
-                                    if (nextCache != null) {
-                                        magicView = findMagicView();
-                                    }
-                                }
+                                intent.putExtra("showLoading", true);
+                                intent.putExtra("injectJS", true);
                                 if (getActivity() instanceof HeroOneActivity) {
                                     int requestCode = HeroActivity.getAutoGenerateRequestCode();
                                     requestCodes.add(requestCode);
-                                    magicGoto(getActivity(), intent, magicView, requestCode);
+                                    startActivityForResult(intent, requestCode);
                                 } else {
-                                    magicGoto(getActivity(), intent, magicView, -1);
+                                    startActivity(intent);
                                 }
+                                HeroActivity.activitySwitchAnimation(getActivity(), R.anim.activity_slide_in, R.anim.activity_still);
                             }
                         } else if (command.startsWith("load:")) {
                             shouldSendViewWillAppear = true;
@@ -808,6 +814,8 @@ public class HeroFragment extends Fragment implements IHeroContext {
                                 showProgressDialog(progressDialog, true);
                             }
                         } else if (command.startsWith("stopLoading")) {
+                            hideProgressDialog(progressDialog);
+                        }  else if (command.startsWith("webViewDidFinishLoad")) {
                             hideProgressDialog(progressDialog);
                         } else if (command.startsWith("present:")) {
                             String url = command.replace("present:", "");
@@ -1055,7 +1063,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
                 } else if (json.has("remind")) {
                     addReminder(json);
                 } else {
-                    evaluateJavaScript("Hero.in(" + json.toString() + ")");
+                    evaluateJavaScript("window.Hero && Hero.in(" + json.toString() + ")");
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

@@ -1,5 +1,6 @@
 package com.hero.signature.fragment;
 
+import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,8 +11,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hero.HeroDrawerActivity;
-import com.hero.HeroFragment;
 import com.hero.R;
 import com.hero.signature.Constants;
 import com.hero.signature.HeroSignatureActivity;
@@ -29,7 +28,7 @@ import java.lang.ref.WeakReference;
 /**
  * Created by Aron on 2018/7/26.
  */
-public class HeroSignatureModifyPwdFragment extends HeroFragment {
+public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragment {
 
     private View layout;
 

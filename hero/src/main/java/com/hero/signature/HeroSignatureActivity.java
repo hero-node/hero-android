@@ -1,6 +1,7 @@
 package com.hero.signature;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.security.keystore.KeyProperties;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -43,8 +45,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSignatureHomeFragment.OnClickListener,
-        HeroSignatureWalletFragment.OnClickListener, FingerprintHelper.SimpleAuthenticationCallback {
+public class HeroSignatureActivity extends FragmentActivity implements HeroSignatureWalletFragment.OnClickListener, FingerprintHelper.SimpleAuthenticationCallback {
 
     private HeroSignatureHomeFragment homeFragment = new HeroSignatureHomeFragment();
 
@@ -114,19 +115,20 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
         initMainContent();
         heroWaitDialog = new HeroWaitDialog(this);
 
-        Intent intent = getIntent();
-        if (intent != null && intent.getExtras() != null) {
-            if (intent.getExtras().containsKey("jumpType")) {
-                int jump = intent.getExtras().getInt("jumpType");
-                if (jump == 1) {
-                    checkKeystoreFile();
-                }
-            }
-        }
+//        Intent intent = getIntent();
+//        if (intent != null && intent.getExtras() != null) {
+//            if (intent.getExtras().containsKey("jumpType")) {
+//                int jump = intent.getExtras().getInt("jumpType");
+//                if (jump == 1) {
+//                    checkKeystoreFile();
+//                }
+//            }
+//        }
     }
 
     private void initMainContent() {
-        gotoFragment(homeFragment, Constants.HOME_TAG);
+        gotoFragment(modifyPwdFragment, Constants.MODIFYPASSWORD_TAG);
+
 //        Intent intent = new Intent();
 //        intent.putExtra("url", "http://10.0.0.26:3000/home.html");
 //        intent.putExtra("headBarVisible", true);
@@ -146,7 +148,7 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
 //        popupWindow.showAtLocation(contentView, Gravity.BOTTOM,0,0);
 //    }
 
-    private void gotoFragment(HeroFragment fragment, String tag) {
+    private void gotoFragment(android.support.v4.app.Fragment fragment, String tag) {
         Bundle bundle = getIntent().getExtras() == null ? new Bundle() : getIntent().getExtras();
         if (walletFileString != null && !walletFileString.equals("")) {
             bundle.putString("walletString", walletFileString);
@@ -156,7 +158,7 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
                 .replace(R.id.mainContent, fragment, tag).commitAllowingStateLoss();
     }
 
-    private void backtoFragment(HeroFragment fragment, String tag) {
+    private void backtoFragment(Fragment fragment, String tag) {
         Bundle bundle = getIntent().getExtras() == null ? new Bundle() : getIntent().getExtras();
         if (walletFileString != null && !walletFileString.equals("")) {
             bundle.putString("walletString", walletFileString);
@@ -179,12 +181,6 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
     @Override
     public void onQrcodeClick() {
         gotoQRcodeFragment();
-    }
-
-    // 签名入口
-    @Override
-    public void onSignClick() {
-//        initPopupWindow();
     }
 
     public void onPostProcessed(Bundle bundle) {
@@ -230,20 +226,20 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
         }
     }
 
-    // 跳转钱包入口
-    @Override
-    public void onWalletClick() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            //申请WRITE_EXTERNAL_STORAGE权限
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    3);
-            return;
-        } else {
-            checkKeystoreFile();
-            return;
-        }
-    }
+//    // 跳转钱包入口
+//    @Override
+//    public void onWalletClick() {
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//                != PackageManager.PERMISSION_GRANTED) {
+//            //申请WRITE_EXTERNAL_STORAGE权限
+//            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+//                    3);
+//            return;
+//        } else {
+//            checkKeystoreFile();
+//            return;
+//        }
+//    }
 
     // 二维码收款码画面
     private void gotoQRcodeFragment() {
@@ -270,10 +266,10 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
         gotoFragment(importFragment, Constants.IMPORT_TAG);
     }
 
-    @Override
-    public HeroFragment getCurrentFragment() {
-        return (HeroFragment) getSupportFragmentManager().findFragmentByTag(Constants.HOME_TAG);
-    }
+//    @Override
+//    public Fragment getCurrentFragment() {
+//        return (Fragment) getSupportFragmentManager().findFragmentByTag(Constants.HOME_TAG);
+//    }
 
     @Override
     public void onBackPressed() {
@@ -303,16 +299,6 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
             fingerprint_alertDialog.dismiss();
         }
         super.onDestroy();
-    }
-
-    @Override
-    protected void startLoading() {
-
-    }
-
-    @Override
-    protected void finishLoading() {
-
     }
 
     private void checkKeystoreFile() {
@@ -364,7 +350,7 @@ public class HeroSignatureActivity extends HeroDrawerActivity implements HeroSig
                 try {
                     String scanCommand = "[{command:'goto:" + result.getContents() + "'}]";
                     JSONArray tabsArray = new JSONArray(scanCommand);
-                    on(tabsArray);
+//                    on(tabsArray);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
