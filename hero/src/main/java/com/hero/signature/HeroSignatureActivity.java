@@ -1,7 +1,5 @@
 package com.hero.signature;
 
-import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,26 +9,21 @@ import android.os.Build;
 import android.os.Bundle;
 import android.security.keystore.KeyProperties;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.hero.HeroDrawerActivity;
-import com.hero.HeroFragment;
 import com.hero.HeroWaitDialog;
 import com.hero.R;
 import com.hero.depandency.google.zxing.integration.android.IntentIntegrator;
 import com.hero.depandency.google.zxing.integration.android.IntentResult;
 import com.hero.signature.fragment.HeroSignatureExportFragment;
-import com.hero.signature.fragment.HeroSignatureHomeFragment;
+import com.hero.signature.fragment.HeroSignatureWalletListFragment;
 import com.hero.signature.fragment.HeroSignatureImportFragment;
 import com.hero.signature.fragment.HeroSignatureModifyPwdFragment;
 import com.hero.signature.fragment.HeroSignatureQRcodeFragment;
@@ -41,13 +34,12 @@ import com.hero.utils.FingerprintHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
-public class HeroSignatureActivity extends FragmentActivity implements HeroSignatureWalletFragment.OnClickListener, FingerprintHelper.SimpleAuthenticationCallback {
+public class HeroSignatureActivity extends FragmentActivity implements HeroSignatureWalletFragment.OnClickListener,
+        FingerprintHelper.SimpleAuthenticationCallback, HeroSignatureWalletListFragment.OnClickListener{
 
-    private HeroSignatureHomeFragment homeFragment = new HeroSignatureHomeFragment();
+    private HeroSignatureWalletListFragment walletListFragment = new HeroSignatureWalletListFragment();
 
     private HeroSignatureImportFragment importFragment = new HeroSignatureImportFragment();
 
@@ -59,19 +51,17 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
 
     private HeroSignatureQRcodeFragment qRcodeFragment = new HeroSignatureQRcodeFragment();
 
-    private HeroFragment heroFragment = new HeroFragment();
-
     private HeroWaitDialog heroWaitDialog;
 
     private FragmentManager fragmentManager;
-
-    private String walletFileString = null;
 
     private FingerprintHelper fingerprintHelper;
 
     private TextView fingerprint_tv;
 
     private AlertDialog fingerprint_alertDialog;
+
+    private HeroSignatureWalletListFragment.WalletData walletData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,8 +79,8 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
 //            window.setNavigationBarColor(Color.TRANSPARENT);
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-            //隐藏底部导航栏
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+            // 黑色
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
         fragmentManager = getSupportFragmentManager();
         fingerprintHelper = new FingerprintHelper(this);
@@ -115,43 +105,31 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
         initMainContent();
         heroWaitDialog = new HeroWaitDialog(this);
 
-//        Intent intent = getIntent();
-//        if (intent != null && intent.getExtras() != null) {
-//            if (intent.getExtras().containsKey("jumpType")) {
-//                int jump = intent.getExtras().getInt("jumpType");
-//                if (jump == 1) {
-//                    checkKeystoreFile();
-//                }
-//            }
-//        }
+        Intent intent = getIntent();
+        if (intent != null && intent.getExtras() != null) {
+            if (intent.getExtras().containsKey("jumpType")) {
+                int jump = intent.getExtras().getInt("jumpType");
+                if (jump == 1) {
+                    checkKeystoreFile();
+                }
+            }
+        }
     }
 
     private void initMainContent() {
-        gotoFragment(modifyPwdFragment, Constants.MODIFYPASSWORD_TAG);
-
-//        Intent intent = new Intent();
-//        intent.putExtra("url", "http://10.0.0.26:3000/home.html");
-//        intent.putExtra("headBarVisible", true);
-//        heroFragment.setArguments(intent.getExtras());
-//        fragmentManager.beginTransaction().add(R.id.mainContent, heroFragment, "test").hide(heroFragment).commitAllowingStateLoss();
+        setContentView(R.layout.activity_drawer);
+        gotoFragment(walletListFragment, Constants.WALLETLIST_TAG);
     }
-//
-//    private void initPopupWindow() {
-//        View contentView = LayoutInflater.from(this).inflate(R.layout.sign_popwindow, null, false);
-//        ((TextView)contentView.findViewById(R.id.sign_tra_data_tv)).setMovementMethod(ScrollingMovementMethod.getInstance());
-//        PopupWindow popupWindow = new PopupWindow(contentView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-//        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.WHITE));
-//        // 设置PopupWindow是否能响应外部点击事件
-//        popupWindow.setOutsideTouchable(false);
-//        popupWindow.setTouchable(true);
-//        popupWindow.setAnimationStyle(R.style.ActionSheetDialogAnimation);
-//        popupWindow.showAtLocation(contentView, Gravity.BOTTOM,0,0);
-//    }
 
     private void gotoFragment(android.support.v4.app.Fragment fragment, String tag) {
+        gotoFragment(fragment, tag, walletData);
+    }
+
+    private void gotoFragment(android.support.v4.app.Fragment fragment, String tag, HeroSignatureWalletListFragment.WalletData walletData) {
         Bundle bundle = getIntent().getExtras() == null ? new Bundle() : getIntent().getExtras();
-        if (walletFileString != null && !walletFileString.equals("")) {
-            bundle.putString("walletString", walletFileString);
+        if (walletData != null) {
+            this.walletData = walletData;
+            bundle.putSerializable("walletData", walletData);
         }
         fragment.setArguments(bundle);
         fragmentManager.beginTransaction().setCustomAnimations(R.anim.fragment_slide_left_in, R.anim.fragment_slide_right_out)
@@ -159,9 +137,14 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
     }
 
     private void backtoFragment(Fragment fragment, String tag) {
+        backtoFragment(fragment, tag, walletData);
+    }
+
+    private void backtoFragment(Fragment fragment, String tag, HeroSignatureWalletListFragment.WalletData walletData) {
         Bundle bundle = getIntent().getExtras() == null ? new Bundle() : getIntent().getExtras();
-        if (walletFileString != null && !walletFileString.equals("")) {
-            bundle.putString("walletString", walletFileString);
+        if (walletData != null) {
+            this.walletData = walletData;
+            bundle.putSerializable("walletData", walletData);
         }
         fragment.setArguments(bundle);
         fragmentManager.beginTransaction().setCustomAnimations(R.anim.fragment_slide_right_in, R.anim.fragment_slide_left_out)
@@ -169,8 +152,18 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
     }
 
     @Override
-    public void onModifyClick() {
-        gotoModifyPasswordFragment();
+    public void onItemClick(HeroSignatureWalletListFragment.WalletData walletData) {
+        gotoWalletHomeFragment(walletData);
+    }
+
+    @Override
+    public void onImportClick() {
+        gotoImportFragment();
+    }
+
+    @Override
+    public void onModifyClick(HeroSignatureWalletListFragment.WalletData walletData) {
+        gotoModifyPasswordFragment(walletData);
     }
 
     @Override
@@ -226,20 +219,10 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
         }
     }
 
-//    // 跳转钱包入口
-//    @Override
-//    public void onWalletClick() {
-//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-//                != PackageManager.PERMISSION_GRANTED) {
-//            //申请WRITE_EXTERNAL_STORAGE权限
-//            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-//                    3);
-//            return;
-//        } else {
-//            checkKeystoreFile();
-//            return;
-//        }
-//    }
+    // 钱包详细画面
+    private void gotoWalletListFragment() {
+        gotoFragment(walletListFragment, Constants.WALLETLIST_TAG);
+    }
 
     // 二维码收款码画面
     private void gotoQRcodeFragment() {
@@ -247,13 +230,13 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
     }
 
     // 钱包详细画面
-    private void gotoWalletHomeFragment() {
-        gotoFragment(walletHomeFragment, Constants.WALLETHOME_TAG);
+    private void gotoWalletHomeFragment(HeroSignatureWalletListFragment.WalletData walletData) {
+        gotoFragment(walletHomeFragment, Constants.WALLETHOME_TAG, walletData);
     }
 
     // 修改密码页面
-    private void gotoModifyPasswordFragment() {
-        gotoFragment(modifyPwdFragment, Constants.MODIFYPASSWORD_TAG);
+    private void gotoModifyPasswordFragment(HeroSignatureWalletListFragment.WalletData walletData) {
+        gotoFragment(modifyPwdFragment, Constants.MODIFYPASSWORD_TAG, walletData);
     }
 
     // 导出页面
@@ -266,11 +249,6 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
         gotoFragment(importFragment, Constants.IMPORT_TAG);
     }
 
-//    @Override
-//    public Fragment getCurrentFragment() {
-//        return (Fragment) getSupportFragmentManager().findFragmentByTag(Constants.HOME_TAG);
-//    }
-
     @Override
     public void onBackPressed() {
         if ((qRcodeFragment != null && qRcodeFragment.isVisible())
@@ -281,7 +259,7 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
         }
         if ((importFragment != null && importFragment.isVisible())
                 || (walletHomeFragment != null && walletHomeFragment.isVisible())) {
-            backtoFragment(homeFragment, Constants.HOME_TAG);
+            backtoFragment(walletListFragment, Constants.WALLETLIST_TAG);
             return;
         }
         super.onBackPressed();
@@ -302,18 +280,11 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
     }
 
     private void checkKeystoreFile() {
-        try {
-            File f = FileUtils.getKeystoreFile();
-            if (f.exists()) {
-                walletFileString = FileUtils.getKeystoreFilecontent();
-                gotoWalletHomeFragment();
-                return;
-            }
-            gotoImportFragment();
-        }  catch (IOException IOEx) {
-            IOEx.printStackTrace();
-            Toast.makeText(this,"文件处理失败",Toast.LENGTH_LONG).show();
+        if (FileUtils.hasKeystoreFile()) {
+            gotoWalletListFragment();
+            return;
         }
+        gotoImportFragment();
     }
 
     @Override

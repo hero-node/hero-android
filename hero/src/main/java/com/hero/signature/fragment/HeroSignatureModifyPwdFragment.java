@@ -23,6 +23,7 @@ import org.web3j.crypto.WalletFile;
 import org.web3j.crypto.WalletUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 /**
@@ -38,7 +39,7 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
 
     private EditText modifypwd_fragment_newpassword_confirm_et;
 
-    private String walletFileString;
+    private HeroSignatureWalletListFragment.WalletData walletData;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -50,7 +51,7 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        walletFileString = getArguments().getString("walletString");
+        walletData = (HeroSignatureWalletListFragment.WalletData) getArguments().getSerializable("walletData");
         initView();
     }
 
@@ -104,8 +105,10 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
     }
 
     private void processModify() {
-        new MyTask((HeroSignatureActivity) getActivity(), walletFileString, modifypwd_fragment_oldpassword_et.getText().toString(),
-                modifypwd_fragment_newpassword_et.getText().toString()).execute();
+        new MyTask((HeroSignatureActivity) getActivity(), walletData.getWalletFile().toString(),
+                modifypwd_fragment_oldpassword_et.getText().toString(),
+                modifypwd_fragment_newpassword_et.getText().toString(),
+                walletData.getName()).execute();
     }
 
     private static class MyTask extends AsyncTask {
@@ -118,12 +121,18 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
 
         private String newpasswordString;
 
+        private String walletName;
+
         // only retain a weak reference to the activity
-        MyTask(HeroSignatureActivity context, String walletFileString, String oldpasswordString, String newpasswordString) {
+        MyTask(HeroSignatureActivity context, String walletFileString,
+               String oldpasswordString, String newpasswordString,
+               String walletName) {
             activityReference = new WeakReference<>(context);
             this.walletFileString = walletFileString;
             this.oldpasswordString = oldpasswordString;
             this.newpasswordString = newpasswordString;
+            this.walletName = walletName;
+
         }
         @Override
         protected void onPreExecute() {
@@ -159,7 +168,7 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
                 if (keyPair != null && keyPair.getPrivateKey() != null
                         && keyPair.getPublicKey() != null) {
 
-                    File keystoreFile = FileUtils.getKeystoreFile();
+                    File keystoreFile = FileUtils.getKeystoreFile(walletName);
 
                     if (keystoreFile.exists()) {
                         keystoreFile.delete();
@@ -169,9 +178,9 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
                     //keystore文件
                     String fileName = WalletUtils.generateWalletFile(newpasswordString, keyPair, FileUtils.getAppFileDir(), false);
 
-                    FileUtils.renameFile(fileName);
+                    FileUtils.renameFile(fileName, walletName);
                     // 密码提示文件
-                    File hintFile = FileUtils.getHintFile();
+                    File hintFile = FileUtils.getHintFile(walletName);
 
                     if (hintFile.exists()) {
                         hintFile.delete();
@@ -184,12 +193,11 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
                 }
                 bundle.putBoolean("isSucceed", true);
                 bundle.putString("message", "修改密码成功");
-            }catch (CipherException ce) {
+            } catch (CipherException ce) {
                 bundle.putBoolean("isSucceed", false);
                 bundle.putString("message", "旧密码错误");
                 ce.printStackTrace();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 bundle.putBoolean("isSucceed", false);
                 bundle.putString("message", "修改密码失败");
                 e.printStackTrace();

@@ -198,6 +198,9 @@ public class HeroSignatureImportFragment extends android.support.v4.app.Fragment
         @Override
         protected Object doInBackground(Object[] objects) {
             Bundle bundle = new Bundle();
+            //获取现在有几个keystore钱包
+            int number = FileUtils.getNumbersOfKeystore();
+
             if (processType == PROCESS_TYPE_KEYSTORE) {
                 String keystore = official_wallet_keystore_et.getText().toString();
 
@@ -221,14 +224,13 @@ public class HeroSignatureImportFragment extends android.support.v4.app.Fragment
                     if (keyPair != null && keyPair.getPrivateKey() != null
                             && keyPair.getPublicKey() != null) {
 
-                        File keystoreFile = FileUtils.getKeystoreFile();
+                        File keystoreFile = FileUtils.getKeystoreFile("Keystore" + number);
 
                         if (keystoreFile.exists()) {
                             keystoreFile.delete();
                         }
                         keystoreFile.createNewFile();
-
-                        FileUtils.writeFile(Constants.KEYSTORE_FILE_PATH, official_wallet_keystore_et.getText().toString());
+                        FileUtils.writeFile(Constants.KEYSTORE_FILE_PATH + "Keystore" + number + ".json", official_wallet_keystore_et.getText().toString());
                     } else {
                         throw new CipherException("keystore密码不正确");
                     }
@@ -251,18 +253,18 @@ public class HeroSignatureImportFragment extends android.support.v4.app.Fragment
                     String fileName = WalletUtils.generateWalletFile(private_key_password_et.getText().toString(),
                             keyPair, FileUtils.getAppFileDir(), false);
 
-                    FileUtils.renameFile(fileName);
+                    //重命名文件
+                    FileUtils.renameFile(fileName, number);
 
                     // 密码提示文件
-                    File hintFile = FileUtils.getHintFile();
+                    File hintFile = FileUtils.getHintFile("Hint" + number);
 
                     if (hintFile.exists()) {
                         hintFile.delete();
                     }
                     hintFile.createNewFile();
 
-                    FileUtils.writeFile(Constants.PASSWORDHINT_FILE_PATH, private_key_hint_et.getText().toString());
-
+                    FileUtils.writeFile(Constants.PASSWORDHINT_FILE_PATH + "Hint" + number + ".txt", private_key_hint_et.getText().toString());
                     bundle.putBoolean("isSucceed", true);
                     bundle.putString("message", "钱包导入成功");
                 } catch (Exception e) {
@@ -273,6 +275,18 @@ public class HeroSignatureImportFragment extends android.support.v4.app.Fragment
             } else {
                 bundle.putBoolean("isSucceed", false);
                 bundle.putString("message", "处理类型不支持");
+            }
+
+            try {
+                //如果是唯一一个钱包设置为默认钱包
+                if (number == 0) {
+                    FileUtils.copyFile(Constants.KEYSTORE_FILE_PATH + "Keystore0.json",
+                            Constants.KEYSTORE_FILE_PATH + "default.json");
+                    FileUtils.copyFile(Constants.PASSWORDHINT_FILE_PATH + "Hint0.txt",
+                            Constants.PASSWORDHINT_FILE_PATH + "default.txt");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             return bundle;
         }

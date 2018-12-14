@@ -28,7 +28,7 @@ public class HeroSignatureQRcodeFragment extends android.support.v4.app.Fragment
 
     private View layout;
 
-    private String walletFileString;
+    private HeroSignatureWalletListFragment.WalletData walletData;
 
     @Override
     public void onAttach(Context context) {
@@ -45,7 +45,7 @@ public class HeroSignatureQRcodeFragment extends android.support.v4.app.Fragment
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        walletFileString = getArguments().getString("walletString");
+        walletData = (HeroSignatureWalletListFragment.WalletData) getArguments().getSerializable("walletData");
 
         initView();
     }
@@ -55,10 +55,8 @@ public class HeroSignatureQRcodeFragment extends android.support.v4.app.Fragment
         Button qrcode_copy_bt = (Button) layout.findViewById(R.id.qrcode_copy_bt);
         TextView qrcode_hash_tv = (TextView) layout.findViewById(R.id.qrcode_hash_tv);
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            WalletFile walletFile = mapper.readValue(walletFileString, WalletFile.class);
-            qrcode_hash_tv.setText(walletFile.getAddress());
-            Bitmap qrcode = ZxingUtils.encodeAsBitmap(walletFile.getAddress(), 400,400);
+            qrcode_hash_tv.setText(walletData.getAddress());
+            Bitmap qrcode = ZxingUtils.encodeAsBitmap(walletData.getAddress(), 400,400);
             qrcode_iv.setImageBitmap(qrcode);
         } catch (Exception e) {
             e.printStackTrace();
@@ -68,7 +66,7 @@ public class HeroSignatureQRcodeFragment extends android.support.v4.app.Fragment
             @Override
             public void onClick(View v) {
                 ClipboardManager cm = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-                cm.setPrimaryClip(ClipData.newPlainText(null, walletFileString));
+                cm.setPrimaryClip(ClipData.newPlainText(null, walletData.getWalletFile().toString()));
                 Toast.makeText(getActivity(), "复制成功", Toast.LENGTH_LONG).show();
             }
         });

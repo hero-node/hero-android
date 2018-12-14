@@ -100,19 +100,6 @@ public class HeroActivity extends HeroFragmentActivity {
             FragmentManager fm = getSupportFragmentManager();
             fm.beginTransaction().replace(R.id.layoutRoot, mainFragment).commit();
         }
-//        if (getActionBar() != null) {
-//            getActionBar().setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_TITLE);
-//            if (android.os.Build.VERSION.SDK_INT >= 19) {
-//                getActionBar().setStackedBackgroundDrawable(new ColorDrawable(backgroundColor));
-//            }
-//        } else {
-////            if (toolbar != null) {
-////                toolbar.setBackgroundColor(backgroundColor);
-////            }
-//        }
-//        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-//            getWindow().setStatusBarColor(backgroundColor);
-//        }
     }
 
     @Override

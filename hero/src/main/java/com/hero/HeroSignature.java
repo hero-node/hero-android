@@ -31,6 +31,7 @@ import com.hero.utils.FileUtils;
 import com.hero.utils.FingerprintHelper;
 
 import org.apache.http.util.EncodingUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.crypto.CipherException;
@@ -44,18 +45,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 import static com.hero.signature.Constants.KEYSTORE_FILE_PATH;
 
 /**
  * Created by Aron on 2018/7/9.
  */
-public class HeroSignature extends View implements IHero, FingerprintHelper.SimpleAuthenticationCallback{
+public class HeroSignature extends View implements IHero, FingerprintHelper.SimpleAuthenticationCallback {
 
-    private Integer transactionType = TRAN_MESSAGE;
-    private static final int TRAN_MESSAGE = 1;
-    private static final int TRAN_TRANSFER = 2;
-    private static final int TRAN_JUMPTOWALLET = 3;
     private static JSONObject jsonObject;
 
     private FingerprintHelper fingerprintHelper;
@@ -76,6 +74,7 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         View view = View.inflate(context, R.layout.fingerprint_dialog, null);
         fingerprint_tv = (TextView) view.findViewById(R.id.fingerprint_hint);
+        fingerprint_tv.setText("指纹识别中");
         builder.setView(view);
         // 创建对话框
         fingerprint_alertDialog = builder.create();
@@ -91,10 +90,36 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
     @Override
     public void on(JSONObject jsonObject) throws JSONException {
         HeroView.on(this, jsonObject);
-        fingerprint_tv.setText("指纹识别中");
+        View contentView = LayoutInflater.from(getContext()).inflate(R.layout.hero_sign_popwindow, null, false);
         if (jsonObject.has("accounts")){
+            final JSONArray jsonArray = new JSONArray();
 
+            ArrayList<File> fileArrayList = FileUtils.getKeystroeFilesWithoutDefault();
+            for (int i = 0; i <fileArrayList.size(); i++) {
+                try {
+                    String walletString = FileUtils.getKeystoreFilecontent(fileArrayList.get(i).getName());
+                    ObjectMapper mapper = new ObjectMapper();
+                    WalletFile walletFile = mapper.readValue(walletString, WalletFile.class);
+                    jsonArray.put(walletFile.getAddress());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (jsonObject.has("isNpc")) {
+                ((HeroActivity)context).getCurrentFragment().mWebview.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        ((HeroActivity)context).getCurrentFragment().mWebview.evaluateJavascript("window["+ this.getClass().toString() +"callback']("+ jsonArray.toString() +")",null);
+                    }
+                });
+            } else {
+                ((HeroActivity)context).on(jsonArray);
+            }
         }
+
+
         if (jsonObject.has("wallet")){
             Intent intent = new Intent(context, HeroSignatureActivity.class);
             intent.putExtra("jumpType", 1);
@@ -102,31 +127,18 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
             return;
         }
         if (jsonObject.has("transaction")){
-
+            contentView.findViewById(R.id.sign_content_transfer_ll).setVisibility(View.VISIBLE);
+            contentView.findViewById(R.id.sign_content_message_ll).setVisibility(View.INVISIBLE);
+            initSignView(contentView, jsonObject);
         }
         if (jsonObject.has("message"))
         {
             System.out.println(jsonObject.toString());
             this.jsonObject = jsonObject;
-            if (jsonObject.has("transactionType")) {
-                this.transactionType = jsonObject.getInt("transactionType");
-            }
-            View contentView = LayoutInflater.from(getContext()).inflate(R.layout.hero_sign_popwindow, null, false);
             try {
-                if (transactionType == TRAN_TRANSFER) {
-                    contentView.findViewById(R.id.sign_content_transfer_ll).setVisibility(View.VISIBLE);
-                    contentView.findViewById(R.id.sign_content_message_ll).setVisibility(View.INVISIBLE);
-
-                } else if (transactionType == TRAN_MESSAGE) {
                     contentView.findViewById(R.id.sign_content_transfer_ll).setVisibility(View.INVISIBLE);
                     contentView.findViewById(R.id.sign_content_message_ll).setVisibility(View.VISIBLE);
-                } else if (transactionType == TRAN_JUMPTOWALLET) {
-                    Intent intent = new Intent(context, HeroSignatureActivity.class);
-                    intent.putExtra("jumpType", 1);
-                    context.startActivity(intent);
-                    return;
-                }
-                if (!FileUtils.getKeystoreFile().exists()) {
+                if (!FileUtils.getKeystoreFile("default").exists()) {
                     contentView.findViewById(R.id.sign_no_keystore_ll).setVisibility(View.VISIBLE);
                     contentView.findViewById(R.id.sign_password_ll).setVisibility(View.INVISIBLE);
                 } else {
@@ -146,13 +158,10 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                             }
                         });
                     }
-
                 }
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
             initSignView(contentView, jsonObject);
         }
     }

@@ -17,14 +17,6 @@
             android:textSize="20sp"
             android:textColor="@color/c4"/>
 
-        <!--<ImageView-->
-            <!--android:layout_width="24dp"-->
-            <!--android:layout_height="24dp"-->
-            <!--android:layout_alignParentRight="true"-->
-            <!--android:layout_centerVertical="true"-->
-            <!--android:layout_marginRight="16dp"-->
-            <!--android:background="@drawable/wallet_scan"/>-->
-
     </RelativeLayout>
 
     <TabHost

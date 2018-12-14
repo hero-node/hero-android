@@ -6,6 +6,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,8 +19,10 @@ import android.widget.Toast;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hero.R;
+import com.hero.utils.FileUtils;
 import com.hero.utils.ZxingUtils;
 
+import org.json.JSONObject;
 import org.web3j.crypto.WalletFile;
 
 /**
@@ -33,7 +36,7 @@ public class HeroSignatureExportFragment extends android.support.v4.app.Fragment
 
     private TabWidget tabWidget;
 
-    private String walletFileString;
+    private HeroSignatureWalletListFragment.WalletData walletData;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -45,7 +48,7 @@ public class HeroSignatureExportFragment extends android.support.v4.app.Fragment
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        walletFileString = getArguments().getString("walletString");
+        walletData = (HeroSignatureWalletListFragment.WalletData) getArguments().getSerializable("walletData");
         initView();
         initContent();
     }
@@ -61,10 +64,11 @@ public class HeroSignatureExportFragment extends android.support.v4.app.Fragment
         ImageView export_qrcode_iv = (ImageView) layout.findViewById(R.id.export_qrcode_iv);
         Button export_copy_bt = (Button) layout.findViewById(R.id.export_copy_bt);
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            WalletFile walletFile = mapper.readValue(walletFileString, WalletFile.class);
-            export_keystore_tv.setText(walletFileString);
-            Bitmap qrcode = ZxingUtils.encodeAsBitmap(walletFile.getAddress(), 400,400);
+            String fileContent = FileUtils.getKeystoreFilecontent(walletData.getName());
+            export_keystore_tv.setText(fileContent);
+            export_keystore_tv.setMovementMethod(ScrollingMovementMethod.getInstance());
+
+            Bitmap qrcode = ZxingUtils.encodeAsBitmap(walletData.getAddress(), 400,400);
             export_qrcode_iv.setImageBitmap(qrcode);
         } catch (Exception e) {
             e.printStackTrace();
