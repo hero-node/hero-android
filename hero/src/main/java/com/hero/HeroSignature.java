@@ -26,9 +26,11 @@ import com.hero.HeroView;
 import com.hero.IHero;
 import com.hero.IHeroContext;
 import com.hero.R;
+import com.hero.depandency.StringUtil;
 import com.hero.signature.HeroSignatureActivity;
 import com.hero.utils.FileUtils;
 import com.hero.utils.FingerprintHelper;
+import com.hero.utils.ShareUtils;
 
 import org.apache.http.util.EncodingUtils;
 import org.json.JSONArray;
@@ -126,8 +128,7 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
             contentView.findViewById(R.id.sign_content_message_ll).setVisibility(View.INVISIBLE);
             initSignView(contentView, jsonObject);
         }
-        if (jsonObject.has("message"))
-        {
+        if (jsonObject.has("message")) {
             System.out.println(jsonObject.toString());
             this.jsonObject = jsonObject;
             try {
@@ -139,20 +140,6 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                 } else {
                     contentView.findViewById(R.id.sign_no_keystore_ll).setVisibility(View.INVISIBLE);
                     contentView.findViewById(R.id.sign_password_ll).setVisibility(View.VISIBLE);
-
-                    if (fingerprintHelper.checkFingerprintAvailable() == FingerprintHelper.FINGERPRINT_STATE_AVAILABLE) {
-                        contentView.findViewById(R.id.sign_fingerprint_ll).setVisibility(View.VISIBLE);
-                        contentView.findViewById(R.id.sign_fingerprint_line).setVisibility(View.VISIBLE);
-                        contentView.findViewById(R.id.sign_fingerprint_ll).setOnClickListener(new OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                fingerprintHelper.setPurpose(KeyProperties.PURPOSE_DECRYPT);
-                                fingerprintHelper.setCallback(HeroSignature.this);
-                                fingerprintHelper.authenticate();
-                                fingerprint_alertDialog.show();
-                            }
-                        });
-                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -162,6 +149,33 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
     }
 
     private void initSignView(View view, JSONObject object) throws JSONException {
+        boolean defaultHasFingerprint = false;
+        ShareUtils shareUtils = ShareUtils.getInstance(context);
+        if (shareUtils.contains("default")) {
+            String fileName = shareUtils.getString("default","");
+            String fingerprint = shareUtils.getString("fingerprint","");
+            if (fingerprint.contains(fileName)){
+                defaultHasFingerprint = true;
+            }
+        }
+
+        if (defaultHasFingerprint && (fingerprintHelper.checkFingerprintAvailable() == FingerprintHelper.FINGERPRINT_STATE_AVAILABLE)) {
+            view.findViewById(R.id.sign_fingerprint_ll).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.sign_fingerprint_line).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.sign_fingerprint_ll).setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    fingerprintHelper.setPurpose(KeyProperties.PURPOSE_DECRYPT);
+                    fingerprintHelper.setCallback(HeroSignature.this);
+                    fingerprintHelper.authenticate();
+                    fingerprint_alertDialog.show();
+                }
+            });
+        } else {
+            view.findViewById(R.id.sign_fingerprint_ll).setVisibility(View.GONE);
+            view.findViewById(R.id.sign_fingerprint_line).setVisibility(View.GONE);
+        }
+
         ((TextView)view.findViewById(R.id.sign_tra_data_tv)).setMovementMethod(ScrollingMovementMethod.getInstance());
         popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setBackgroundDrawable(new ColorDrawable(Color.WHITE));
@@ -171,32 +185,35 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
         popupWindow.setAnimationStyle(R.style.ActionSheetDialogAnimation);
         popupWindow.showAtLocation(view, Gravity.BOTTOM,0,0);
 
-        if (object.has("transactionData")) {
-            JSONObject jsonObject = object.getJSONObject("transactionData");
+        if (object.has("message")) {
+            JSONObject jsonObject = object.getJSONObject("message");
+            if (jsonObject.has("to")) {
+                ((TextView)view.findViewById(R.id.sign_tra_toaddress_tv)).setText(jsonObject.getString("to"));
 
-            //字段处理
-            if (jsonObject.has("hash")) {
-                ((TextView)view.findViewById(R.id.sign_tra_hash_tv)).setText(jsonObject.getString("hash"));
             }
-            if (jsonObject.has("nonce") && jsonObject.has("position")) {
+            if (jsonObject.has("from")) {
+                ((TextView)view.findViewById(R.id.sign_tra_fromaddress_tv)).setText(jsonObject.getString("from"));
+            }
+
+            if (jsonObject.has("nonce")) {
                 ((TextView)view.findViewById(R.id.sign_tra_nonce_tv)).setText(
-                        jsonObject.getInt("nonce") + "I﹛"+ jsonObject.getInt("position") + "﹜");
-            }
-            if (jsonObject.has("position")) {
-                ((TextView)view.findViewById(R.id.sign_tra_data_tv)).setText(jsonObject.getString("position"));
-            }
-            if (jsonObject.has("receiveAddress")) {
-                ((TextView)view.findViewById(R.id.sign_tra_toaddress_tv)).setText(jsonObject.getString("receiveAddress"));
-
-            }
-            if (jsonObject.has("sendAddress")) {
-                ((TextView)view.findViewById(R.id.sign_tra_fromaddress_tv)).setText(jsonObject.getString("sendAddress"));
+                        StringUtil.hexStringToString(jsonObject.getString("nonce")));
             }
             if (jsonObject.has("value")) {
-                ((TextView)view.findViewById(R.id.sign_tra_value_tv)).setText(jsonObject.getString("value"));
+                ((TextView)view.findViewById(R.id.sign_tra_value_tv)).setText(StringUtil.hexStringToString(jsonObject.getString("value")));
             }
-            if (jsonObject.has("data")) {
-                ((TextView)view.findViewById(R.id.sign_tra_data_tv)).setText(jsonObject.getString("value"));
+            //inputData
+            if (jsonObject.has("data") && !jsonObject.getString("data").equals("")) {
+                ((TextView)view.findViewById(R.id.sign_tra_data_tv)).setText(jsonObject.getString("data"));
+            } else {
+                ((TextView)view.findViewById(R.id.sign_tra_data_tv)).setText("0x");
+            }
+
+            if (jsonObject.has("gas")) {
+                ((TextView)view.findViewById(R.id.sign_gaslimit_tv)).setText(StringUtil.hexStringToString(jsonObject.getString("gas")));
+            }
+            if (jsonObject.has("gasPrice")) {
+                ((TextView)view.findViewById(R.id.sign_gasPrice_tv)).setText(StringUtil.hexStringToString(jsonObject.getString("gasPrice")));
             }
         }
 

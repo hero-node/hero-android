@@ -44,6 +44,7 @@
         android:padding="8dp"
         android:drawablePadding="12dp"
         android:maxLines="1"
+        android:inputType="textPassword"
         android:gravity="left|center_vertical"
         android:background="@null"
         android:drawableBottom="@drawable/sign_line"

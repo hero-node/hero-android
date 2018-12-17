@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -90,11 +91,12 @@ public class HeroSignatureWalletListFragment extends android.support.v4.app.Frag
     }
 
     private void initData(ArrayList<File> files) {
+        walletDataList.clear();
         for (int i = 0; i < files.size(); i++) {
-            walletDataList.clear();
             WalletData walletData = new WalletData();
             walletData.setImageid(R.drawable.wallet_icon);
             String fileName = files.get(i).getName();
+            // 设置钱包名
             walletData.setName(fileName);
             try {
                 String walletString = FileUtils.getKeystoreFilecontent(fileName);
@@ -192,7 +194,7 @@ public class HeroSignatureWalletListFragment extends android.support.v4.app.Frag
             }
             WalletData data = (WalletData) getItem(position);
             holder.iv.setImageResource(R.drawable.wallet_icon);
-            holder.tv.setText(data.getName());
+            holder.tv.setText("钱包" + (position + 1));
             holder.tvdetail.setText(data.getAddress());
             return convertView;
         }

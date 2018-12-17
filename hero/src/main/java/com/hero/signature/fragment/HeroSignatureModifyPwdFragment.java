@@ -33,11 +33,11 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
 
     private View layout;
 
-    private EditText modifypwd_fragment_oldpassword_et;
+    private static EditText modifypwd_fragment_oldpassword_et;
 
-    private EditText modifypwd_fragment_newpassword_et;
+    private static EditText modifypwd_fragment_newpassword_et;
 
-    private EditText modifypwd_fragment_newpassword_confirm_et;
+    private static EditText modifypwd_fragment_newpassword_confirm_et;
 
     private HeroSignatureWalletListFragment.WalletData walletData;
 
@@ -83,7 +83,7 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
                     return;
                 }
 
-                if (!modifypwd_fragment_oldpassword_et.getText().toString().equals(modifypwd_fragment_newpassword_et.getText().toString())) {
+                if (modifypwd_fragment_oldpassword_et.getText().toString().equals(modifypwd_fragment_newpassword_et.getText().toString())) {
                     Toast.makeText(getActivity(),"新旧密码不能相同", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -105,7 +105,7 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
     }
 
     private void processModify() {
-        new MyTask((HeroSignatureActivity) getActivity(), walletData.getWalletFile().toString(),
+        new MyTask((HeroSignatureActivity) getActivity(), walletData.getWalletFile(),
                 modifypwd_fragment_oldpassword_et.getText().toString(),
                 modifypwd_fragment_newpassword_et.getText().toString(),
                 walletData.getName()).execute();
@@ -115,7 +115,7 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
 
         private WeakReference<HeroSignatureActivity> activityReference;
 
-        private String walletFileString;
+        private WalletFile walletFile;
 
         private String oldpasswordString;
 
@@ -124,11 +124,11 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
         private String walletName;
 
         // only retain a weak reference to the activity
-        MyTask(HeroSignatureActivity context, String walletFileString,
+        MyTask(HeroSignatureActivity context, WalletFile walletFile,
                String oldpasswordString, String newpasswordString,
                String walletName) {
             activityReference = new WeakReference<>(context);
-            this.walletFileString = walletFileString;
+            this.walletFile = walletFile;
             this.oldpasswordString = oldpasswordString;
             this.newpasswordString = newpasswordString;
             this.walletName = walletName;
@@ -154,6 +154,9 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
             if (bundle.getBoolean("isSucceed")) {
                 activity.onPostProcessed(bundle);
             }
+            modifypwd_fragment_newpassword_confirm_et.setText("");
+            modifypwd_fragment_newpassword_et.setText("");
+            modifypwd_fragment_oldpassword_et.setText("");
             super.onPostExecute(o);
         }
 
@@ -161,9 +164,6 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
         protected Object doInBackground(Object[] objects) {
             Bundle bundle = new Bundle();
             try {
-                ObjectMapper mapper = new ObjectMapper();
-                WalletFile walletFile = mapper.readValue(walletFileString, WalletFile.class);
-
                 ECKeyPair keyPair = Wallet.decrypt(oldpasswordString, walletFile);
                 if (keyPair != null && keyPair.getPrivateKey() != null
                         && keyPair.getPublicKey() != null) {
@@ -177,8 +177,12 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
 
                     //keystore文件
                     String fileName = WalletUtils.generateWalletFile(newpasswordString, keyPair, FileUtils.getAppFileDir(), false);
+                    String index = walletName;
+                    index = index.replace("Keystore","");
+                    index =index.replace(".json","");
 
-                    FileUtils.renameFile(fileName, walletName);
+                    FileUtils.renameFile(fileName, Integer.valueOf(index));
+
                     // 密码提示文件
                     File hintFile = FileUtils.getHintFile(walletName);
 
@@ -187,7 +191,10 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
                     }
                     hintFile.createNewFile();
 
-                    FileUtils.writeFile(Constants.PASSWORDHINT_FILE_PATH, "");
+                    String fName = walletName;
+                    fName = fName.replace(".json", ".txt");
+
+                    FileUtils.writeFile(Constants.PASSWORDHINT_FILE_PATH + fName, "");
                 } else {
                     throw new CipherException("旧密码错误");
                 }

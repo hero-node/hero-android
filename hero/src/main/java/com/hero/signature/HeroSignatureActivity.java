@@ -18,6 +18,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hero.HeroActivity;
 import com.hero.HeroWaitDialog;
 import com.hero.R;
 import com.hero.depandency.google.zxing.integration.android.IntentIntegrator;
@@ -30,6 +31,7 @@ import com.hero.signature.fragment.HeroSignatureQRcodeFragment;
 import com.hero.signature.fragment.HeroSignatureWalletFragment;
 import com.hero.utils.FileUtils;
 import com.hero.utils.FingerprintHelper;
+import com.hero.utils.ShareUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -178,8 +180,6 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
 
     public void onPostProcessed(Bundle bundle) {
         checkKeystoreFile();
-//        gotoFragment(walletHomeFragment, Constants.WALLETHOME_TAG);
-
         if (bundle!= null && bundle.containsKey("password") && fingerprintHelper.checkFingerprintAvailable() == FingerprintHelper.FINGERPRINT_STATE_AVAILABLE) {
             final String password = bundle.getString("password");
 
@@ -257,8 +257,7 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
             backtoFragment(walletHomeFragment, Constants.WALLETHOME_TAG);
             return;
         }
-        if ((importFragment != null && importFragment.isVisible())
-                || (walletHomeFragment != null && walletHomeFragment.isVisible())) {
+        if ((walletHomeFragment != null && walletHomeFragment.isVisible())) {
             backtoFragment(walletListFragment, Constants.WALLETLIST_TAG);
             return;
         }
@@ -349,6 +348,13 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
         Toast.makeText(this, "指纹认证成功", Toast.LENGTH_SHORT).show();
         if (fingerprint_alertDialog != null && fingerprint_alertDialog.isShowing()) {
             fingerprint_alertDialog.dismiss();
+        }
+        ShareUtils shareUtils = ShareUtils.getInstance(HeroSignatureActivity.this);
+        if (shareUtils.contains("fingerprint")) {
+            String name = shareUtils.getString("fingerprint","");
+            ShareUtils.getInstance(HeroSignatureActivity.this).putString("fingerprint", name + "," + walletData.getName());
+        } else {
+            ShareUtils.getInstance(HeroSignatureActivity.this).putString("fingerprint", walletData.getName());
         }
     }
 

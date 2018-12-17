@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,10 +27,12 @@ import com.hero.signature.Constants;
 import com.hero.signature.HeroSignatureActivity;
 import com.hero.utils.FileUtils;
 import com.hero.utils.FingerprintHelper;
+import com.hero.utils.ShareUtils;
 
 import org.json.JSONObject;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.ECKeyPair;
+import org.web3j.crypto.Keys;
 import org.web3j.crypto.Wallet;
 import org.web3j.crypto.WalletFile;
 import org.web3j.crypto.WalletUtils;
@@ -200,6 +203,7 @@ public class HeroSignatureImportFragment extends android.support.v4.app.Fragment
             Bundle bundle = new Bundle();
             //获取现在有几个keystore钱包
             int number = FileUtils.getNumbersOfKeystore();
+            ShareUtils shareUtils = ShareUtils.getInstance(activityReference.get());
 
             if (processType == PROCESS_TYPE_KEYSTORE) {
                 String keystore = official_wallet_keystore_et.getText().toString();
@@ -224,7 +228,13 @@ public class HeroSignatureImportFragment extends android.support.v4.app.Fragment
                     if (keyPair != null && keyPair.getPrivateKey() != null
                             && keyPair.getPublicKey() != null) {
 
+                        if (shareUtils.getBoolean(Keys.getAddress(keyPair), false)) {
+                            throw new CipherException("钱包已存在");
+                        }
+
                         File keystoreFile = FileUtils.getKeystoreFile("Keystore" + number);
+                        shareUtils.putString("Keystore" + number + ".json", "Keystore" + number + ".json");
+                        shareUtils.putBoolean(Keys.getAddress(keyPair), true);
 
                         if (keystoreFile.exists()) {
                             keystoreFile.delete();
@@ -247,14 +257,19 @@ public class HeroSignatureImportFragment extends android.support.v4.app.Fragment
                 }
             } else if (processType == PROCESS_TYPE_PRIVATEKEY) {
                 try {
-                    ECKeyPair keyPair = new ECKeyPair(Numeric.toBigInt(private_key_data_et.getText().toString()),
-                            Numeric.toBigInt(new byte[0]));
+                    ECKeyPair keyPair = ECKeyPair.create(Numeric.toBigInt(private_key_data_et.getText().toString()));
+                    if (shareUtils.getBoolean(Keys.getAddress(keyPair), false)) {
+                        throw new CipherException("钱包已存在");
+                    }
+
                     //keystore文件
                     String fileName = WalletUtils.generateWalletFile(private_key_password_et.getText().toString(),
                             keyPair, FileUtils.getAppFileDir(), false);
 
                     //重命名文件
                     FileUtils.renameFile(fileName, number);
+                    shareUtils.putString("Keystore" + number + ".json", "Keystore" + number + ".json");
+                    shareUtils.putBoolean(Keys.getAddress(keyPair), true);
 
                     // 密码提示文件
                     File hintFile = FileUtils.getHintFile("Hint" + number);
@@ -267,6 +282,10 @@ public class HeroSignatureImportFragment extends android.support.v4.app.Fragment
                     FileUtils.writeFile(Constants.PASSWORDHINT_FILE_PATH + "Hint" + number + ".txt", private_key_hint_et.getText().toString());
                     bundle.putBoolean("isSucceed", true);
                     bundle.putString("message", "钱包导入成功");
+                } catch (CipherException ce) {
+                    bundle.putBoolean("isSucceed", false);
+                    bundle.putString("message", ce.getMessage());
+                    ce.printStackTrace();
                 } catch (Exception e) {
                     bundle.putBoolean("isSucceed", false);
                     bundle.putString("message", "keystore处理异常");
@@ -282,9 +301,8 @@ public class HeroSignatureImportFragment extends android.support.v4.app.Fragment
                 if (number == 0) {
                     FileUtils.copyFile(Constants.KEYSTORE_FILE_PATH + "Keystore0.json",
                             Constants.KEYSTORE_FILE_PATH + "default.json");
-                    FileUtils.copyFile(Constants.PASSWORDHINT_FILE_PATH + "Hint0.txt",
-                            Constants.PASSWORDHINT_FILE_PATH + "default.txt");
                 }
+                shareUtils.putString("default", "Keystore0.json");
             } catch (Exception e) {
                 e.printStackTrace();
             }

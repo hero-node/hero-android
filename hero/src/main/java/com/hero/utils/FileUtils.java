@@ -11,6 +11,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by Aron on 2018/7/26.
@@ -80,6 +82,7 @@ public class FileUtils {
             String fileName = files[i].getName();
             if (fileName.endsWith(".json") && !fileName.startsWith("default")) {
                 fileArrayList.add(files[i]);
+                Collections.sort(fileArrayList);
             }
         }
         return fileArrayList;
@@ -122,13 +125,6 @@ public class FileUtils {
         //文件重命名
         File keystoreFile = new File(Constants.APP_FILE_PATH, fileName);
         File keystoreFilenew = new File(Constants.KEYSTORE_FILE_PATH + "Keystore" + index + ".json");
-        keystoreFile.renameTo(keystoreFilenew);
-    }
-
-    public static void renameFile(String fileName, String newFileName) {
-        //文件重命名
-        File keystoreFile = new File(Constants.APP_FILE_PATH, fileName);
-        File keystoreFilenew = new File(Constants.KEYSTORE_FILE_PATH + newFileName + ".json");
         keystoreFile.renameTo(keystoreFilenew);
     }
 

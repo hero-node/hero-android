@@ -23,11 +23,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hero.HeroDrawerActivity;
-import com.hero.HeroFragment;
 import com.hero.R;
 import com.hero.signature.HeroSignatureActivity;
 import com.hero.utils.FileUtils;
+import com.hero.utils.ShareUtils;
 
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.ECKeyPair;
@@ -36,7 +35,6 @@ import org.web3j.crypto.WalletFile;
 import org.web3j.utils.Numeric;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 /**
@@ -273,7 +271,7 @@ public class HeroSignatureWalletFragment extends android.support.v4.app.Fragment
                     @Override
                     public void onClick(View v) {
                         alertDialog.dismiss();
-                        new MyTask((HeroSignatureActivity) getActivity(), walletData.getName()).execute();
+                        new MyTask((HeroSignatureActivity) getActivity(), walletData.getName(), walletData.getAddress()).execute();
                     }
 
                 });
@@ -294,10 +292,13 @@ public class HeroSignatureWalletFragment extends android.support.v4.app.Fragment
 
         private String fileName;
 
+        private String address;
+
         // only retain a weak reference to the activity
-        MyTask(HeroSignatureActivity context, String walletName) {
-            activityReference = new WeakReference<>(context);
-            fileName = walletName;
+        MyTask(HeroSignatureActivity context, String walletName, String address) {
+            this.activityReference = new WeakReference<>(context);
+            this.fileName = walletName;
+            this.address = address;
         }
         @Override
         protected void onPreExecute() {
@@ -326,11 +327,34 @@ public class HeroSignatureWalletFragment extends android.support.v4.app.Fragment
         protected Object doInBackground(Object[] objects) {
             Bundle bundle = new Bundle();
             try {
+                ShareUtils shareUtils = ShareUtils.getInstance(activityReference.get());
                 File keystoreFile = FileUtils.getKeystoreFile(fileName);
                 if (keystoreFile.exists()) {
                     keystoreFile.delete();
                 }
-                File hintFile = FileUtils.getHintFile(fileName);
+                //如果是默认钱包的话一起删除默认钱包
+                if (shareUtils.getString("default","").equals(fileName)) {
+                    shareUtils.remove("default");
+                    File defaultFile = FileUtils.getKeystoreFile("default");
+                    if (defaultFile.exists()) {
+                        defaultFile.delete();
+                    }
+                }
+
+                if (shareUtils.contains("fingerprint")) {
+                    String name = shareUtils.getString("fingerprint","");
+                    if (name.contains("," + fileName)) {
+                        name.replace("," + fileName,"");
+                    } else if (name.contains(fileName)){
+                        name.replace(fileName,"");
+                    }
+                    shareUtils.putString("fingerprint", name);
+                }
+
+                shareUtils.remove(fileName);
+                shareUtils.remove(address);
+                File hintFile = FileUtils.getHintFile(fileName.replace(".json",".txt").replace("Keystore","Hint"));
+
                 if (hintFile.exists()) {
                     hintFile.delete();
                 }
@@ -344,7 +368,6 @@ public class HeroSignatureWalletFragment extends android.support.v4.app.Fragment
             return bundle;
         }
     }
-
 
     private void initModifyPassword() {
         TextView wallet_modify_password_tv = (TextView) layout.findViewById(R.id.wallet_modify_password_tv);
