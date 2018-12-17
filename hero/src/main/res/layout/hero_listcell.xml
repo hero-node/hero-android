@@ -5,10 +5,9 @@
               android:background="@color/defaultListCellColor"
               >
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:orientation="horizontal">
+        android:layout_height="fill_parent">
 
     <ImageView
         android:id="@+id/imageView"
@@ -20,8 +19,9 @@
         android:layout_gravity="center_vertical"
         android:visibility="gone" />
 
-
     <LinearLayout
+        android:id="@+id/content_ll"
+        android:layout_toRightOf="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:orientation="vertical">
@@ -76,29 +76,31 @@
         android:clickable="false"
         android:textSize="14dp"
         android:textColor="@color/c2"
-        android:gravity="center_vertical|right"
-        />
+        android:layout_toRightOf="@+id/content_ll"
+        android:gravity="center_vertical|right"/>
 
-    <ImageView
-        android:id="@+id/arrow"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
-        android:layout_marginRight="16dp"
-        android:gravity="center_vertical|right"
-        android:contentDescription="indicator"
-        android:background="@drawable/disclosure"
-        android:visibility="gone" />
-
-        <Switch
+    <Switch
         android:id="@+id/switchButton"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginRight="16dp"
         android:contentDescription="switch"
-        android:gravity="center_vertical|right"
+        android:layout_gravity="end"
+        android:layout_alignParentRight="true"
         android:visibility="gone"
-        />
-    </LinearLayout>
+    />
+
+    <ImageView
+        android:id="@+id/arrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="16dp"
+        android:layout_centerInParent="true"
+        android:layout_alignParentRight="true"
+        android:contentDescription="indicator"
+        android:background="@drawable/goto_right_arrow"
+        android:visibility="gone" />
+    </RelativeLayout>
     <LinearLayout
         android:id="@+id/separatorLine"
         android:layout_height="0.5dp"

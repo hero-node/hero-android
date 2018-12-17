@@ -41,6 +41,7 @@ import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -335,8 +336,8 @@ public class HeroTableViewCell extends FrameLayout implements IHero, Checkable {
             if (imageView != null) {
                 int imageSize = jsonObject.has("height") ? HeroView.dip2px(getContext(), jsonObject.getInt("height")) : getContext().getResources().getDimensionPixelSize(R.dimen.list_default_height);
                 imageSize = imageSize*2/3;
-                LinearLayout.LayoutParams p;
-                p = new LinearLayout.LayoutParams(imageSize, imageSize);
+                RelativeLayout.LayoutParams p;
+                p = new RelativeLayout.LayoutParams(imageSize, imageSize);
                 p.leftMargin = imageSize/4;
                 p.topMargin = imageSize/4;
                 imageView.setLayoutParams(p);
