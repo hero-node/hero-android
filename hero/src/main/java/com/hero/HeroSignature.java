@@ -100,7 +100,7 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                     String walletString = FileUtils.getKeystoreFilecontent(fileArrayList.get(i).getName());
                     ObjectMapper mapper = new ObjectMapper();
                     WalletFile walletFile = mapper.readValue(walletString, WalletFile.class);
-                    jsonArray.put(walletFile.getAddress());
+                    jsonArray.put("0x"+walletFile.getAddress());
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -108,12 +108,7 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
             }
 
             if (jsonObject.has("isNpc")) {
-                ((HeroActivity)context).getCurrentFragment().mWebview.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        ((HeroActivity)context).getCurrentFragment().mWebview.evaluateJavascript("window["+ this.getClass().toString() +"callback']("+ jsonArray.toString() +")",null);
-                    }
-                });
+                ((HeroActivity)context).getCurrentFragment().mWebview.evaluateJavascript("window['HeroSignature"+"callback']("+ jsonArray.toString() +")",null);
             } else {
                 ((HeroActivity)context).on(jsonArray);
             }

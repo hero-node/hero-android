@@ -1383,6 +1383,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
             dialog.setCancelable(cancelable);
             dialog.getWindow().setDimAmount(PROGESS_DIALOG_DIM_AMOUNT);
             dialog.setContentView(R.layout.layout_progress_dialog);
+            dialog.getWindow().setBackgroundDrawableResource(R.color.heroTransparent);
         }
     }
 

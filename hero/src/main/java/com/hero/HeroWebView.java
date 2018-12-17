@@ -67,6 +67,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -76,6 +77,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -125,6 +127,7 @@ public class HeroWebView extends WebView implements IHero {
         this.setDownloadListener(new MyWebViewDownLoadListener());
         final Context theContext = context;
         this.setWebViewClient(new WebViewClient() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Nullable
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
@@ -140,6 +143,32 @@ public class HeroWebView extends WebView implements IHero {
                         Log.d("WebViewDebug",e.getMessage()+e.toString());
                         e.printStackTrace();
                     }
+                }else if(injectHero ){
+                    if (url.endsWith("js") || url.endsWith("css") || url.endsWith("png") || url.endsWith("jpg") || url.endsWith("jpeg")|| url.endsWith("svg") || url.endsWith("jpeg")|| url.endsWith("ico")){
+                        return super.shouldInterceptRequest(view, request);
+                    }
+                    URL contentUrl = null;
+                    try {
+                        contentUrl = new URL(url);
+                        BufferedReader in = new BufferedReader(new InputStreamReader(contentUrl.openStream()));
+                        StringBuilder response = new StringBuilder();
+                        String inputLine;
+                        while ((inputLine = in.readLine()) != null)
+                            response.append(inputLine+"\n");
+                        in.close();
+                        String _content = response.toString();
+                        _content = _content.replaceAll("<head>","<head><script src='https://localhost:3000/hero-home/hero-provider.js'></script>");
+                        _content = _content.replaceAll("Content-Security-Policy","Hero Web3 Provider");
+                        InputStream stream = new ByteArrayInputStream(_content.getBytes(StandardCharsets.UTF_8));
+                        WebResourceResponse resourceResponse = new WebResourceResponse(
+                                "text/html"
+                                , "UTF-8", stream);
+                        return resourceResponse;
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
                 return super.shouldInterceptRequest(view, request);
             }
@@ -149,7 +178,6 @@ public class HeroWebView extends WebView implements IHero {
                 if (!isUrlAuthenticated(url)) {
                     return true;
                 }
-
                 if (hijackUrlArray != null) {
                     try {
                         JSONObject jsonObject = shouldHijackUrl(url);
@@ -182,21 +210,23 @@ public class HeroWebView extends WebView implements IHero {
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 super.onReceivedError(view, errorCode, description, failingUrl);
-                InputStream page404 = getResources().openRawResource(R.raw.page_404);
-                if (page404 != null) {
-                    String content = null;
-                    try {
-                        content = inputStreamTOString(page404);
-                    } catch (Exception e) {
-                        Log.d("Error", e.getMessage());
+                if (failingUrl.equalsIgnoreCase(mUrl)){
+                    InputStream page404 = getResources().openRawResource(R.raw.page_404);
+                    if (page404 != null) {
+                        String content = null;
+                        try {
+                            content = inputStreamTOString(page404);
+                        } catch (Exception e) {
+                            Log.d("Error", e.getMessage());
+                        }
+                        view.loadData(content, "text/html;charset=UTF-8", null);
                     }
-                    view.loadData(content, "text/html;charset=UTF-8", null);
-                }
-                try {
-                    JSONObject object = new JSONObject("{common:'webViewDidFinishLoad'}");
-                    HeroView.sendActionToContext(getContext(), object);
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    try {
+                        JSONObject object = new JSONObject("{common:'webViewDidFinishLoad'}");
+                        HeroView.sendActionToContext(getContext(), object);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -218,11 +248,6 @@ public class HeroWebView extends WebView implements IHero {
             }
 
             @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                super.onPageStarted(view, url, favicon);
-            }
-
-            @Override
             public boolean shouldOverrideKeyEvent(WebView view, KeyEvent event) {
                 if ((event.getKeyCode() == KeyEvent.KEYCODE_BACK) && view.canGoBack()) {
                     view.goBack();
@@ -232,20 +257,6 @@ public class HeroWebView extends WebView implements IHero {
             }
         });
         this.setWebChromeClient(new WebChromeClient() {
-
-            @Override
-            public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
-                return super.onJsConfirm(view, url, message, result);
-            }
-
-            @Override
-            public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
-                return super.onJsPrompt(view, url, message, defaultValue, result);
-            }
-            @Override
-            public boolean onJsBeforeUnload(WebView view, String url, String message, JsResult result) {
-                return super.onJsBeforeUnload(view, url, message, result);
-            }
             @Override
             public void onReceivedTitle(WebView view, String title) {
                 super.onReceivedTitle(view, title);
@@ -255,10 +266,6 @@ public class HeroWebView extends WebView implements IHero {
                         parentFragment.setTitle(title);
                     }
                 }
-            }
-            @Override
-            public void onProgressChanged(WebView view, int newProgress) {
-                super.onProgressChanged(view, newProgress);
             }
         });
         this.setBackgroundColor(initColor);
@@ -340,11 +347,20 @@ public class HeroWebView extends WebView implements IHero {
             if (!modules.containsKey(module)){
                 json.put("class",module);
                 IHero m = HeroView.fromJson(this.getContext(),json);
-                m.on(json);
                 modules.put(module,m);
-            }else{
-                ((IHero)modules.get(module)).on(json);
             }
+            final String fModule = module;
+            final JSONObject fJson = json;
+            this.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        ((IHero)modules.get(fModule)).on(fJson);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
@@ -361,7 +377,8 @@ public class HeroWebView extends WebView implements IHero {
     }
     @Override
     public void loadUrl(String url) {
-        if (BuildConfig.DEBUG && url.startsWith("http")) {
+        url = url.startsWith("http")?url :"https://"+url;
+        if (BuildConfig.DEBUG) {
             this.setWebContentsDebuggingEnabled(true);
             if (url.contains("?")) {
                 url = url + "&test=true";
@@ -371,37 +388,6 @@ public class HeroWebView extends WebView implements IHero {
         }
         mUrl = url;
         if (!isUrlAuthenticated(url)) {
-            return;
-        }
-        if (injectHero){
-            final String _url = url;
-            final WebView _webview = this;
-            new Thread() {
-                public void run() {
-                    try {
-                        URL oracle = new URL(_url);
-                        BufferedReader in = new BufferedReader(
-                                new InputStreamReader(oracle.openStream()));
-                        StringBuilder response = new StringBuilder();
-                        String inputLine;
-                        while ((inputLine = in.readLine()) != null)
-                            response.append(inputLine+"\n");
-                        in.close();
-                        String _content = response.toString();
-                        _content = _content.replaceAll("<head>","<head><script src='https://localhost:3000/hero-home/hero-provider.js'></script>");
-                        _content = _content.replaceAll("Content-Security-Policy","Hero Web3 Provider");
-                        final String  content = _content;
-                        _webview.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                _webview.loadDataWithBaseURL(_url,content,"text/html","",null);
-                            }
-                        });
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }.start();
             return;
         }
         Map header = null;

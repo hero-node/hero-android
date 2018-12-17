@@ -79,18 +79,17 @@
         android:gravity="center_vertical|right"
         />
 
-    <TextView
+    <ImageView
         android:id="@+id/arrow"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
         android:layout_marginRight="16dp"
-        android:contentDescription="arrow"
-        android:textSize="24dp"
-        android:textColor="@color/switch_thumb_normal_material_dark"
         android:gravity="center_vertical|right"
-        android:text=">"
+        android:contentDescription="indicator"
+        android:background="@drawable/disclosure"
         android:visibility="gone" />
-    <Switch
+
+        <Switch
         android:id="@+id/switchButton"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
