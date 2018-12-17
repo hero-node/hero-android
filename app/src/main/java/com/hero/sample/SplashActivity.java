@@ -71,7 +71,7 @@ public class SplashActivity extends Activity {
             JSONArray jsonArray = new JSONArray();
             JSONObject jsonObjectInArray = new JSONObject();
             jsonObjectInArray.put("title","home");
-            jsonObjectInArray.put("url","http://192.168.32.156:3000/projects/hero-home/home.html");
+            jsonObjectInArray.put("url","http://10.122.16.189:3000/projects/hero-home/home.html");
             jsonArray.put(jsonObjectInArray);
             jsonObject.put("tabs",jsonArray);
             jsonObject.put("key","newApp");
