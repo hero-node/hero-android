@@ -98,6 +98,9 @@ public class HeroWebView extends WebView implements IHero {
     private static final String METHOD_POST = HttpPost.METHOD_NAME;
     private boolean injectHero;
     private HashMap modules;
+    private String providerUrl = "https://mainnet.infura.io/33USgHxvCp3UoDItBSRs";
+//    private String providerUrl = "https://ropsten.infura.io/v3/719be1b239a24d1e87a2e326be6c4384";
+//    private String providerUrl = "http://localhost:8545";
     public HeroWebView(Context context, int initColor, final boolean injectHero) {
         this(context);
         try {
@@ -127,27 +130,37 @@ public class HeroWebView extends WebView implements IHero {
         this.setDownloadListener(new MyWebViewDownLoadListener());
         final Context theContext = context;
         this.setWebViewClient(new WebViewClient() {
+            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Nullable
             @Override
-            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+            public WebResourceResponse shouldInterceptRequest(WebView view, final WebResourceRequest request) {
                 String url = request.getUrl().toString();
                 if (url.startsWith("https://localhost:3000")){
                     try {
                         InputStream in = getResources().getAssets().open(request.getUrl().getPath().substring(1));
+                        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                        StringBuilder response = new StringBuilder();
+                        String inputLine;
+                        while ((inputLine = br.readLine()) != null)
+                            response.append(inputLine+"\n");
+                        in.close();
+                        String _content = response.toString();
+                        _content = _content.replaceAll("https://localhost:3001",providerUrl);
+                        InputStream newIn = new ByteArrayInputStream(_content.getBytes(StandardCharsets.UTF_8));
                         WebResourceResponse resourceResponse = new WebResourceResponse(
                                 MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(url))
-                                , "UTF-8", in);
+                                , "UTF-8", newIn);
                         return resourceResponse;
                     } catch (IOException e) {
                         Log.d("WebViewDebug",e.getMessage()+e.toString());
                         e.printStackTrace();
                     }
                 }else if(injectHero ){
-                    if (url.endsWith("js") || url.endsWith("css") || url.endsWith("png") || url.endsWith("jpg") || url.endsWith("jpeg")|| url.endsWith("svg") || url.endsWith("jpeg")|| url.endsWith("ico")){
+                    if (url.endsWith("js") || url.endsWith("css") || url.endsWith("png") || url.endsWith("jpg") || url.endsWith("jpeg")|| url.endsWith("svg") || url.endsWith("jpeg")|| url.endsWith("ico")|| url.endsWith("tiff")){
                         return super.shouldInterceptRequest(view, request);
                     }
-                    URL contentUrl = null;
+                    URL contentUrl;
                     try {
                         contentUrl = new URL(url);
                         BufferedReader in = new BufferedReader(new InputStreamReader(contentUrl.openStream()));
