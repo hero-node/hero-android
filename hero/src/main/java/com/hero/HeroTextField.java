@@ -255,6 +255,8 @@ public class HeroTextField extends EditText implements IHero {
                 this.setInputType(InputType.TYPE_CLASS_NUMBER);
             } else if (type.equals("pin")) {
                 this.setInputType(InputType.TYPE_CLASS_NUMBER);
+            } else if (type.equals("url")) {
+                this.setInputType(InputType.TYPE_CLASS_NUMBER);
             }
         }
         if (jsonObject.has("formatStyle")) {

@@ -13,13 +13,9 @@ public class Constants {
 
     public static final String APP_FILE_PATH = "/data/user/0/com.hero.sample/files/";
 
-//    public static final String KEYSTORE_FILE_PATH = "/data/user/0/com.hero.sample/files/keystore.json";
-
     public static final String KEYSTORE_FILE_PATH = "/data/user/0/com.hero.sample/files/";
 
     public static final String PASSWORDHINT_FILE_PATH = "/data/user/0/com.hero.sample/files/";
-
-//    public static final String PASSWORDHINT_FILE_PATH = "/data/user/0/com.hero.sample/files/hint.txt";
 
     public static final int CURRENT_VERSION = 3;
 

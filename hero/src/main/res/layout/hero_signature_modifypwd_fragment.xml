@@ -97,7 +97,7 @@
         android:layout_alignLeft="@+id/modifypwd_fragment_newpassword_confirm_et"
         android:layout_marginTop="12dp"
         android:textColor="@color/c2"
-        />
+        android:visibility="invisible"/>
 
     <TextView
         android:id="@+id/modifypwd_fragment_input_tv"
@@ -108,6 +108,6 @@
         android:layout_toRightOf="@+id/modifypwd_fragment_forget_tv"
         android:layout_marginTop="12dp"
         android:textColor="@color/tab_blue"
-        />
+        android:visibility="invisible" />
 
 </RelativeLayout>

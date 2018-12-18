@@ -106,6 +106,17 @@
             android:drawablePadding="12dp"
             android:text="导出keystore"/>
 
+        <Switch
+            android:id="@+id/wallet_export_default_sw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="默认钱包"
+            android:textSize="16sp"
+            android:drawablePadding="12dp"
+            android:textColor="@color/c3"
+            android:drawableBottom="@drawable/sign_line"
+            android:layout_marginTop="12dp"/>
+
     </LinearLayout>
 
     <Button

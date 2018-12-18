@@ -68,7 +68,7 @@ public class HeroSignatureExportFragment extends android.support.v4.app.Fragment
             export_keystore_tv.setText(fileContent);
             export_keystore_tv.setMovementMethod(ScrollingMovementMethod.getInstance());
 
-            Bitmap qrcode = ZxingUtils.encodeAsBitmap(walletData.getAddress(), 400,400);
+            Bitmap qrcode = ZxingUtils.encodeAsBitmap(fileContent, 400,400);
             export_qrcode_iv.setImageBitmap(qrcode);
         } catch (Exception e) {
             e.printStackTrace();

@@ -62,8 +62,8 @@
 
         <CheckBox
             android:id="@+id/official_wallet_agrselect_cb"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
             android:checked="true"
             style="@style/CustomWalletCheckbox"/>
 
@@ -71,16 +71,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="我已经仔细阅读并同意"
-            android:layout_marginLeft="8dp"
-            android:textSize="16sp"/>
+            android:layout_marginLeft="4dp"
+            android:textSize="15sp"/>
 
         <TextView
             android:id="@+id/official_wallet_service_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:text="服务及隐私条例"
-            android:textColor="@color/tab_blue"/>
+            android:textSize="15sp"
+            android:text="服务及隐私条例"/>
 
     </LinearLayout>
 
@@ -106,6 +105,7 @@
         android:layout_marginTop="140dp"
         android:textColor="@color/c1"
         android:layout_centerHorizontal="true"
-        android:textSize="14sp"/>
+        android:textSize="14sp"
+        android:visibility="invisible"/>
 
 </RelativeLayout>

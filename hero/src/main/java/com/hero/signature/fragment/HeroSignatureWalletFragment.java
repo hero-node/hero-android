@@ -16,14 +16,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hero.R;
+import com.hero.signature.Constants;
 import com.hero.signature.HeroSignatureActivity;
 import com.hero.utils.FileUtils;
 import com.hero.utils.ShareUtils;
@@ -73,6 +76,11 @@ public class HeroSignatureWalletFragment extends android.support.v4.app.Fragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         walletData = (HeroSignatureWalletListFragment.WalletData) getArguments().getSerializable("walletData");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         initView();
     }
 
@@ -80,6 +88,53 @@ public class HeroSignatureWalletFragment extends android.support.v4.app.Fragment
         initHash();
         initExport();
         initModifyPassword();
+        initDefaultWallet();
+    }
+
+    private void initDefaultWallet() {
+        ShareUtils shareUtils = ShareUtils.getInstance(getContext());
+        String defaultWallet = shareUtils.getString("default", "");
+        if (defaultWallet.equals(walletData.getName())) {
+            ((Switch)layout.findViewById(R.id.wallet_export_default_sw)).setChecked(true);
+            layout.findViewById(R.id.wallet_export_default_sw).setClickable(false);
+        } else {
+            ((Switch)layout.findViewById(R.id.wallet_export_default_sw)).setChecked(false);
+            ((Switch)layout.findViewById(R.id.wallet_export_default_sw)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(final CompoundButton buttonView, boolean isChecked) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    View view = View.inflate(getActivity(), R.layout.hero_confirm_dialog, null);
+                    TextView content = (TextView) view.findViewById(R.id.confirm_dialog_content);
+                    TextView buttonConfirm = (TextView) view.findViewById(R.id.confirm_dialog_confirm);
+                    TextView buttonCancel = (TextView) view.findViewById(R.id.confirm_dialog_cancel);
+                    view.findViewById(R.id.confirm_dialog_password_et).setVisibility(View.GONE);
+                    view.findViewById(R.id.confirm_dialog_ok).setVisibility(View.GONE);
+                    content.setText("是否设置为默认钱包");
+                    builder.setView(view);
+                    // 创建对话框
+                    final AlertDialog alertDialog = builder.create();
+                    alertDialog.setCanceledOnTouchOutside(false);
+                    buttonConfirm.setOnClickListener(new View.OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            new MyDefaultTask((HeroSignatureActivity) getActivity(), walletData.getName()).execute();
+                            buttonView.setChecked(true);
+                            alertDialog.dismiss();
+                        }
+
+                    });
+                    buttonCancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            buttonView.setChecked(false);
+                            alertDialog.dismiss();
+                        }
+                    });
+                    alertDialog.show();
+                }
+            });
+        }
     }
 
     private void initExport() {
@@ -393,6 +448,68 @@ public class HeroSignatureWalletFragment extends android.support.v4.app.Fragment
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+    }
+
+    private static class MyDefaultTask extends AsyncTask {
+
+        private WeakReference<HeroSignatureActivity> activityReference;
+
+        private String fileName;
+
+        // only retain a weak reference to the activity
+        MyDefaultTask(HeroSignatureActivity context, String walletName) {
+            this.activityReference = new WeakReference<>(context);
+            this.fileName = walletName;
+        }
+        @Override
+        protected void onPreExecute() {
+            activityReference.get().showWaitDialog();
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            if (!(o instanceof Bundle)) {
+                return;
+            }
+            Bundle bundle = (Bundle) o;
+            HeroSignatureActivity activity = activityReference.get();
+            if (activity == null || activity.isFinishing())
+                return;
+            activity.dismissWaitDialog();
+            Toast.makeText(activity, bundle.getString("message"), Toast.LENGTH_SHORT).show();
+            if (bundle.getBoolean("isSucceed")) {
+                activity.onPostProcessed(bundle);
+            }
+            super.onPostExecute(o);
+        }
+
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            Bundle bundle = new Bundle();
+            try {
+                ShareUtils shareUtils = ShareUtils.getInstance(activityReference.get());
+                //设置默认钱包
+                if (!shareUtils.getString("default","").equals(fileName)) {
+                    shareUtils.remove("default");
+                    shareUtils.putString("default", fileName);
+                    File defaultFile = FileUtils.getKeystoreFile("default");
+                    if (defaultFile.exists()) {
+                        defaultFile.delete();
+                    }
+                    FileUtils.copyFile(Constants.KEYSTORE_FILE_PATH + fileName,
+                            Constants.KEYSTORE_FILE_PATH + "default.json");
+                }
+
+                bundle.putBoolean("isSucceed", true);
+                bundle.putString("message", "设置默认钱包成功");
+            } catch (Exception e) {
+                bundle.putBoolean("isSucceed", false);
+                bundle.putString("message", "设置默认钱包失败");
+                e.printStackTrace();
+            }
+            return bundle;
+        }
     }
 
 }
