@@ -252,11 +252,11 @@ public class HeroTextField extends EditText implements IHero {
             if (type.equals("number")) {
                 this.setInputType(InputType.TYPE_CLASS_NUMBER);
             } else if (type.equals("phone")) {
-                this.setInputType(InputType.TYPE_CLASS_NUMBER);
+                this.setInputType(InputType.TYPE_CLASS_PHONE);
             } else if (type.equals("pin")) {
                 this.setInputType(InputType.TYPE_CLASS_NUMBER);
             } else if (type.equals("url")) {
-                this.setInputType(InputType.TYPE_CLASS_NUMBER);
+                this.setInputType(InputType.TYPE_TEXT_VARIATION_URI);
             }
         }
         if (jsonObject.has("formatStyle")) {

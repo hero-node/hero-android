@@ -65,14 +65,13 @@
 
     <TextView
         android:id="@+id/textView2"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_marginLeft="15dp"
         android:layout_marginTop="0dp"
         android:layout_marginBottom="0dp"
         android:layout_marginRight="10dp"
         android:contentDescription="detailValue"
-        android:autoText="false"
         android:clickable="false"
         android:textSize="14dp"
         android:textColor="@color/c2"
@@ -92,8 +91,8 @@
 
     <ImageView
         android:id="@+id/arrow"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="8dp"
+        android:layout_height="12dp"
         android:layout_marginRight="16dp"
         android:layout_centerInParent="true"
         android:layout_alignParentRight="true"

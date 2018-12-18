@@ -103,6 +103,12 @@ public class HeroWebView extends WebView implements IHero {
 //    private String providerUrl = "http://localhost:8545";
     public HeroWebView(Context context, int initColor, final boolean injectHero) {
         this(context);
+        this.setInjectHero(injectHero);
+        this.setBackgroundColor(initColor);
+    }
+
+    public HeroWebView(Context context) {
+        super(context);
         try {
             this.getSettings().setJavaScriptEnabled(true);
             this.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
@@ -110,7 +116,6 @@ public class HeroWebView extends WebView implements IHero {
             e.printStackTrace();
         }
         this.addJavascriptInterface(this, "native");
-        this.setInjectHero(injectHero);
         String userAgent = this.getSettings().getUserAgentString();
         userAgent += " Android/" + ContextUtils.getSystemVersion() + " hero-android/" + ContextUtils.getVersionCode(this.getContext()) + " imei/" + ContextUtils.getIMEI(context) + " androidId/" + ContextUtils.getAndroidId(context);
         userAgent += " Brand/" + ContextUtils.getDeviceBrand() +" Model/" + ContextUtils.getDeviceName();
@@ -281,11 +286,7 @@ public class HeroWebView extends WebView implements IHero {
                 }
             }
         });
-        this.setBackgroundColor(initColor);
-    }
 
-    public HeroWebView(Context context) {
-        super(context);
     }
 
     public String getFromAssets(String fileName){
