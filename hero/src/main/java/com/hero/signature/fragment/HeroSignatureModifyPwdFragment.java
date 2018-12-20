@@ -179,7 +179,7 @@ public class HeroSignatureModifyPwdFragment extends android.support.v4.app.Fragm
                     String fileName = WalletUtils.generateWalletFile(newpasswordString, keyPair, FileUtils.getAppFileDir(), false);
                     String index = walletName;
                     index = index.replace("Keystore","");
-                    index =index.replace(".json","");
+                    index = index.replace(".json","");
 
                     FileUtils.renameFile(fileName, Integer.valueOf(index));
 

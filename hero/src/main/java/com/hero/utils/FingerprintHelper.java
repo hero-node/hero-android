@@ -35,6 +35,8 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
     // 明文密码
     private String data = null;
 
+    private String walletName = null;
+
     public FingerprintHelper(Context context) {
         manager = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
         mFingerSharedPreference = new FingerSharedPreference(context);
@@ -181,5 +183,13 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    public String getWalletName() {
+        return walletName == null ? "" : walletName;
+    }
+
+    public void setWalletName(String walletName) {
+        this.walletName = walletName;
     }
 }
