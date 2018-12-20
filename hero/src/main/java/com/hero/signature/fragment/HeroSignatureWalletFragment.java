@@ -174,7 +174,7 @@ public class HeroSignatureWalletFragment extends android.support.v4.app.Fragment
                             return;
                         }
                         alertDialog.dismiss();
-                        new MyWalletTask((HeroSignatureActivity) getActivity(), walletData.getWalletFile().toString(), password).execute();
+                        new MyWalletTask((HeroSignatureActivity) getActivity(), walletData.getWalletFile(), password).execute();
                     }
 
                 });
@@ -194,14 +194,14 @@ public class HeroSignatureWalletFragment extends android.support.v4.app.Fragment
 
         private WeakReference<HeroSignatureActivity> activityReference;
 
-        private String walletFileString;
+        private WalletFile walletFile;
 
         private String passwordString;
 
         // only retain a weak reference to the activity
-        MyWalletTask(HeroSignatureActivity context, String walletFileString, String passwordString) {
+        MyWalletTask(HeroSignatureActivity context, WalletFile walletFile, String passwordString) {
             activityReference = new WeakReference<>(context);
-            this.walletFileString = walletFileString;
+            this.walletFile = walletFile;
             this.passwordString = passwordString;
         }
         @Override
@@ -260,9 +260,6 @@ public class HeroSignatureWalletFragment extends android.support.v4.app.Fragment
         protected Object doInBackground(Object[] objects) {
             Bundle bundle = new Bundle();
             try {
-                ObjectMapper mapper = new ObjectMapper();
-                WalletFile walletFile = mapper.readValue(walletFileString, WalletFile.class);
-
                 ECKeyPair keyPair = Wallet.decrypt(passwordString, walletFile);
                 if (keyPair != null && keyPair.getPrivateKey() != null
                         && keyPair.getPublicKey() != null) {
