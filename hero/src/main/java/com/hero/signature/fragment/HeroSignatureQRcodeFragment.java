@@ -66,7 +66,7 @@ public class HeroSignatureQRcodeFragment extends android.support.v4.app.Fragment
             @Override
             public void onClick(View v) {
                 ClipboardManager cm = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-                cm.setPrimaryClip(ClipData.newPlainText(null, walletData.getWalletFile().toString()));
+                cm.setPrimaryClip(ClipData.newPlainText(null, walletData.getAddress().toString()));
                 Toast.makeText(getActivity(), "复制成功", Toast.LENGTH_LONG).show();
             }
         });

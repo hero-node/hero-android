@@ -244,6 +244,7 @@ public class HeroSignatureImportFragment extends android.support.v4.app.Fragment
                     } else {
                         throw new CipherException("keystore密码不正确");
                     }
+                    bundle.putString("walletName", "Keystore" + number + ".json" );
                     bundle.putBoolean("isSucceed", true);
                     bundle.putString("message", "钱包导入成功");
                 } catch (CipherException ce) {
@@ -280,6 +281,7 @@ public class HeroSignatureImportFragment extends android.support.v4.app.Fragment
                     hintFile.createNewFile();
 
                     FileUtils.writeFile(Constants.PASSWORDHINT_FILE_PATH + "Hint" + number + ".txt", private_key_hint_et.getText().toString());
+                    bundle.putString("walletName", "Keystore" + number + ".json" );
                     bundle.putBoolean("isSucceed", true);
                     bundle.putString("message", "钱包导入成功");
                 } catch (CipherException ce) {

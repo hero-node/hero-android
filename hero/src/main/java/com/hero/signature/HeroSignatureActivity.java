@@ -134,7 +134,7 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
             bundle.putSerializable("walletData", walletData);
         }
         fragment.setArguments(bundle);
-        fragmentManager.beginTransaction().setCustomAnimations(R.anim.fragment_slide_left_in, R.anim.fragment_slide_right_out)
+        fragmentManager.beginTransaction().setCustomAnimations(R.anim.fragment_slide_right_in, R.anim.fragment_slide_left_out)
                 .replace(R.id.mainContent, fragment, tag).commitAllowingStateLoss();
     }
 
@@ -149,7 +149,7 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
             bundle.putSerializable("walletData", walletData);
         }
         fragment.setArguments(bundle);
-        fragmentManager.beginTransaction().setCustomAnimations(R.anim.fragment_slide_right_in, R.anim.fragment_slide_left_out)
+        fragmentManager.beginTransaction().setCustomAnimations(R.anim.fragment_slide_left_in, R.anim.fragment_slide_right_out)
                 .replace(R.id.mainContent, fragment, tag).commitAllowingStateLoss();
     }
 
@@ -181,7 +181,10 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
     public void onPostProcessed(Bundle bundle) {
         checkKeystoreFile();
         if (bundle!= null && bundle.containsKey("password") && fingerprintHelper.checkFingerprintAvailable() == FingerprintHelper.FINGERPRINT_STATE_AVAILABLE) {
+            final String walletName = bundle.getString("walletName");
             final String password = bundle.getString("password");
+
+            fingerprint_tv.setText("指纹识别中");
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             View view = View.inflate(this, R.layout.hero_confirm_dialog, null);
@@ -199,6 +202,7 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
 
                 @Override
                 public void onClick(View v) {
+                    fingerprintHelper.setWalletName(walletName);
                     fingerprintHelper.generateKey();
                     fingerprintHelper.setPurpose(KeyProperties.PURPOSE_ENCRYPT);
                     fingerprintHelper.setData(password);
@@ -352,9 +356,9 @@ public class HeroSignatureActivity extends FragmentActivity implements HeroSigna
         ShareUtils shareUtils = ShareUtils.getInstance(HeroSignatureActivity.this);
         if (shareUtils.contains("fingerprint")) {
             String name = shareUtils.getString("fingerprint","");
-            ShareUtils.getInstance(HeroSignatureActivity.this).putString("fingerprint", name + "," + walletData.getName());
+            ShareUtils.getInstance(HeroSignatureActivity.this).putString("fingerprint", name + "," + fingerprintHelper.getWalletName());
         } else {
-            ShareUtils.getInstance(HeroSignatureActivity.this).putString("fingerprint", walletData.getName());
+            ShareUtils.getInstance(HeroSignatureActivity.this).putString("fingerprint", fingerprintHelper.getWalletName());
         }
     }
 
