@@ -228,14 +228,16 @@ public class HeroWebView extends WebView implements IHero {
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 super.onReceivedError(view, errorCode, description, failingUrl);
+                Log.d("onReceivedError",failingUrl+mUrl);
+
                 if (failingUrl.equalsIgnoreCase(mUrl)){
+
                     InputStream page404 = getResources().openRawResource(R.raw.page_404);
                     if (page404 != null) {
-                        Log.d("onReceivedError",failingUrl+mUrl);
-
                         String content = null;
                         try {
                             content = inputStreamTOString(page404);
+                            Log.d("onReceivedError","page404"+content);
                         } catch (Exception e) {
                             Log.d("Error", e.getMessage());
                         }
@@ -393,7 +395,7 @@ public class HeroWebView extends WebView implements IHero {
     }
     @Override
     public void loadUrl(String url) {
-        url = url.startsWith("http")?url :"https://"+url;
+        url = url.startsWith("http")?url :"http://"+url;
         if (BuildConfig.DEBUG) {
             this.setWebContentsDebuggingEnabled(true);
             if (url.contains("?")) {
@@ -402,7 +404,6 @@ public class HeroWebView extends WebView implements IHero {
                 url = url + "?test=true";
             }
         }
-        mUrl = url;
         if (!isUrlAuthenticated(url)) {
             return;
         }
@@ -415,6 +416,8 @@ public class HeroWebView extends WebView implements IHero {
         } else {
             super.loadUrl(url);
         }
+        mUrl = this.getUrl();
+
     }
 
     @Override
