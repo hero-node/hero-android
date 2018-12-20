@@ -97,6 +97,7 @@ public class HeroWebView extends WebView implements IHero {
     private String method;
     private static final String METHOD_POST = HttpPost.METHOD_NAME;
     private boolean injectHero;
+    private boolean pause = false;
     private HashMap modules;
     private String providerUrl = "https://mainnet.infura.io/33USgHxvCp3UoDItBSRs";
 //    private String providerUrl = "https://ropsten.infura.io/v3/719be1b239a24d1e87a2e326be6c4384";
@@ -140,6 +141,7 @@ public class HeroWebView extends WebView implements IHero {
             @Nullable
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, final WebResourceRequest request) {
+                if (pause) return super.shouldInterceptRequest(view, request);
                 String url = request.getUrl().toString();
                 if (url.startsWith("https://localhost:3000")){
                     try {
@@ -292,7 +294,16 @@ public class HeroWebView extends WebView implements IHero {
         });
 
     }
-
+    public void pause(){
+        pause = true;
+        this.onPause();
+        this.pauseTimers();
+    }
+    public void resume(){
+        pause = false;
+        this.onResume();
+        this.resumeTimers();
+    }
     public String getFromAssets(String fileName){
         String jsStr = "";
         try {
@@ -331,6 +342,7 @@ public class HeroWebView extends WebView implements IHero {
 
     @JavascriptInterface
     public void on(String jsonStr) {
+        if (this.pause) return;
         try {
             Object json = new JSONTokener(jsonStr).nextValue();
             if (parentFragment != null && parentFragment.getTag() != null) {
@@ -352,7 +364,7 @@ public class HeroWebView extends WebView implements IHero {
 
     @JavascriptInterface
     public void npc(String jsonStr) {
-        Log.d("WebViewDebug","npc"+jsonStr);
+        if (this.pause) return;
         try {
             String str = jsonStr.replaceAll("heronpc://","");
             Log.d("WebViewDebug","npc"+str);
@@ -419,9 +431,9 @@ public class HeroWebView extends WebView implements IHero {
         mUrl = this.getUrl();
 
     }
-
     @Override
     public void on(JSONObject jsonObject) throws JSONException {
+        if (this.pause) return;
         HeroView.on(this, jsonObject);
         if (jsonObject.has("url")) {
             Object urlObject = jsonObject.get("url");

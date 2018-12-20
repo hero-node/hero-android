@@ -221,17 +221,20 @@ public class HeroFragment extends Fragment implements IHeroContext {
     @Override
     public void onStop() {
         super.onStop();
+        this.getWebView().pause();
     }
 
     @Override
     public void onPause() {
         shouldSendViewWillAppear = true;
         super.onPause();
+        this.getWebView().pause();
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        this.getWebView().resume();
         if (!isHidden) {
             if (mActionDatas != null && shouldSendViewWillAppear && mActionDatas.has("viewWillAppear")) {
                 try {
