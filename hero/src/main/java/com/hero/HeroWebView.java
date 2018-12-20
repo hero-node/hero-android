@@ -231,6 +231,8 @@ public class HeroWebView extends WebView implements IHero {
                 if (failingUrl.equalsIgnoreCase(mUrl)){
                     InputStream page404 = getResources().openRawResource(R.raw.page_404);
                     if (page404 != null) {
+                        Log.d("onReceivedError",failingUrl+mUrl);
+
                         String content = null;
                         try {
                             content = inputStreamTOString(page404);
