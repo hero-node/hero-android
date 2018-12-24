@@ -165,7 +165,10 @@ public class HeroChatView extends FrameLayout implements View.OnClickListener, H
         clipBoard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         ((Activity) context).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
+        findViewById(R.id.chat_album).setOnClickListener(this);
+        findViewById(R.id.chat_location).setOnClickListener(this);
         findViewById(R.id.imgTitleBack).setOnClickListener(this);
+
         imgTitleRight.setOnClickListener(this);
         imgEmojiNormal.setOnClickListener(this);
         imgEmojiChecked.setOnClickListener(this);
@@ -368,7 +371,14 @@ public class HeroChatView extends FrameLayout implements View.OnClickListener, H
                 layoutMore.setVisibility(VISIBLE);
                 rollListToBottom();
             }
+        } else if (id == R.id.chat_album){
+            
+
+        } else if (id == R.id.chat_location) {
+
+
         } else {
+
         }
     }
 
