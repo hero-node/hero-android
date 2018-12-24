@@ -203,7 +203,8 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                         JSONObject jsonObject = new JSONObject();
                         jsonObject.put("npc","fail");
                         jsonObject.put("desc","User denied transcation signature");
-                        ((HeroActivity)context).getCurrentFragment().mWebview.evaluateJavascript("window['HeroSignature"+"callback']("+ jsonObject.toString() +")",null);
+
+                        ((HeroFragmentActivity)context).getCurrentFragment().mWebview.evaluateJavascript("window['HeroSignature"+"callback']("+ jsonObject.toString() +")",null);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
