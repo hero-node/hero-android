@@ -9,6 +9,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.security.keystore.KeyProperties;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Gravity;
@@ -74,21 +75,6 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
         super(c);
         this.context = c;
         this.fingerprintHelper = new FingerprintHelper(context);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        View view = View.inflate(context, R.layout.fingerprint_dialog, null);
-        fingerprint_tv = (TextView) view.findViewById(R.id.fingerprint_hint);
-        fingerprint_tv.setText("指纹识别中");
-        builder.setView(view);
-        // 创建对话框
-        fingerprint_alertDialog = builder.create();
-        fingerprint_alertDialog.setCanceledOnTouchOutside(true);
-        fingerprint_alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                fingerprintHelper.stopAuthenticate();
-            }
-        });
     }
 
     @Override
@@ -175,6 +161,23 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                     fingerprintHelper.setPurpose(KeyProperties.PURPOSE_DECRYPT);
                     fingerprintHelper.setCallback(HeroSignature.this);
                     fingerprintHelper.authenticate();
+
+                    if (fingerprint_alertDialog == null) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                        View view = View.inflate(context, R.layout.fingerprint_dialog, null);
+                        fingerprint_tv = (TextView) view.findViewById(R.id.fingerprint_hint);
+                        builder.setView(view);
+                        // 创建对话框
+                        fingerprint_alertDialog = builder.create();
+                        fingerprint_alertDialog.setCanceledOnTouchOutside(true);
+                        fingerprint_alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialog) {
+                                fingerprintHelper.stopAuthenticate();
+                            }
+                        });
+                    }
+                    fingerprint_tv.setText("指纹识别中");
                     fingerprint_alertDialog.show();
                 }
             });
@@ -366,12 +369,19 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
     @Override
     public void onAuthenticationSucceeded(String value) {
         Toast.makeText(context, "指纹认证成功", Toast.LENGTH_SHORT).show();
-        if (fingerprint_alertDialog != null && fingerprint_alertDialog.isShowing()) {
-            fingerprint_alertDialog.dismiss();
-        }
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                if (fingerprint_alertDialog != null && fingerprint_alertDialog.isShowing()) {
+                    fingerprint_alertDialog.dismiss();
+                }
+                isCancel = false;
+                popupWindow.dismiss();
+            }
+        });
+
         new MyTask((HeroActivity) getContext(), value).execute();
-        isCancel = false;
-        popupWindow.dismiss();
+
     }
 
     @Override
