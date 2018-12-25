@@ -74,11 +74,11 @@ public class ImageLoadUtils {
                 String domain = HeroApplication.getDomainAddress(url);
                 String cookieString = ((HeroApplication) application).getCookieManager().getCookie(domain);
                 if (cookieString != null) {
-                    Glide.with(context).load(getUrlWithCookie(url, cookieString)).skipMemoryCache(false).dontAnimate().diskCacheStrategy(DiskCacheStrategy.SOURCE).into(view);
+                    Glide.with(context).load(getUrlWithCookie(url, cookieString)).skipMemoryCache(true).dontAnimate().diskCacheStrategy(DiskCacheStrategy.SOURCE).into(view);
                     return;
                 }
             }
-            Glide.with(context).load(new MyGlideUrl(url)).dontAnimate().skipMemoryCache(false).dontAnimate().diskCacheStrategy(DiskCacheStrategy.SOURCE).into(view);
+            Glide.with(context).load(new MyGlideUrl(url)).dontAnimate().skipMemoryCache(true).dontAnimate().diskCacheStrategy(DiskCacheStrategy.SOURCE).into(view);
         }
     }
 
