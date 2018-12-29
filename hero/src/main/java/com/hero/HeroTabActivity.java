@@ -500,7 +500,7 @@ public class HeroTabActivity extends HeroHomeActivity implements RadioGroup.OnCh
 
     @Override
     public int getHomeTabHeight() {
-        if (urlMap.size() <= 1) {
+        if (urlMap.size() < 2) {
             return 0;
         } else {
             return super.getHomeTabHeight();

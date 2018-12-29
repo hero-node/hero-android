@@ -98,9 +98,9 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
             }
 
             if (jsonObject.has("isNpc")) {
-                ((HeroActivity)context).getCurrentFragment().mWebview.evaluateJavascript("window['HeroSignature"+"callback']("+ jsonArray.toString() +")",null);
+                ((HeroFragmentActivity)context).getCurrentFragment().mWebview.evaluateJavascript("window['HeroSignature"+"callback']("+ jsonArray.toString() +")",null);
             } else {
-                ((HeroActivity)context).on(jsonArray);
+                ((HeroFragmentActivity)context).on(jsonArray);
             }
         }
 

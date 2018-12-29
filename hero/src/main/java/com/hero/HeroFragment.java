@@ -174,7 +174,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
         int layoutId = getLayoutId();
         View v = inflater.inflate(layoutId, container, false);
         initViews((ViewGroup) v);
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         if (mUrl != null) {
             this.loadUrl(mUrl);
         }
@@ -280,6 +279,9 @@ public class HeroFragment extends Fragment implements IHeroContext {
     public FrameLayout getView() {
         return mLayout;
     }
+    public View getRootContentView() {
+        return rootLayout;
+    }
 
     public HeroWebView getWebView() {
         return mWebview;
@@ -321,30 +323,24 @@ public class HeroFragment extends Fragment implements IHeroContext {
         }
         Drawable originDrawable = ContextCompat.getDrawable(getActivity(),
                 R.drawable.ic_back);
-
         backImageView.setImageDrawable(tintDrawable(originDrawable, tintColor));
         toolbarTitleView.setTextColor(tintColor);
-
-
+//
+//
         mLayout.setBackgroundColor(backgroundColor);
-        setTitleBackgroundColor(backgroundColor);
-        setStatusBarColor(backgroundColor);
-
         if (window == null) {
             window = getActivity().getWindow();
         }
-
         // 浅色
         if (!isColorDark(backgroundColor)) {
-            // 黑色
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            window.setStatusBarColor(Color.TRANSPARENT);
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         } else {
             int flag = ((window.getDecorView().getSystemUiVisibility()) & (~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR));
             window.getDecorView().setSystemUiVisibility(flag);
         }
-
     }
 
     public void loadUrl(String url) {
@@ -365,6 +361,7 @@ public class HeroFragment extends Fragment implements IHeroContext {
             }
         }
         mWebview.loadUrl(url);
+
     }
 
     public void refresh() {
@@ -507,16 +504,17 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     }
                     if (ui.has("backgroundColor")) {
                         backgroundColor = HeroView.parseColor("#" + ui.getString("backgroundColor"));
-
                         mLayout.setBackgroundColor(backgroundColor);
+                        rootLayout.setBackgroundColor(backgroundColor);
+                        mainContentView.setBackgroundColor(backgroundColor);
                         setTitleBackgroundColor(backgroundColor);
-                        setStatusBarColor(backgroundColor);
-                        // 浅色
+//                        // 浅色
                         if (!isColorDark(backgroundColor)) {
                             // 黑色
-                            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-                            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+                            window.setStatusBarColor(Color.TRANSPARENT);
+                            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
                         } else {
                             int flag = ((window.getDecorView().getSystemUiVisibility()) & (~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR));
                             window.getDecorView().setSystemUiVisibility(flag);
@@ -532,15 +530,8 @@ public class HeroFragment extends Fragment implements IHeroContext {
                         backImageView.setImageDrawable(tintDrawable(originDrawable, tintColor));
                         toolbarTitleView.setTextColor(tintColor);
                     }
-
                     mLayout.removeAllViews();
                     customWebView = null;
-                    if (getActionBar() == null) {
-                        if (!isNavigationBarHidden) {
-                            toolbar.setVisibility(View.VISIBLE);
-                            setNavigationBarOverlayed(false);
-                        }
-                    }
                     if (ui.has("nav")) {
                         JSONObject nav = ui.getJSONObject("nav");
                         JSONObject appearance = new JSONObject();
@@ -727,9 +718,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
                                     setActionbarTitleEnabled(false);
                                 }
                             }
-                        }
-                        if (jsonAppearance.has("overlayed")) {
-                            setNavigationBarOverlayed(true);
                         }
                     }
                 } else if (json.has("command")) {
@@ -1824,50 +1812,16 @@ public class HeroFragment extends Fragment implements IHeroContext {
         return null;
     }
 
-    // is the fragment full screen (no action bar)
-    public boolean isFullHeight() {
+    public boolean getNavigationBarHidden() {
         return isNavigationBarHidden;
     }
 
-    public void setFullHeight(boolean fullHeight) {
-        isNavigationBarHidden = fullHeight;
-        setNavigationBarHidden(isNavigationBarHidden);
-    }
-
-    public int getToolBarHeight() {
-        if (toolbar != null) {
-            return HeroView.getFixedActionBarHeight(getContext());
-        }
-        return 0;
-    }
-
-    public void showToolBar(boolean show) {
-        toolbar.setVisibility(show ? View.VISIBLE : View.GONE);
-        setNavigationBarOverlayed(false);
-    }
-
-    private void setNavigationBarHidden(boolean hidden) {
-        if (getToolbar() != null) {
-            getToolbar().setVisibility(hidden ? View.GONE : View.VISIBLE);
-        }
-        setNavigationBarOverlayed(hidden);
-    }
-
-    private void setNavigationBarOverlayed(boolean isOverlayed) {
-        if (mainContentView != null) {
-            ViewGroup.LayoutParams params = mainContentView.getLayoutParams();
-            if (params instanceof FrameLayout.LayoutParams) {
-                if (isOverlayed) {
-                    ((FrameLayout.LayoutParams) params).topMargin = 0;
-                    mainContentView.setLayoutParams(params);
-                } else {
-                    ((FrameLayout.LayoutParams) params).topMargin = HeroView.getFixedActionBarHeight(getContext());
-                    mainContentView.setLayoutParams(params);
-                }
-            }
+    public void setNavigationBarHidden(boolean hidden) {
+        isNavigationBarHidden = hidden;
+        if (toolbarContainer != null){
+            toolbarContainer.setVisibility(hidden ? View.GONE : View.VISIBLE);
         }
     }
-
     public boolean onBackPressed() {
         if (goBackWebView()) {
             return true;

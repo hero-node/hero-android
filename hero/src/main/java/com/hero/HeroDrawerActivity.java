@@ -147,7 +147,7 @@ public abstract class HeroDrawerActivity extends HeroHomeActivity {
         if (drawerFragment == null) {
             drawerFragment = new HeroFragment();
         }
-        drawerFragment.setFullHeight(true);
+        drawerFragment.setNavigationBarHidden(true);
         if (drawerFragment != null) {
             FragmentManager fm = getSupportFragmentManager();
             fm.beginTransaction().replace(R.id.drawerContent, drawerFragment, "drawer").commitAllowingStateLoss();

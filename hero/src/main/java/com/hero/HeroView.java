@@ -243,90 +243,35 @@ public class HeroView extends FrameLayout implements IHero {
     }
 
     public static int getParentHeight(View view) {
-        int height = 0;
-        int screen_height = getScreenHeight(view.getContext());
-        int screen_top = getScreenTop(view.getContext());
-        if (screen_top == 0) {
-            screen_top = getFixedStatusBarHeight(view.getContext());
-        }
-        screen_height -= screen_top;
-//        if (HeroHomeActivity.getAvailableScreenHeight() > 0) {
-//           screen_height = Math.min(screen_height, HeroHomeActivity.getAvailableScreenHeight());
-//        }
-        if (view.getContext() instanceof AppCompatActivity && ((AppCompatActivity) view.getContext()).getSupportActionBar() != null) {
-            int actionBarHeight = ((AppCompatActivity) view.getContext()).getSupportActionBar().getHeight();
-            if (actionBarHeight == 0 && view.getContext() instanceof HeroActivity) {
-                actionBarHeight = getFixedActionBarHeight(view.getContext());
-            }
-            screen_height -= actionBarHeight;
-        } else if (((Activity) view.getContext()).getActionBar() != null) {
-            int actionBarHeight = ((Activity) view.getContext()).getActionBar().getHeight();
-            if (actionBarHeight == 0 && view.getContext() instanceof HeroActivity) {
-                actionBarHeight = getFixedActionBarHeight(view.getContext());
-            }
-            screen_height -= actionBarHeight;
-        } else {
-            // if no actionbar, subtract toolbar height
-            boolean isFullHeight = false;
-            HeroFragment fragment = null;
-            if (view.getContext() instanceof HeroFragmentActivity) {
-                fragment = ((HeroFragmentActivity) view.getContext()).getParentFragment(view);//.getCurrentFragment();
-                if (fragment != null) {
-                    isFullHeight = fragment.isFullHeight();
-                }
-            }
-            if (!isFullHeight && !isExtendToNavigationBar(view)) {
-                int toolBarHeight;
-                if (fragment != null) {
-                    toolBarHeight = fragment.getToolBarHeight();
-                } else {
-                    toolBarHeight = getFixedActionBarHeight(view.getContext());
-                }
-                screen_height -= toolBarHeight;
-            }
-        }
-        if (view.getContext() instanceof HeroTabActivity) {
-            int tabHeight = ((HeroTabActivity)(view.getContext())).getHomeTabHeight();
-            screen_height -= tabHeight;
-        } else if (view.getContext() instanceof HeroHomeActivity) {
-            int tabHeight = ((HeroHomeActivity)(view.getContext())).getHomeTabHeight();
-            screen_height -= tabHeight;
-        }
-
         if (view.getParent() != null) {
+            int height = 0;
             if (((View) view.getParent()).getLayoutParams() != null) {
                 height = ((View) view.getParent()).getLayoutParams().height;
-            } else {
-                height = ((View) view.getParent()).getHeight();
             }
-
             if (height <= 0) {
-                height = ((View) view.getParent()).getHeight();
+                height=  ((View) view.getParent()).getMeasuredHeight();
+                if (view.getContext() instanceof HeroFragmentActivity){
+                    height += ((HeroFragmentActivity)view.getContext()).getCurrentFragment().getNavigationBarHidden()?84:0;
+                }
             }
+            return height;
+        }else{
+            return getScreenHeight(view.getContext());
         }
-
-        if (height <= 0) {
-            height = screen_height;
-        }
-        return Math.min(height, screen_height);
     }
-
     public static int getScreenWidth(Context context) {
         DisplayMetrics dm = context.getResources().getDisplayMetrics();
         return dm.widthPixels;
     }
-
     public static int getScreenHeight(Context context) {
         DisplayMetrics dm = context.getResources().getDisplayMetrics();
         return dm.heightPixels;
     }
-
     public static int getScreenTop(Context context) {
         Rect frame = new Rect();
         ((Activity) context).getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
         return frame.top;
     }
-
     public static float getAnimTime(JSONObject jsonObject) throws JSONException {
         String animation = jsonObject.getString("animation");
         float animTime = 0.0f;

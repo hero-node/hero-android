@@ -2,10 +2,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/layoutToolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?android:attr/actionBarSize"
-                android:background="@color/defaultBackground"
-                android:visibility="gone">
-
+                android:layout_height="match_parent"
+                android:background="@color/heroWhite"
+                android:visibility="visible">
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/toolBarStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp">
+    </RelativeLayout>
     <RelativeLayout
         android:id="@+id/layoutCenterItem"
         android:layout_width="wrap_content"
@@ -14,6 +18,7 @@
         android:layout_marginRight="60dp"
         android:orientation="horizontal"
         android:layout_centerInParent="true"
+        android:layout_below="@+id/toolBarStatus"
         android:gravity="center"
         >
 
@@ -41,6 +46,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:orientation="horizontal"
+        android:layout_below="@+id/toolBarStatus"
         >
         <ImageView
             android:id="@+id/leftImage"
@@ -61,6 +67,15 @@
         android:layout_height="match_parent"
         android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:layout_below="@+id/toolBarStatus"
+
         >
     </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#cccccc"
+        android:layout_alignParentBottom="true"
+        />
+
 </RelativeLayout>

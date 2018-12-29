@@ -79,7 +79,6 @@ import com.hero.depandency.MPermissionUtils;
 import com.hero.depandency.MyFileUtils;
 import com.hero.depandency.TouchImageView;
 import com.hero.depandency.UploadUtils;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -291,8 +290,11 @@ public class HeroImageView extends ImageView implements IHero, HeroFragmentActiv
                 String base64Data = mat.replaceFirst("");
                 setLoadedImageBitmap(BitmapUtils.decodeBitmapFromBase64(base64Data));
             }
-        }
+        }else if (jsonObject.has("svg")) {
+            String data = jsonObject.getString("svg");
 
+
+        }
         if (jsonObject.has("localImageReady")) {
             localImageReadyObj = jsonObject.getJSONObject("localImageReady");
         }

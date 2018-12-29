@@ -44,9 +44,11 @@ import android.text.method.PasswordTransformationMethod;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.hero.depandency.FormatUtils;
 
@@ -137,6 +139,30 @@ public class HeroTextField extends EditText implements IHero {
                 }
             }
         });
+        this.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if(event == null || event.getKeyCode() == KeyEvent.KEYCODE_ENTER){
+                    JSONObject json = HeroView.getJson(self);
+                    if (json != null) {
+                        if (json.has("textFieldDidEndEditing")) {
+                            try {
+                                JSONObject end = json.getJSONObject("textFieldDidEndEditing");
+                                end.put("value", self.getText().toString());
+                                end.put("name", HeroView.getName(HeroTextField.this));
+                                end.put("event", "textFieldDidEndEditing");
+                                self.postEventToContext(end);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+                return false;
+
+            }
+        });
+
         this.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {

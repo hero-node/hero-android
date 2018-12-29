@@ -33,6 +33,8 @@ package com.hero;
 
 import android.app.ActionBar;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -43,6 +45,8 @@ import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -94,29 +98,34 @@ public abstract class HeroFragmentActivity extends AppCompatActivity implements 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //设置透明的状态栏和控制面板
+        getWindow().setStatusBarColor(Color.TRANSPARENT);
+        getWindow().getDecorView().setSystemUiVisibility( View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         if (HeroApplication.getInstance() != null) {
             HeroApplication.getInstance().pushActivity(this);
         }
         hasPresentActivity = false;
 
-        if (savedInstanceState != null) {
-            // Check if there are any pending onActivityResult calls to view.
-            if (savedInstanceState.containsKey(NEXT_CANDIDATE_REQUEST_INDEX_TAG)) {
-                mNextCandidateRequestIndex =
-                        savedInstanceState.getInt(NEXT_CANDIDATE_REQUEST_INDEX_TAG);
-                int[] requestCodes = savedInstanceState.getIntArray(ALLOCATED_REQUEST_INDEX_TAG);
-                int[] viewIds = savedInstanceState.getIntArray(REQUEST_VIEW_ID_TAG);
-                if (requestCodes == null || viewIds == null ||
-                        requestCodes.length != viewIds.length) {
-                    Log.w(TAG, "Invalid requestCode mapping in savedInstanceState.");
-                } else {
-                    mRequestViews = new SparseIntArray(requestCodes.length);
-                    for (int i = 0; i < requestCodes.length; i++) {
-                        mRequestViews.put(requestCodes[i], viewIds[i]);
-                    }
-                }
-            }
-        }
+//        if (savedInstanceState != null) {
+//            // Check if there are any pending onActivityResult calls to view.
+//            if (savedInstanceState.containsKey(NEXT_CANDIDATE_REQUEST_INDEX_TAG)) {
+//                mNextCandidateRequestIndex =
+//                        savedInstanceState.getInt(NEXT_CANDIDATE_REQUEST_INDEX_TAG);
+//                int[] requestCodes = savedInstanceState.getIntArray(ALLOCATED_REQUEST_INDEX_TAG);
+//                int[] viewIds = savedInstanceState.getIntArray(REQUEST_VIEW_ID_TAG);
+//                if (requestCodes == null || viewIds == null ||
+//                        requestCodes.length != viewIds.length) {
+//                    Log.w(TAG, "Invalid requestCode mapping in savedInstanceState.");
+//                } else {
+//                    mRequestViews = new SparseIntArray(requestCodes.length);
+//                    for (int i = 0; i < requestCodes.length; i++) {
+//                        mRequestViews.put(requestCodes[i], viewIds[i]);
+//                    }
+//                }
+//            }
+//        }
 
         if (mRequestViews == null) {
             mRequestViews = new SparseIntArray();
