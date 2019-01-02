@@ -1,5 +1,6 @@
 package com.hero;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.security.keystore.KeyProperties;
@@ -16,6 +18,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.ValueCallback;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.PopupWindow;
@@ -38,11 +42,14 @@ import org.apache.http.util.EncodingUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.spongycastle.crypto.ec.ECDecryptor;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.Wallet;
 import org.web3j.crypto.WalletFile;
+import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
 import org.web3j.utils.Numeric;
 
 import java.io.File;
@@ -56,6 +63,7 @@ import static com.hero.signature.Constants.KEYSTORE_FILE_PATH;
 /**
  * Created by Aron on 2018/7/9.
  */
+@TargetApi(Build.VERSION_CODES.KITKAT)
 public class HeroSignature extends View implements IHero, FingerprintHelper.SimpleAuthenticationCallback {
 
     private static JSONObject jsonObject;
@@ -152,16 +160,49 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
         if (jsonObject.has("encrypt")){
             String  data = jsonObject.getJSONObject("encrypt").getString("data");
             String  pub  = jsonObject.getJSONObject("encrypt").getString("pub");
-            String msg = "{encrypt:{result:'🔒',original:'data'}}";
-            JSONObject msgObject = new JSONObject(msg);
-            ((HeroFragmentActivity)context).on(msgObject);
+            callJs("encrypt", pub, data);
         }
         if (jsonObject.has("decrypt")){
-            String  data = jsonObject.getJSONObject("encrypt").getString("data");
-            String  pub  = jsonObject.getJSONObject("encrypt").getString("pub");
-            String msg = "{decrypt:{result:'🔒',original:'data'}}";
-            JSONObject msgObject = new JSONObject(msg);
-            ((HeroFragmentActivity)context).on(msgObject);
+            String  data = jsonObject.getJSONObject("decrypt").getString("data");
+            String  pub  = jsonObject.getJSONObject("decrypt").getString("pub");
+            callJs("decrypt", pub, data);
+        }
+    }
+
+    private void callJs(String type, String pub, final String data) {
+        WebView webView = new WebView(context);
+        WebSettings webSettings = webView.getSettings();
+        //允许使用JS
+        webSettings.setJavaScriptEnabled(true);
+        if (type.equals("encrypt")) {
+            webView.evaluateJavascript("javascript:encrypt("+ pub + "," + data +
+                    "," + StringUtil.radomString(8)+ "," + StringUtil.radomString(16) + ")",
+                    new ValueCallback<String>() {
+                @Override
+                public void onReceiveValue(String value) {
+                    String msg = "{encrypt:{result:'" + value + "',original:'"+ data +"'}}";
+                    try {
+                        JSONObject msgObject = new JSONObject(msg);
+                        ((HeroFragmentActivity)context).on(msgObject);
+                    } catch (JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            });
+        } else if (type.equals("decrypt")) {
+            webView.evaluateJavascript("javascript:decrypt(" + pub + "," + data +")",
+                    new ValueCallback<String>() {
+                @Override
+                public void onReceiveValue(String value) {
+                    String msg = "{encrypt:{result:'" + value + "',original:'"+ data +"'}}";
+                    try {
+                        JSONObject msgObject = new JSONObject(msg);
+                        ((HeroFragmentActivity)context).on(msgObject);
+                    } catch (JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
     }
 

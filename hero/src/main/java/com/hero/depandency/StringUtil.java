@@ -37,6 +37,7 @@ import android.net.Uri;
 import com.hero.HeroView;
 
 import java.security.MessageDigest;
+import java.util.Random;
 
 /**
  * Created by liuguoping on 15/10/12.
@@ -127,5 +128,21 @@ public class StringUtil {
             e1.printStackTrace();
         }
         return s;
+    }
+
+    /**
+     * 生成指定位数的随机字符串
+     * @param length 字符串长度
+     * @return
+     */
+    public static String radomString(int length) {
+        String str= "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0 ; i < length ; i++){
+            int number = random.nextInt(str.length());
+            sb.append(str.charAt(number));
+        }
+        return sb.toString();
     }
 }
