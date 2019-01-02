@@ -16,6 +16,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -68,7 +69,6 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
     private Context context;
 
     private PopupWindow popupWindow;
-
     private boolean isCancel = false;
 
     public HeroSignature(Context c) {
@@ -122,6 +122,46 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
             System.out.println(jsonObject.toString());
             this.jsonObject = jsonObject;
             initSignView(contentView, jsonObject);
+        }
+        if (jsonObject.has("pub")){
+            String content = "";
+            try {
+                if (!FileUtils.getKeystoreFile("default").exists()) {
+                    content = FileUtils.getKeystoreFilecontent("default");
+                } else {
+                    ArrayList<File> fileArrayList = FileUtils.getKeystroeFilesWithoutDefault();
+                    content = FileUtils.getKeystoreFilecontent(fileArrayList.get(0).getName());
+                }
+                ObjectMapper mapper = new ObjectMapper();
+                WalletFile walletFile = mapper.readValue(content, WalletFile.class);
+                ECKeyPair keyPair = Wallet.decrypt("1", walletFile);
+                if (keyPair != null && keyPair.getPrivateKey() != null
+                        && keyPair.getPublicKey() != null) {
+                    JSONObject pub = new JSONObject();
+                    pub.put("pub",keyPair.getPublicKey());
+                    ((HeroFragmentActivity)context).on(pub);
+                } else {
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (CipherException e) {
+                e.printStackTrace();
+            }
+        }
+        if (jsonObject.has("encrypt")){
+            String  data = jsonObject.getJSONObject("encrypt").getString("data");
+            String  pub  = jsonObject.getJSONObject("encrypt").getString("pub");
+            String msg = "{encrypt:{result:'🔒',original:'data'}}";
+            JSONObject msgObject = new JSONObject(msg);
+            ((HeroFragmentActivity)context).on(msgObject);
+        }
+        if (jsonObject.has("decrypt")){
+            String  data = jsonObject.getJSONObject("encrypt").getString("data");
+            String  pub  = jsonObject.getJSONObject("encrypt").getString("pub");
+            String msg = "{decrypt:{result:'🔒',original:'data'}}";
+            JSONObject msgObject = new JSONObject(msg);
+            ((HeroFragmentActivity)context).on(msgObject);
         }
     }
 
