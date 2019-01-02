@@ -34,7 +34,6 @@ package com.hero;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -45,8 +44,6 @@ import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;

@@ -36,6 +36,7 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -372,9 +373,13 @@ public class HeroChatView extends FrameLayout implements View.OnClickListener, H
                 rollListToBottom();
             }
         } else if (id == R.id.chat_album){
-            
-
+            // 激活系统图库，选择一张图片
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("image/*");
+            // 开启一个带有返回值的Activity
+            ((HeroActivity)context).startActivityForResult(intent, HeroActivity.LOCAL_CROP);
         } else if (id == R.id.chat_location) {
+
 
 
         } else {

@@ -32,19 +32,15 @@
 package com.hero;
 
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentManager;
@@ -56,6 +52,8 @@ import org.json.JSONObject;
 public class HeroActivity extends HeroFragmentActivity {
     public static final int RESULT_CODE_DISMISS = -1009;
     private static int autoGenerateRequestCode = 1000;
+
+    public static final int LOCAL_CROP = 13;// 本地图库
 
     public static final boolean SHOW_ACTIVITY_ANIM = true;
 
@@ -196,5 +194,22 @@ public class HeroActivity extends HeroFragmentActivity {
         } catch (ActivityNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case LOCAL_CROP:// 系统图库
+                if (resultCode == RESULT_OK) {
+                    // 创建intent用于裁剪图片
+                    Intent intent1 = new Intent("com.android.camera.action.CROP");
+                    // 获取图库所选图片的uri
+                    Uri uri = data.getData();
+
+
+                }
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }
