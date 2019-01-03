@@ -131,42 +131,110 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
             this.jsonObject = jsonObject;
             initSignView(contentView, jsonObject);
         }
-        if (jsonObject.has("pub")){
-            String content = "";
-            try {
-                if (!FileUtils.getKeystoreFile("default").exists()) {
-                    content = FileUtils.getKeystoreFilecontent("default");
-                } else {
-                    ArrayList<File> fileArrayList = FileUtils.getKeystroeFilesWithoutDefault();
-                    content = FileUtils.getKeystoreFilecontent(fileArrayList.get(0).getName());
-                }
-                ObjectMapper mapper = new ObjectMapper();
-                WalletFile walletFile = mapper.readValue(content, WalletFile.class);
-                ECKeyPair keyPair = Wallet.decrypt("1", walletFile);
-                if (keyPair != null && keyPair.getPrivateKey() != null
-                        && keyPair.getPublicKey() != null) {
-                    JSONObject pub = new JSONObject();
-                    pub.put("pub",keyPair.getPublicKey());
-                    ((HeroFragmentActivity)context).on(pub);
-                } else {
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (CipherException e) {
-                e.printStackTrace();
-            }
+        if (jsonObject.has("pub")) {
+            checkPassword();
         }
         if (jsonObject.has("encrypt")){
-            String  data = jsonObject.getJSONObject("encrypt").getString("data");
-            String  pub  = jsonObject.getJSONObject("encrypt").getString("pub");
+            JSONObject object = jsonObject.getJSONObject("encrypt");
+            String data = "";
+            String pub  = "";
+            if (object.has("data")) {
+                data = object.getString("data");
+            }
+            if (object.has("pub")) {
+                data = object.getString("pub");
+            }
             callJs("encrypt", pub, data);
         }
-        if (jsonObject.has("decrypt")){
-            String  data = jsonObject.getJSONObject("decrypt").getString("data");
-            String  pub  = jsonObject.getJSONObject("decrypt").getString("pub");
-            callJs("decrypt", pub, data);
+        if (jsonObject.has("decrypt")) {
+            JSONObject object = jsonObject.getJSONObject("decrypt");
+            String data = "";
+            if (object.has("data")) {
+                data = object.getString("data");
+            }
+            String pri =HeroInstance.getInstance().getPrivate_key();
+            if ( pri != null && !pri.equals("")) {
+                callJs("decrypt", pri , data);
+            } else {
+                checkPassword();
+            }
         }
+    }
+
+    private void checkPassword() {
+        View checkView = LayoutInflater.from(getContext()).inflate(R.layout.hero_signcheck_popwindow, null, false);
+        try {
+            if (FileUtils.getKeystoreFile("default").exists()) {
+                boolean defaultHasFingerprint = false;
+                ShareUtils shareUtils = ShareUtils.getInstance(context);
+                if (shareUtils.contains("default")) {
+                    String fileName = shareUtils.getString("default","");
+                    String fingerprint = shareUtils.getString("fingerprint","");
+                    if (fingerprint.contains(fileName)){
+                        defaultHasFingerprint = true;
+                    }
+                }
+
+                if (defaultHasFingerprint && (fingerprintHelper.checkFingerprintAvailable() == FingerprintHelper.FINGERPRINT_STATE_AVAILABLE)) {
+                    checkView.findViewById(R.id.sign_fingerprint_ll).setVisibility(View.VISIBLE);
+                    checkView.findViewById(R.id.sign_fingerprint_line).setVisibility(View.VISIBLE);
+                    checkView.findViewById(R.id.sign_fingerprint_ll).setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            fingerprintHelper.setPurpose(KeyProperties.PURPOSE_DECRYPT);
+                            fingerprintHelper.setCallback(HeroSignature.this);
+                            fingerprintHelper.authenticate();
+
+                            if (fingerprint_alertDialog == null) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                                View view = View.inflate(context, R.layout.fingerprint_dialog, null);
+                                fingerprint_tv = (TextView) view.findViewById(R.id.fingerprint_hint);
+                                builder.setView(view);
+                                // 创建对话框
+                                fingerprint_alertDialog = builder.create();
+                                fingerprint_alertDialog.setCanceledOnTouchOutside(true);
+                                fingerprint_alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                    @Override
+                                    public void onCancel(DialogInterface dialog) {
+                                        fingerprintHelper.stopAuthenticate();
+                                    }
+                                });
+                            }
+                            fingerprint_tv.setText("指纹识别中");
+                            fingerprint_alertDialog.show();
+                        }
+                    });
+                } else {
+                    checkView.findViewById(R.id.sign_fingerprint_ll).setVisibility(View.GONE);
+                    checkView.findViewById(R.id.sign_fingerprint_line).setVisibility(View.GONE);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        popupWindow = new PopupWindow(checkView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.WHITE));
+        // 设置PopupWindow是否能响应外部点击事件
+        popupWindow.setOutsideTouchable(false);
+        popupWindow.setTouchable(true);
+        popupWindow.setAnimationStyle(R.style.ActionSheetDialogAnimation);
+        popupWindow.showAtLocation(checkView, Gravity.BOTTOM,0,0);
+
+        final EditText password_et = (EditText) checkView.findViewById(R.id.signcheck_password_et);
+
+        checkView.findViewById(R.id.signcheck_confirm_bt).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (password_et.getText() == null | password_et.getText().equals("")
+                        | password_et.getText().length() == 0) {
+                    Toast.makeText(getContext(),"请输入正确的密码", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                new MySignTask((HeroActivity) context, password_et.getText().toString()).execute();
+                popupWindow.dismiss();
+            }
+        });
     }
 
     private void callJs(String type, String pub, final String data) {
@@ -194,7 +262,7 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                     new ValueCallback<String>() {
                 @Override
                 public void onReceiveValue(String value) {
-                    String msg = "{encrypt:{result:'" + value + "',original:'"+ data +"'}}";
+                    String msg = "{decrypt:{result:'" + value + "',original:'"+ data +"'}}";
                     try {
                         JSONObject msgObject = new JSONObject(msg);
                         ((HeroFragmentActivity)context).on(msgObject);
@@ -461,9 +529,11 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                 popupWindow.dismiss();
             }
         });
-
-        new MyTask((HeroActivity) getContext(), value).execute();
-
+        if (jsonObject.has("message") || jsonObject.has("transaction")) {
+            new MyTask((HeroActivity) getContext(), value).execute();
+        } else if (jsonObject.has("pub")) {
+            new MySignTask((HeroActivity) getContext(), value).execute();
+        }
     }
 
     @Override
@@ -474,5 +544,83 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
     @Override
     public void onAuthenticationError(String errString) {
         fingerprint_tv.setText(errString);
+    }
+
+
+    private static class MySignTask extends AsyncTask {
+
+        private WeakReference<HeroActivity> activityReference;
+
+        private String passwordString;
+
+        // only retain a weak reference to the activity
+        MySignTask(HeroActivity context, String passwordString) {
+            activityReference = new WeakReference<>(context);
+            this.passwordString = passwordString;
+        }
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            if (!(o instanceof Bundle)) {
+                return;
+            }
+            Bundle bundle = (Bundle) o;
+            HeroActivity activity = activityReference.get();
+            if (activity == null || activity.isFinishing())
+                return;
+            Toast.makeText(activity, bundle.getString("message"), Toast.LENGTH_SHORT).show();
+            try {
+                if (bundle.getBoolean("isSucceed")) {
+                    JSONObject pub = new JSONObject();
+                    pub.put("pub", bundle.getString("pub"));
+                    ((IHeroContext) (activityReference.get())).on(jsonObject);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            super.onPostExecute(o);
+        }
+
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            Bundle bundle = new Bundle();
+            try {
+                String content = "";
+                if (!FileUtils.getKeystoreFile("default").exists()) {
+                    content = FileUtils.getKeystoreFilecontent("default");
+                } else {
+                    ArrayList<File> fileArrayList = FileUtils.getKeystroeFilesWithoutDefault();
+                    content = FileUtils.getKeystoreFilecontent(fileArrayList.get(0).getName());
+                }
+
+                ObjectMapper mapper = new ObjectMapper();
+                WalletFile walletFile = mapper.readValue(content, WalletFile.class);
+
+                ECKeyPair keyPair = Wallet.decrypt(passwordString, walletFile);
+                if (keyPair != null && keyPair.getPrivateKey() != null
+                        && keyPair.getPublicKey() != null) {
+                    HeroInstance.getInstance().setPrivate_key(keyPair.getPrivateKey().toString());
+                    HeroInstance.getInstance().setPublic_key(keyPair.getPublicKey().toString());
+                    bundle.putString("pub", keyPair.getPublicKey().toString());
+                } else {
+                    throw new CipherException("密码错误");
+                }
+                bundle.putBoolean("isSucceed", true);
+                bundle.putString("message", "密码正确");
+            } catch (CipherException ce) {
+                bundle.putBoolean("isSucceed", false);
+                bundle.putString("message", "验证失败");
+                ce.printStackTrace();
+            } catch (Exception e) {
+                bundle.putBoolean("isSucceed", false);
+                bundle.putString("message", "验证失败");
+                e.printStackTrace();
+            }
+            return bundle;
+        }
     }
 }

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sign_popwindow_rl"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:id="@+id/signcheck_password_rl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="@color/heroWhite">
+
+        <LinearLayout
+            android:id="@+id/signcheck_password_ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/sign_content_transfer_ll"
+            android:orientation="vertical"
+            android:paddingTop="8dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="密钥认证"
+                android:textColor="@color/c4"
+                android:textSize="12sp"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_weight="6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <EditText
+                        android:id="@+id/signcheck_password_et"
+                        android:layout_width="match_parent"
+                        android:layout_height="32dp"
+                        android:background="@drawable/sign_password_background"
+                        android:hint="输入密码"
+                        android:inputType="textPassword"
+                        android:maxLines="1"
+                        android:padding="8dp"
+                        android:layout_marginTop="16dp"
+                        android:textSize="13sp" />
+
+                    <Button
+                        android:id="@+id/signcheck_confirm_bt"
+                        android:layout_width="match_parent"
+                        android:layout_height="32dp"
+                        android:background="@drawable/sign_confirm_button"
+                        android:text="确认"
+                        android:textColor="@color/heroWhite"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginBottom="20dp"
+                        android:textSize="15sp" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/signcheck_fingerprint_line"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="12dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/vertical_line"/>
+
+                <LinearLayout
+                    android:id="@+id/signcheck_fingerprint_ll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="100dp"
+                        android:layout_height="80dp"
+                        android:src="@drawable/fingerprint_grey_icon"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="4dp"
+                        android:textSize="12sp"
+                        android:text="点击进入指纹识别"/>
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>
+
