@@ -439,69 +439,69 @@ public class HeroFragment extends Fragment implements IHeroContext {
                     intent.putExtra("jsonObject", globalEvent.toString());
                     manager.sendBroadcast(intent);
                 }
-                if (json.has("ui") || json.has("ui_cache")) {
+                if (json.has("ui")) {
                     boolean isCache = false;
                     int cacheVersion = 0;
-                    JSONObject ui;
-                    if (json.has("ui")) {
-                        Object object1 = json.get("ui");
-                        if (object1.equals("blank")) {
-                            return;
-                        }
-                        ui = (JSONObject) json.get("ui");
-                        JSONObject ui_cache = (mCache == null) ? null : mCache.getAsJSONObject(mUrl);
-                        if (ui_cache != null && ui_cache.has("ui_cache")) {
-                            ui_cache = ui_cache.getJSONObject("ui_cache");
-                            if (ui.has("version")) {
-                                int version = ui.getInt("version");
-                                int version_old = -1000;
-                                if (ui_cache.has("version")) {
-                                    version_old = ui_cache.getInt("version");
-                                }
-
-                                String uiData = ui.toString();
-                                if (isAlwaysNeedReload(uiData, version)) {
-                                    //                                    JSONObject ui_new = new JSONObject();
-                                    //                                    ui_cache.put("ui_cache", ui);
-                                    //                                    mCache.put(mUrl, ui_new);
-                                } else {
-                                    if (version != version_old) {
-                                        JSONObject ui_new = new JSONObject();
-                                        ui_new.put("ui_cache", ui);
-                                        mCache.put(mUrl, ui_new);
-                                    } else {
-                                        // get the original cache string for comparison
-                                        if (USE_CACHE) {
-                                            String cacheStr = mCache.getAsString(mUrl);
-                                            JSONObject uiNow = new JSONObject();
-                                            uiNow.put("ui_cache", ui);
-                                            String uiStr = uiNow.toString();
-                                            if (uiStr.length() == cacheStr.length() && uiStr.equals(cacheStr)) {
-                                                return;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            int version = 0;
-                            if (ui.has("version")) {
-                                version = ui.getInt("version");
-                            }
-                            String uiData = ui.toString();
-                            if (!isAlwaysNeedReload(uiData, version)) {
-                                JSONObject ui_new = new JSONObject();
-                                ui_new.put("ui_cache", ui);
-                                mCache.put(mUrl, ui_new);
-                            }
-                        }
-                    } else {
-                        ui = (JSONObject) json.get("ui_cache");
-                        isCache = true;
-                        if (ui.has("version")) {
-                            cacheVersion = ui.getInt("version");
-                        }
-                    }
+                    JSONObject ui = (JSONObject) json.get("ui");
+//                    if (json.has("ui")) {
+//                        Object object1 = json.get("ui");
+//                        if (object1.equals("blank")) {
+//                            return;
+//                        }
+//                        ui = (JSONObject) json.get("ui");
+//                        JSONObject ui_cache = (mCache == null) ? null : mCache.getAsJSONObject(mUrl);
+//                        if (ui_cache != null && ui_cache.has("ui_cache")) {
+//                            ui_cache = ui_cache.getJSONObject("ui_cache");
+//                            if (ui.has("version")) {
+//                                int version = ui.getInt("version");
+//                                int version_old = -1000;
+//                                if (ui_cache.has("version")) {
+//                                    version_old = ui_cache.getInt("version");
+//                                }
+//
+//                                String uiData = ui.toString();
+//                                if (isAlwaysNeedReload(uiData, version)) {
+//                                    //                                    JSONObject ui_new = new JSONObject();
+//                                    //                                    ui_cache.put("ui_cache", ui);
+//                                    //                                    mCache.put(mUrl, ui_new);
+//                                } else {
+//                                    if (version != version_old) {
+//                                        JSONObject ui_new = new JSONObject();
+//                                        ui_new.put("ui_cache", ui);
+//                                        mCache.put(mUrl, ui_new);
+//                                    } else {
+//                                        // get the original cache string for comparison
+//                                        if (USE_CACHE) {
+//                                            String cacheStr = mCache.getAsString(mUrl);
+//                                            JSONObject uiNow = new JSONObject();
+//                                            uiNow.put("ui_cache", ui);
+//                                            String uiStr = uiNow.toString();
+//                                            if (uiStr.length() == cacheStr.length() && uiStr.equals(cacheStr)) {
+//                                                return;
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        } else {
+//                            int version = 0;
+//                            if (ui.has("version")) {
+//                                version = ui.getInt("version");
+//                            }
+//                            String uiData = ui.toString();
+//                            if (!isAlwaysNeedReload(uiData, version)) {
+//                                JSONObject ui_new = new JSONObject();
+//                                ui_new.put("ui_cache", ui);
+//                                mCache.put(mUrl, ui_new);
+//                            }
+//                        }
+//                    } else {
+//                        ui = (JSONObject) json.get("ui_cache");
+//                        isCache = true;
+//                        if (ui.has("version")) {
+//                            cacheVersion = ui.getInt("version");
+//                        }
+//                    }
                     if (ui.has("backgroundColor")) {
                         backgroundColor = HeroView.parseColor("#" + ui.getString("backgroundColor"));
                         mLayout.setBackgroundColor(backgroundColor);

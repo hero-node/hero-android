@@ -63,6 +63,7 @@
     <LinearLayout
         android:id="@+id/layoutRightItem"
         android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:orientation="horizontal"
