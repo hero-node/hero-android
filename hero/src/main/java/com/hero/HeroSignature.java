@@ -188,9 +188,9 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                 }
 
                 if (defaultHasFingerprint && (fingerprintHelper.checkFingerprintAvailable() == FingerprintHelper.FINGERPRINT_STATE_AVAILABLE)) {
-                    checkView.findViewById(R.id.sign_fingerprint_ll).setVisibility(View.VISIBLE);
-                    checkView.findViewById(R.id.sign_fingerprint_line).setVisibility(View.VISIBLE);
-                    checkView.findViewById(R.id.sign_fingerprint_ll).setOnClickListener(new OnClickListener() {
+                    checkView.findViewById(R.id.signcheck_fingerprint_ll).setVisibility(View.VISIBLE);
+                    checkView.findViewById(R.id.signcheck_fingerprint_line).setVisibility(View.VISIBLE);
+                    checkView.findViewById(R.id.signcheck_fingerprint_ll).setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             fingerprintHelper.setPurpose(KeyProperties.PURPOSE_DECRYPT);
