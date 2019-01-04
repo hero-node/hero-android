@@ -445,7 +445,7 @@ public class HeroTabActivity extends HeroHomeActivity implements RadioGroup.OnCh
             JSONObject taggedObject = null;
             for (int i = 0; i < ((JSONArray) object).length(); i ++) {
                 JSONObject item = ((JSONArray) object).optJSONObject(i);
-                if (item.has("fragment_tag")) {
+                if (item != null && item.has("fragment_tag")) {
                     taggedObject = item;
                     break;
                 }
