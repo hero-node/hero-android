@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.fingerprint.FingerprintManager;
@@ -21,8 +22,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -54,12 +58,18 @@ import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.utils.Numeric;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import static com.hero.signature.Constants.KEYSTORE_FILE_PATH;
@@ -85,9 +95,9 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
 
     private WebView webView;
 
-    private static String PUBLICKEY;
+    public static String PUBLICKEY;
 
-    private static String PRIVATEKEY;
+    public static String PRIVATEKEY;
 
     public HeroSignature(Context c) {
         super(c);
@@ -154,7 +164,7 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                 data = object.getString("data");
             }
             if (object.has("pub")) {
-                data = object.getString("pub");
+                pub = object.getString("pub");
             }
             callJs("encrypt", pub, data);
         }
@@ -261,66 +271,83 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
     private void callJs(final String type, final String pub, final String data) {
         if (webView == null) {
             webView = new WebView(context);
+
+            WebSettings webSettings = webView.getSettings();
+            //允许使用JS
+            webSettings.setJavaScriptEnabled(true);
+            webSettings.setAllowFileAccess(true);
+            webSettings.setAppCacheEnabled(true);
+            webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+
         }
 
-        WebSettings webSettings = webView.getSettings();
-        //允许使用JS
-        webSettings.setJavaScriptEnabled(true);
-        String jsStr = "";
-        try {
-            InputStream in = context.getAssets().open("hero-provider.js");
-            byte buff[] = new byte[1024];
-            ByteArrayOutputStream fromFile = new ByteArrayOutputStream();
-            do {
-                int numRead = in.read(buff);
-                if (numRead <= 0) {
-                    break;
-                }
-                fromFile.write(buff, 0, numRead);
-            } while (true);
-            jsStr = fromFile.toString();
-            in.close();
-            fromFile.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        webView.loadUrl("javascript:" + jsStr);
-        webView.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public void onReceivedTitle(WebView view, String title) {
-                super.onReceivedTitle(view, title);
-                if (type.equals("encrypt")) {
-                    webView.evaluateJavascript("javascript:encrypt("+ pub + "," + data +
-                                    "," + StringUtil.radomString(8)+ "," + StringUtil.radomString(16) + ")",
-                            new ValueCallback<String>() {
-                                @Override
-                                public void onReceiveValue(String value) {
-                                    String msg = "{encrypt:{result:'" + value + "',original:'"+ data +"'}}";
-                                    try {
-                                        JSONObject msgObject = new JSONObject(msg);
-                                        ((HeroFragmentActivity)context).on(msgObject);
-                                    } catch (JSONException e){
-                                        e.printStackTrace();
+        webView.loadUrl("file:///android_asset/hero-home/blank.html");
+
+        webView.setWebViewClient(new WebViewClient() {
+
+                @Override
+                public void onPageFinished(WebView view, String url) {
+                    super.onPageFinished(view, url);
+                    if (type.equals("encrypt")) {
+                        webView.evaluateJavascript("window.encrypt('"+ pub + "','" + data +
+                                        "','" + StringUtil.radomString(8)+ "','" + StringUtil.radomString(16) + "')",
+                                new ValueCallback<String>() {
+                                    @Override
+                                    public void onReceiveValue(String value) {
+                                        String msg = "{encrypt:{result:'" + value + "',original:'"+ data +"'}}";
+                                        try {
+                                            JSONObject msgObject = new JSONObject(msg);
+                                            ((HeroFragmentActivity)context).on(msgObject);
+                                        } catch (JSONException e){
+                                            e.printStackTrace();
+                                        }
                                     }
-                                }
-                            });
-                } else if (type.equals("decrypt")) {
-                    webView.evaluateJavascript("javascript:decrypt(" + pub + "," + data +")",
-                            new ValueCallback<String>() {
-                                @Override
-                                public void onReceiveValue(String value) {
-                                    String msg = "{decrypt:{result:'" + value + "',original:'"+ data +"'}}";
-                                    try {
-                                        JSONObject msgObject = new JSONObject(msg);
-                                        ((HeroFragmentActivity)context).on(msgObject);
-                                    } catch (JSONException e){
-                                        e.printStackTrace();
+                                });
+                    } else if (type.equals("decrypt")) {
+                        webView.evaluateJavascript("window.decrypt(" + pub + "," + data +")",
+                                new ValueCallback<String>() {
+                                    @Override
+                                    public void onReceiveValue(String value) {
+                                        String msg = "{decrypt:{result:'" + value + "',original:'"+ data +"'}}";
+                                        try {
+                                            JSONObject msgObject = new JSONObject(msg);
+                                            ((HeroFragmentActivity)context).on(msgObject);
+                                        } catch (JSONException e){
+                                            e.printStackTrace();
+                                        }
                                     }
-                                }
-                            });
+                                });
+                    }
+
                 }
-            }
-        });
+
+                @Override
+                public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                    super.onPageStarted(view, url, favicon);
+                }
+            });
+
+
+//        String jsStr = "";
+//        try {
+//            InputStream in = context.getAssets().open("/hero-home/hero-provider.js");
+//            byte buff[] = new byte[1024];
+//            ByteArrayOutputStream fromFile = new ByteArrayOutputStream();
+//            do {
+//                int numRead = in.read(buff);
+//                if (numRead <= 0) {
+//                    break;
+//                }
+//                fromFile.write(buff, 0, numRead);
+//            } while (true);
+//            jsStr = fromFile.toString();
+//            in.close();
+//            fromFile.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        webView.loadUrl("javascript:" + jsStr);
+
     }
 
     private void initSignView(View view, JSONObject object) throws JSONException {
