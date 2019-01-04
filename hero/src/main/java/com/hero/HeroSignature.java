@@ -290,7 +290,7 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                     super.onPageFinished(view, url);
                     if (type.equals("encrypt")) {
                         webView.evaluateJavascript("window.heroencrypt('"+ pub + "','" + data +
-                                        "','" + StringUtil.radomString(8)+ "','" + StringUtil.radomString(16) + "')",
+                                        "','" + StringUtil.radomString(16)+ "','" + StringUtil.radomString(32) + "')",
                                 new ValueCallback<String>() {
                                     @Override
                                     public void onReceiveValue(String value) {

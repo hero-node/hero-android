@@ -136,7 +136,7 @@ public class StringUtil {
      * @return
      */
     public static String radomString(int length) {
-        String str= "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        String str= "0123456789ABCDEF";
         Random random = new Random();
         StringBuffer sb = new StringBuffer();
         for(int i = 0 ; i < length ; i++){
