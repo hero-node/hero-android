@@ -169,18 +169,25 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
             callJs("encrypt", pub, data);
         }
         if (jsonObject.has("decrypt")) {
+            this.jsonObject = jsonObject;
             JSONObject object = jsonObject.getJSONObject("decrypt");
-            String data = "";
-            if (object.has("data")) {
-                data = object.getString("data");
+            String text = "";
+            if (object.has("payload")) {
+                JSONObject payload = object.getJSONObject("payload");
+                if (payload.has("text")) {
+                    text = payload.getString("text");
+                }
             }
             String pri = PRIVATEKEY;
+
             if (pri != null && !pri.equals("")) {
-                callJs("decrypt", pri , data);
+                callJs("decrypt", pri , text);
             } else {
-                checkPassword(true, data);
+                checkPassword(true, text);
             }
         }
+
+
     }
 
     private void checkPassword(final boolean isNeedCallJs, final String data) {
@@ -290,7 +297,7 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                     super.onPageFinished(view, url);
                     if (type.equals("encrypt")) {
                         webView.evaluateJavascript("window.heroencrypt('"+ pub + "','" + data +
-                                        "','" + StringUtil.radomString(16)+ "','" + StringUtil.radomString(32) + "')",
+                                        "','" + StringUtil.radomString(32)+ "','" + StringUtil.radomString(64) + "')",
                                 new ValueCallback<String>() {
                                     @Override
                                     public void onReceiveValue(String value) {
@@ -304,14 +311,16 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                                     }
                                 });
                     } else if (type.equals("decrypt")) {
-                        webView.evaluateJavascript("window.decrypt(" + pub + "," + data +")",
+                        webView.evaluateJavascript("window.decrypt('" + HeroSignature.PRIVATEKEY + "','" + data +"')",
                                 new ValueCallback<String>() {
                                     @Override
                                     public void onReceiveValue(String value) {
-                                        String msg = "{decrypt:{result:'" + value + "',original:'"+ data +"'}}";
+                                        String result = value.substring(1, value.length() -1);
                                         try {
-                                            JSONObject msgObject = new JSONObject(msg);
-                                            ((HeroFragmentActivity)context).on(msgObject);
+                                            if (jsonObject.has("decrypt")) {
+                                                jsonObject.getJSONObject("decrypt").put("result", result);
+                                            }
+                                            ((HeroFragmentActivity)context).on(jsonObject);
                                         } catch (JSONException e){
                                             e.printStackTrace();
                                         }
@@ -320,33 +329,7 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                     }
 
                 }
-
-                @Override
-                public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                    super.onPageStarted(view, url, favicon);
-                }
             });
-
-
-//        String jsStr = "";
-//        try {
-//            InputStream in = context.getAssets().open("/hero-home/hero-provider.js");
-//            byte buff[] = new byte[1024];
-//            ByteArrayOutputStream fromFile = new ByteArrayOutputStream();
-//            do {
-//                int numRead = in.read(buff);
-//                if (numRead <= 0) {
-//                    break;
-//                }
-//                fromFile.write(buff, 0, numRead);
-//            } while (true);
-//            jsStr = fromFile.toString();
-//            in.close();
-//            fromFile.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        webView.loadUrl("javascript:" + jsStr);
 
     }
 
@@ -660,8 +643,8 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
             try {
                 if (bundle.getBoolean("isSucceed")) {
                     JSONObject pub = new JSONObject();
-                    pub.put("pub", bundle.getString("pub"));
-                    ((IHeroContext) (activityReference.get())).on(jsonObject);
+                    pub.put("pub", "0x" + bundle.getString("pub"));
+                    ((IHeroContext) (activityReference.get())).on(pub);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -690,9 +673,9 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                 ECKeyPair keyPair = Wallet.decrypt(passwordString, walletFile);
                 if (keyPair != null && keyPair.getPrivateKey() != null
                         && keyPair.getPublicKey() != null) {
-                    PRIVATEKEY = keyPair.getPrivateKey().toString();
-                    PUBLICKEY = keyPair.getPublicKey().toString();
-                    bundle.putString("pub", keyPair.getPublicKey().toString());
+                    PRIVATEKEY = keyPair.getPrivateKey().toString(16);
+                    PUBLICKEY = keyPair.getPublicKey().toString(16);
+                    bundle.putString("pub", PUBLICKEY);
                 } else {
                     throw new CipherException("密码错误");
                 }

@@ -145,4 +145,17 @@ public class StringUtil {
         }
         return sb.toString();
     }
+
+    /**
+     * 字节流转成十六进制表示
+     */
+    public static String encode(byte[] src) {
+        String strHex = "";
+        StringBuilder sb = new StringBuilder("");
+        for (int n = 0; n < src.length; n++) {
+            strHex = Integer.toHexString(src[n] & 0xFF);
+            sb.append((strHex.length() == 1) ? "0" + strHex : strHex); // 每个字节由两个字符表示，位数不够，高位补0
+        }
+        return sb.toString().trim();
+    }
 }
