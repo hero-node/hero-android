@@ -259,6 +259,9 @@ public class ChatEmojiUtils {
 
     public static SpannableString mixTextWithEmoji(Context context, String text) {
 
+        if (text == null) {
+            return new SpannableString("");
+        }
         SpannableString spannable = new SpannableString(text);
 
         if (text.indexOf("[") != -1) {

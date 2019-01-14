@@ -7,9 +7,11 @@ import com.snappydb.DB;
 import com.snappydb.DBFactory;
 import com.snappydb.SnappydbException;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,14 +47,15 @@ public class HeroDB extends View implements IHero {
             try {
                 initOrOpenDb();
                 if (jsonObject.has("value")) {
-                    setValue(jsonObject.get("value"), jsonObject.getString("key"));
+                    setValue(jsonObject.getJSONObject("value"), jsonObject.getString("key"));
                 } else {
                     Object value = getValue(jsonObject.getString("key"));
                     if (jsonObject.has("isNpc")) {
-                        ((HeroFragmentActivity)context).getCurrentFragment().mWebview.evaluateJavascript("window['HeroSignature"+"callback']("+ value.toString() +")",null);
+                        ((HeroFragmentActivity)context).getCurrentFragment().mWebview.evaluateJavascript("window['HeroDB"+"callback']("+ value.toString() +")",null);
                     } else {
                         JSONObject o = new JSONObject();
                         o.put("result", value);
+                        o.put("key", jsonObject.getString("key"));
                         ((HeroFragmentActivity)context).on(o);
                     }
                 }
@@ -65,16 +68,21 @@ public class HeroDB extends View implements IHero {
         if (jsonObject.has("arrayKey")) {
             try {
                 initOrOpenDb();
-                if (jsonObject.has("values")) {
-                    addValue(jsonObject.get("value"), jsonObject.getString("key"));
+                if (jsonObject.has("value")) {
+                    addValue(jsonObject.getJSONObject("value"), jsonObject.getString("arrayKey"));
                 } else if (jsonObject.has("start") && jsonObject.has("count")) {
-                    Object[] value = valueForArrayKey(jsonObject.getString("key"), jsonObject.getInt("start"),
+                    Object[] value = valueForArrayKey(jsonObject.getString("arrayKey"), jsonObject.getInt("start"),
                             jsonObject.getInt("count"));
                     if (jsonObject.has("isNpc")) {
-                        ((HeroFragmentActivity)context).getCurrentFragment().mWebview.evaluateJavascript("window['HeroSignature"+"callback']("+ value.toString() +")",null);
+                        ((HeroFragmentActivity)context).getCurrentFragment().mWebview.evaluateJavascript("window['HeroDB"+"callback']("+ value.toString() +")",null);
                     } else {
                         JSONObject o = new JSONObject();
-                        o.put("result", value);
+                        JSONArray jsonArray = new JSONArray();
+                        for (Object object : value) {
+                            jsonArray.put(object);
+                        }
+                        o.put("result", jsonArray);
+                        o.put("arrayKey", jsonObject.getString("arrayKey"));
                         ((HeroFragmentActivity)context).on(o);
                     }
                 }
@@ -86,42 +94,63 @@ public class HeroDB extends View implements IHero {
     }
 
 
-    private void setValue(Object value, String key) throws SnappydbException {
-        snappyDB.put(key,value);
+    private void setValue(JSONObject value, String key) throws SnappydbException, JSONException{
+        snappyDB.put(key, value.get("value"));
     }
 
     private Object getValue(String key) throws SnappydbException {
-        return snappyDB.getObject(key,Object.class);
+        if (snappyDB.findKeys(key).length == 0) {
+            return snappyDB.getObject(key,Object.class);
+        } else {
+            return new Object();
+        }
     }
 
-    private void addValue(Object value, String key) throws SnappydbException {
-        Object[] arraysOld = snappyDB.getObjectArray(key, Object.class);
+    private void addValue(JSONObject value, String key) throws SnappydbException, JSONException{
+        Object[] arraysOld ;
+        if (snappyDB.findKeys(key).length == 0) {
+            arraysOld = null;
+        } else {
+            arraysOld = snappyDB.getObjectArray(key, Object.class);
+        }
+
         Object[] arraysNew = null;
         if (arraysOld != null) {
-            List<Object> listOld = Arrays.asList(arraysOld);
+            List<Object> listOld = new ArrayList<Object>();
+            for (Object o : arraysOld) {
+                listOld.add(o);
+            }
             List<Object> listNew;
-            if (value instanceof Object[]) {
-                listNew = Arrays.asList(value);
-                listOld.add(listNew);
+            Object o = value;
+            if (o instanceof Object[]) {
+                listNew = Arrays.asList(o);
+                listOld.add(o);
             } else {
                 listNew = listOld;
-                listNew.add(value);
+                listNew.add(o);
             }
             arraysNew = listNew.toArray();
+            snappyDB.put(key, arraysNew);
         } else {
-            snappyDB.put(key, value);
+            Object o = value;
+            List<Object> list = new ArrayList<>();
+            list.add(o);
+            snappyDB.put(key, list.toArray());
         }
-        snappyDB.put(key, arraysNew);
     }
 
     private Object[] valueForArrayKey (String key, int start, int count) throws SnappydbException {
-        Object[] arraysOld = snappyDB.getObjectArray(key, Object.class);
-        if (start + count <= arraysOld.length) {
-            List<Object> listOld = Arrays.asList(arraysOld);
-            List<Object> listNew = listOld.subList(listOld.size() - start - count -1 , listOld.size() - start - 1);
-            return listNew.toArray();
+        if (snappyDB.findKeys(key).length == 0) {
+            return new Object[10];
         } else {
-            return null;
+            Object[] arraysOld = snappyDB.getObjectArray(key, Object.class);
+            if (start + count <= arraysOld.length) {
+                List<Object> listOld = Arrays.asList(arraysOld);
+                List<Object> listNew = listOld.subList(listOld.size() - start - count -1 , listOld.size() - start - 1);
+                return listNew.toArray();
+            } else {
+                return arraysOld;
+            }
         }
     }
 

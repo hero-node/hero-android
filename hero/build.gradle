@@ -52,6 +52,8 @@ dependencies {
     compile "com.tbruyelle.rxpermissions:rxpermissions:0.9.4@aar"
     compile "io.reactivex:rxjava:1.1.0"
 
+    compile 'com.esotericsoftware.kryo:kryo:2.24.0'
+
     compile 'org.web3j:core:3.3.1-android'
     compile 'com.wang.avi:library:2.1.3'
 }
