@@ -99,6 +99,13 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
 
     public static String PRIVATEKEY;
 
+    private int type = MESSAGE_ORTRA_SIGN;
+
+    private static final int MESSAGE_ORTRA_SIGN = -1;
+
+    private static final int CHECKPASSWORD_SIGN = 1;
+
+
     public HeroSignature(Context c) {
         super(c);
         this.context = c;
@@ -145,6 +152,7 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
             contentView.findViewById(R.id.sign_content_message_ll).setVisibility(View.INVISIBLE);
             this.jsonObject = jsonObject;
             initSignView(contentView, jsonObject);
+            type = MESSAGE_ORTRA_SIGN;
         }
         if (jsonObject.has("message")) {
             contentView.findViewById(R.id.sign_content_transfer_ll).setVisibility(View.INVISIBLE);
@@ -152,9 +160,11 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
             System.out.println(jsonObject.toString());
             this.jsonObject = jsonObject;
             initSignView(contentView, jsonObject);
+            type = MESSAGE_ORTRA_SIGN;
         }
         if (jsonObject.has("pub")) {
             checkPassword(false,null);
+            type = CHECKPASSWORD_SIGN;
         }
         if (jsonObject.has("encrypt")){
             JSONObject object = jsonObject.getJSONObject("encrypt");
@@ -184,6 +194,7 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                 callJs("decrypt", pri , text);
             } else {
                 checkPassword(true, text);
+                type = CHECKPASSWORD_SIGN;
             }
         }
 
@@ -588,9 +599,9 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
                 popupWindow.dismiss();
             }
         });
-        if (jsonObject.has("message") || jsonObject.has("transaction")) {
+        if (type == MESSAGE_ORTRA_SIGN) {
             new MyTask((HeroActivity) getContext(), value).execute();
-        } else if (jsonObject.has("pub")) {
+        } else if (type == CHECKPASSWORD_SIGN) {
             new MySignTask((HeroActivity) getContext(), value).execute();
         }
     }
