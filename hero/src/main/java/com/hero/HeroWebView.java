@@ -141,7 +141,7 @@ public class HeroWebView extends WebView implements IHero {
             public WebResourceResponse shouldInterceptRequest(WebView view, final WebResourceRequest request) {
                 if (pause) return super.shouldInterceptRequest(view, request);
                 String url = request.getUrl().toString();
-                if (url.startsWith("https://localhost:3000")){
+                if (url.startsWith("https://localhost:3000") ||  url.startsWith("http://localhost:3000")){
                     try {
                         InputStream in = getResources().getAssets().open(request.getUrl().getPath().substring(1));
                         BufferedReader br = new BufferedReader(new InputStreamReader(in));

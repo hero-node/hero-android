@@ -391,7 +391,7 @@ public class HeroChatView extends FrameLayout implements View.OnClickListener, H
         } else if (id == R.id.chat_video) {
             try {
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("command", "goto:https://localhost:3000/hero-home/videoChat.html");
+                jsonObject.put("command", "gotoWithLoading:http://localhost:3000/hero-home/videoChat.html");
                 HeroView.sendActionToContext(getContext(), jsonObject);
             } catch (JSONException e) {
                 e.printStackTrace();
