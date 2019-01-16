@@ -31,13 +31,17 @@
 
 package com.hero;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
@@ -387,7 +391,7 @@ public class HeroChatView extends FrameLayout implements View.OnClickListener, H
         } else if (id == R.id.chat_video) {
             try {
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("command", "gotoWithLoading:https://localhost:3000/hero-home/videoCall.html");
+                jsonObject.put("command", "goto:https://localhost:3000/hero-home/videoChat.html");
                 HeroView.sendActionToContext(getContext(), jsonObject);
             } catch (JSONException e) {
                 e.printStackTrace();

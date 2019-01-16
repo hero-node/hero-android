@@ -31,14 +31,20 @@
 
 package com.hero;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -119,11 +125,6 @@ public class HeroWebView extends WebView implements IHero {
             }
         }
         this.getSettings().setUserAgentString(userAgent);
-
-        // TODO add
-//        this.getSettings().setUseWideViewPort(true);
-//        this.getSettings().setLoadWithOverviewMode(true);
-
         this.getSettings().setDomStorageEnabled(true);
         String appCachePath = getContext().getCacheDir().getAbsolutePath();
         this.getSettings().setAppCachePath(appCachePath);
@@ -277,19 +278,25 @@ public class HeroWebView extends WebView implements IHero {
         this.setWebChromeClient(new WebChromeClient() {
 
             @Override
-            public void onPermissionRequest(PermissionRequest request) {
-                Log.i("Herowebview","onPermissionRequest ------");
+            public void onPermissionRequest(final PermissionRequest request) {
+                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED
+                        || ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions((HeroActivity)getContext(), new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO},
+                            100);
+                } else {
 
-                Log.i("Herowebview",request.toString());
-
-
-                super.onPermissionRequest(request);
+                }
+                if (myHandler != null) {
+                    myHandler.setPermissionRequest(request);
+                } else {
+                    myHandler = new MyHandler(request);
+                }
             }
 
             @Override
             public void onPermissionRequestCanceled(PermissionRequest request) {
-                Log.i("Herowebview","onPermissionRequestCanceled ------");
-
                 super.onPermissionRequestCanceled(request);
             }
 
@@ -306,8 +313,38 @@ public class HeroWebView extends WebView implements IHero {
                 }
             }
         });
-
     }
+
+    public static MyHandler myHandler;
+
+    public class MyHandler extends Handler {
+
+        PermissionRequest permissionRequest;
+
+        MyHandler (PermissionRequest permissionRequest) {
+            this.permissionRequest = permissionRequest;
+        }
+
+        public PermissionRequest getPermissionRequest() {
+            return permissionRequest;
+        }
+
+        public void setPermissionRequest(PermissionRequest permissionRequest) {
+            this.permissionRequest = permissionRequest;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+
+            switch (msg.what) {
+                case 1:
+                    permissionRequest.grant(permissionRequest.getResources());
+                    break;
+            }
+            super.handleMessage(msg);
+        }
+    }
+
     public void pause(){
         pause = true;
         this.onPause();

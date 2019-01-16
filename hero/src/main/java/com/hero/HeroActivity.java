@@ -44,6 +44,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -107,15 +108,6 @@ public class HeroActivity extends HeroFragmentActivity {
             FragmentManager fm = getSupportFragmentManager();
             fm.beginTransaction().replace(R.id.layoutRoot, mainFragment).commit();
         }
-
-//            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-//                    != PackageManager.PERMISSION_GRANTED) {
-//                //申请WRITE_EXTERNAL_STORAGE权限
-//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},
-//                        100);
-//            } else {
-//
-//            }
     }
 
     @Override
@@ -124,10 +116,13 @@ public class HeroActivity extends HeroFragmentActivity {
         switch (requestCode) {
             case 100:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this,"相机权限已打开", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this,"权限已打开", Toast.LENGTH_SHORT).show();
+                    Message message = new Message();
+                    message.what = 1;
+                    HeroWebView.myHandler.sendMessage(message);
                     return;
                 } else {
-                    Toast.makeText(this,"请手动打开相机权限", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this,"请手动打开权限", Toast.LENGTH_SHORT).show();
                 }
         }
     }

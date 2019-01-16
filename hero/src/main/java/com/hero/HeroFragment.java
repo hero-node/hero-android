@@ -929,24 +929,6 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             JSONObject data = new JSONObject();
                             data.put("her", submitData);
                             self.on(data);
-                        } else if (command.startsWith("grantPermission:")) {
-                            String grantType = command.replace("grantPermission:", "");
-                            if (grantType.equals("Camera")) {
-                                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)
-                                        != PackageManager.PERMISSION_GRANTED) {
-                                    //申请WRITE_EXTERNAL_STORAGE权限
-                                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA},
-                                            100);
-                                } else {
-                                    try {
-                                        JSONObject jsonObject = new JSONObject();
-                                        jsonObject.put("command", "goto:https://localhost:3000/hero-home/videoChat.html");
-                                        HeroView.sendActionToContext(getContext(), jsonObject);
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
                         }
                     } else if (cmdObj instanceof JSONObject) {
                         JSONObject cmdJson = (JSONObject) cmdObj;
