@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<body>
+  <meta charset="utf-8">
+  <script src="./app/hero.js"></script>
+  <script>
+  Hero.on = function(data){
+
+  };
+  Hero.ss = function() {
+    alert('222222');
+
+  }
+  Hero.viewWillAppear = function() {
+    this.ss();
+    this.command('grantPermission:Camera');
+
+  };
+  Hero.viewWillDisAppear = function() {
+
+  };
+  Hero.viewDidload = function() {
+
+  };
+
+</script>
+</body>
+</html>

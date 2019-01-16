@@ -40,10 +40,12 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.DownloadListener;
 import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
+import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -117,6 +119,11 @@ public class HeroWebView extends WebView implements IHero {
             }
         }
         this.getSettings().setUserAgentString(userAgent);
+
+        // TODO add
+//        this.getSettings().setUseWideViewPort(true);
+//        this.getSettings().setLoadWithOverviewMode(true);
+
         this.getSettings().setDomStorageEnabled(true);
         String appCachePath = getContext().getCacheDir().getAbsolutePath();
         this.getSettings().setAppCachePath(appCachePath);
@@ -268,6 +275,26 @@ public class HeroWebView extends WebView implements IHero {
             }
         });
         this.setWebChromeClient(new WebChromeClient() {
+
+            @Override
+            public void onPermissionRequest(PermissionRequest request) {
+                Log.i("Herowebview","onPermissionRequest ------");
+
+                Log.i("Herowebview",request.toString());
+
+
+                super.onPermissionRequest(request);
+            }
+
+            @Override
+            public void onPermissionRequestCanceled(PermissionRequest request) {
+                Log.i("Herowebview","onPermissionRequestCanceled ------");
+
+                super.onPermissionRequestCanceled(request);
+            }
+
+
+
             @Override
             public void onReceivedTitle(WebView view, String title) {
                 super.onReceivedTitle(view, title);

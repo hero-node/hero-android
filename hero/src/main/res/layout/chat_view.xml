@@ -193,6 +193,22 @@
                         android:layout_marginLeft="32dp"
                         android:background="@drawable/chat_more_icon_bg"
                         android:src="@drawable/location_icon"/>
+
+                    <ImageView
+                        android:id="@+id/chat_video"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:layout_marginLeft="32dp"
+                        android:background="@drawable/chat_more_icon_bg"
+                        android:src="@drawable/video_icon"/>
+
+                    <ImageView
+                        android:id="@+id/chat_trade"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:layout_marginLeft="32dp"
+                        android:background="@drawable/chat_more_icon_bg"
+                        android:src="@drawable/video_icon"/>
                 </LinearLayout>
 
             </LinearLayout>

@@ -31,23 +31,32 @@
 
 package com.hero;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
 
 public class HeroActivity extends HeroFragmentActivity {
     public static final int RESULT_CODE_DISMISS = -1009;
@@ -97,6 +106,29 @@ public class HeroActivity extends HeroFragmentActivity {
         if (mainFragment != null) {
             FragmentManager fm = getSupportFragmentManager();
             fm.beginTransaction().replace(R.id.layoutRoot, mainFragment).commit();
+        }
+
+//            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+//                    != PackageManager.PERMISSION_GRANTED) {
+//                //申请WRITE_EXTERNAL_STORAGE权限
+//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},
+//                        100);
+//            } else {
+//
+//            }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case 100:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this,"相机权限已打开", Toast.LENGTH_SHORT).show();
+                    return;
+                } else {
+                    Toast.makeText(this,"请手动打开相机权限", Toast.LENGTH_SHORT).show();
+                }
         }
     }
 
@@ -165,12 +197,6 @@ public class HeroActivity extends HeroFragmentActivity {
     @Override
     public void setRightItems(JSONArray array) {
         mRightItems = array;
-    }
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
 

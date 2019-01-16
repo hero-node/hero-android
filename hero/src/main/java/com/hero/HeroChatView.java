@@ -168,6 +168,8 @@ public class HeroChatView extends FrameLayout implements View.OnClickListener, H
 
         findViewById(R.id.chat_album).setOnClickListener(this);
         findViewById(R.id.chat_location).setOnClickListener(this);
+        findViewById(R.id.chat_video).setOnClickListener(this);
+        findViewById(R.id.chat_location).setOnClickListener(this);
         findViewById(R.id.imgTitleBack).setOnClickListener(this);
 
         imgTitleRight.setOnClickListener(this);
@@ -382,7 +384,15 @@ public class HeroChatView extends FrameLayout implements View.OnClickListener, H
 
 
 
-        } else {
+        } else if (id == R.id.chat_video) {
+            try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("command", "gotoWithLoading:https://localhost:3000/hero-home/videoCall.html");
+                HeroView.sendActionToContext(getContext(), jsonObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else if (id == R.id.chat_trade) {
 
         }
     }

@@ -31,6 +31,7 @@
 
 package com.hero;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -41,6 +42,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -538,33 +540,36 @@ public class HeroFragment extends Fragment implements IHeroContext {
                         appearance.put("appearance", nav);
                         this.on(appearance);
                     }
-                    JSONArray views = ui.getJSONArray("views");
-                    for (int i = 0; i < views.length(); i++) {
-                        JSONObject view = views.getJSONObject(i);
-                        IHero v = createNewIHeroView(view);
-                        addDescriptionToView(v);
-                        if (v instanceof HeroWebView) {
-                            customWebView = (HeroWebView) v;
-                        }
-                        if (v != null) {
-                            if (view.has("parent")) {
-                                String parent = view.getString("parent");
-                                ViewGroup p = (ViewGroup) HeroView.findViewByName(mLayout, parent);
-                                if (p != null) {
-                                    p.addView((View) v);
-                                }
-                            } else {
-                                mLayout.addView((View) v);
+                    if (ui.has("views")) {
+                        JSONArray views = ui.getJSONArray("views");
+                        for (int i = 0; i < views.length(); i++) {
+                            JSONObject view = views.getJSONObject(i);
+                            IHero v = createNewIHeroView(view);
+                            addDescriptionToView(v);
+                            if (v instanceof HeroWebView) {
+                                customWebView = (HeroWebView) v;
                             }
-                            v.on(view);
-                            if (v instanceof HeroTableView) {
-                                AbsListView.OnScrollListener scrollListener = getListScrollListener();
-                                if (scrollListener != null) {
-                                    ((HeroTableView) v).setOnScrollListener(scrollListener);
+                            if (v != null) {
+                                if (view.has("parent")) {
+                                    String parent = view.getString("parent");
+                                    ViewGroup p = (ViewGroup) HeroView.findViewByName(mLayout, parent);
+                                    if (p != null) {
+                                        p.addView((View) v);
+                                    }
+                                } else {
+                                    mLayout.addView((View) v);
+                                }
+                                v.on(view);
+                                if (v instanceof HeroTableView) {
+                                    AbsListView.OnScrollListener scrollListener = getListScrollListener();
+                                    if (scrollListener != null) {
+                                        ((HeroTableView) v).setOnScrollListener(scrollListener);
+                                    }
                                 }
                             }
                         }
                     }
+
                     Bundle bundle = getArguments();
                     if (bundle != null &&bundle.containsKey(ARGUMENTS_MAGIC_VIEW)) {
                         // cache != 0 means ui should be cached
@@ -924,6 +929,24 @@ public class HeroFragment extends Fragment implements IHeroContext {
                             JSONObject data = new JSONObject();
                             data.put("her", submitData);
                             self.on(data);
+                        } else if (command.startsWith("grantPermission:")) {
+                            String grantType = command.replace("grantPermission:", "");
+                            if (grantType.equals("Camera")) {
+                                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)
+                                        != PackageManager.PERMISSION_GRANTED) {
+                                    //申请WRITE_EXTERNAL_STORAGE权限
+                                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA},
+                                            100);
+                                } else {
+                                    try {
+                                        JSONObject jsonObject = new JSONObject();
+                                        jsonObject.put("command", "goto:https://localhost:3000/hero-home/videoChat.html");
+                                        HeroView.sendActionToContext(getContext(), jsonObject);
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
                         }
                     } else if (cmdObj instanceof JSONObject) {
                         JSONObject cmdJson = (JSONObject) cmdObj;
