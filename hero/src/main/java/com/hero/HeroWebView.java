@@ -286,7 +286,7 @@ public class HeroWebView extends WebView implements IHero {
                     ActivityCompat.requestPermissions((HeroActivity)getContext(), new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO},
                             100);
                 } else {
-
+                    request.grant(request.getResources());
                 }
                 if (myHandler != null) {
                     myHandler.setPermissionRequest(request);
