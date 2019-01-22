@@ -39,6 +39,7 @@ import com.hero.IHero;
 import com.hero.IHeroContext;
 import com.hero.R;
 import com.hero.depandency.StringUtil;
+import com.hero.signature.Constants;
 import com.hero.signature.HeroSignatureActivity;
 import com.hero.utils.FileUtils;
 import com.hero.utils.FingerprintHelper;
@@ -51,6 +52,7 @@ import org.json.JSONObject;
 import org.spongycastle.crypto.ec.ECDecryptor;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.ECKeyPair;
+import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.Wallet;
 import org.web3j.crypto.WalletFile;
@@ -72,7 +74,13 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
+import static com.hero.signature.Constants.AES_128_CTR;
+import static com.hero.signature.Constants.CIPHER;
+import static com.hero.signature.Constants.CURRENT_VERSION;
 import static com.hero.signature.Constants.KEYSTORE_FILE_PATH;
+import static com.hero.signature.Constants.PROCESS_TYPE_KEYSTORE;
+import static com.hero.signature.Constants.PROCESS_TYPE_PRIVATEKEY;
+import static com.hero.signature.Constants.SCRYPT;
 
 /**
  * Created by Aron on 2018/7/9.
@@ -198,6 +206,16 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
             }
         }
 
+        // 导入私钥处理
+        if (jsonObject.has("private")) {
+            String walletName = "";
+            if (jsonObject.has("name")) {
+                walletName = jsonObject.getString("name");
+            }
+            if (jsonObject.has("password")) {
+                new ImportPrivateTask((HeroActivity)context, walletName,jsonObject.getString("private"),jsonObject.getString("password")).execute();
+            }
+        }
 
     }
 
@@ -699,6 +717,96 @@ public class HeroSignature extends View implements IHero, FingerprintHelper.Simp
             } catch (Exception e) {
                 bundle.putBoolean("isSucceed", false);
                 bundle.putString("message", "验证失败");
+                e.printStackTrace();
+            }
+            return bundle;
+        }
+    }
+
+    private static class ImportPrivateTask extends AsyncTask {
+
+        private WeakReference<HeroActivity> activityReference;
+
+        private String walletName;
+        private String privateKey;
+        private String password;
+
+        // only retain a weak reference to the activity
+        ImportPrivateTask(HeroActivity context, String walletName, String privateKey, String password) {
+            activityReference = new WeakReference<>(context);
+            this.walletName = walletName;
+            this.privateKey = privateKey;
+            this.password = password;
+        }
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            if (!(o instanceof Bundle)) {
+                return;
+            }
+            Bundle bundle = (Bundle) o;
+            HeroActivity activity = activityReference.get();
+            if (activity == null || activity.isFinishing())
+                return;
+            Toast.makeText(activity, bundle.getString("message"), Toast.LENGTH_SHORT).show();
+            super.onPostExecute(o);
+        }
+
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            Bundle bundle = new Bundle();
+            //获取现在有几个keystore钱包
+            int number = FileUtils.getNumbersOfKeystore();
+            ShareUtils shareUtils = ShareUtils.getInstance(activityReference.get());
+                try {
+                    ECKeyPair keyPair = ECKeyPair.create(Numeric.toBigInt(privateKey));
+                    if (shareUtils.getBoolean(Keys.getAddress(keyPair), false)) {
+                        throw new CipherException("钱包已存在");
+                    }
+
+                    //keystore文件
+                    String fileName = WalletUtils.generateWalletFile(password,
+                            keyPair, FileUtils.getAppFileDir(), false);
+
+                    //重命名文件
+                    FileUtils.renameFile(fileName, number);
+                    shareUtils.putString("Keystore" + number + ".json", "Keystore" + number + ".json");
+                    shareUtils.putBoolean(Keys.getAddress(keyPair), true);
+
+                    // 密码提示文件
+                    File hintFile = FileUtils.getHintFile("Hint" + number);
+
+                    if (hintFile.exists()) {
+                        hintFile.delete();
+                    }
+                    hintFile.createNewFile();
+
+                    FileUtils.writeFile(Constants.PASSWORDHINT_FILE_PATH + "Hint" + number + ".txt", "");
+                    bundle.putString("walletName", "Keystore" + number + ".json" );
+                    bundle.putBoolean("isSucceed", true);
+                    bundle.putString("message", "钱包导入成功");
+                } catch (CipherException ce) {
+                    bundle.putBoolean("isSucceed", false);
+                    bundle.putString("message", ce.getMessage());
+                    ce.printStackTrace();
+                } catch (Exception e) {
+                    bundle.putBoolean("isSucceed", false);
+                    bundle.putString("message", "keystore处理异常");
+                    e.printStackTrace();
+                }
+
+            try {
+                //如果是唯一一个钱包设置为默认钱包
+                if (number == 0) {
+                    FileUtils.copyFile(Constants.KEYSTORE_FILE_PATH + "Keystore0.json",
+                            Constants.KEYSTORE_FILE_PATH + "default.json");
+                }
+                shareUtils.putString("default", "Keystore0.json");
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return bundle;
